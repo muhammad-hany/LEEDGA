@@ -3,6 +3,7 @@ package com.leedga.seagate.leedga;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.method.ScrollingMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -52,7 +53,6 @@ public class TestFragment extends Fragment {
     }
 
     public void previewNextQuestion(int singlecount,int multiCount){
-        firstClickperQuestion=true;
         if (singlecount<test.getSingleQuestions().size()){
             previewSingleNextQuestion(singlecount);
         }else {
@@ -145,6 +145,7 @@ public class TestFragment extends Fragment {
 
     private void initViews(View v) {
         answerText= (TextView) v.findViewById(R.id.answerText);
+        answerText.setMovementMethod(new ScrollingMovementMethod());
         answerText.setVisibility(View.INVISIBLE);
         next= (Button) v.findViewById(R.id.next);
         next.setEnabled(false);
@@ -178,23 +179,16 @@ public class TestFragment extends Fragment {
         next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (firstClickperQuestion) {
-                    answerText.setVisibility(View.VISIBLE);
-                    next.setText("next");
-                    firstClickperQuestion=false;
-                }else {
-                    if (singleCount < test.getSingleQuestions().size() || multiCount < test.getMultiQuestions().size()) {
-                        clearRadioCheck();
-                        checkBoxesClearCheck();
-                        previewNextQuestion(singleCount, multiCount);
+                if (singleCount < test.getSingleQuestions().size() || multiCount < test.getMultiQuestions().size()) {
+                    clearRadioCheck();
+                    checkBoxesClearCheck();
+                    previewNextQuestion(singleCount, multiCount);
 
-                    } else {
-
-
-                        Intent i = new Intent(getContext(), ResultActivity.class);
-                        startActivity(i);
-                    }
+                } else {
+                    Intent i = new Intent(getContext(), ResultActivity.class);
+                    startActivity(i);
                 }
+
             }
 
 

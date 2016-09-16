@@ -125,23 +125,24 @@
         style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="post"
+        android:text="next"
         android:id="@+id/next"
         android:layout_alignTop="@+id/back"
         android:layout_alignRight="@+id/radioGroup"
         android:layout_alignEnd="@+id/radioGroup"/>
 
     <TextView
-        android:maxLines="4"
+        android:textSize="15sp"
+        android:maxLines="3"
         android:scrollbars="vertical"
         android:layout_width="180dp"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="the answer"
         android:id="@+id/answerText"
-        android:layout_alignBottom="@+id/back"
-        android:layout_centerHorizontal="true"
-        android:layout_gravity="center"/>
+        android:layout_gravity="center"
+        android:layout_below="@+id/next"
+        android:layout_centerHorizontal="true"/>
 
 
 </RelativeLayout>

@@ -5,51 +5,113 @@
              tools:context=".TestTypeFragment">
 
 
-
-    <Switch
-        android:padding="10dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="True or False"
-        android:id="@+id/true_false"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="54dp"
-        android:checked="true"/>
-
-    <Switch
-        android:padding="10dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="One Choice"
-        android:id="@+id/one_choice"
-        android:layout_below="@+id/true_false"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:checked="true"/>
-
-    <Switch
-        android:padding="10dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Multi Choice"
-        android:id="@+id/multi_choice"
-        android:layout_below="@+id/one_choice"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:checked="true"/>
-
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Next"
         android:id="@+id/next"
-        android:layout_below="@+id/multi_choice"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="111dp"/>
+        android:layout_marginBottom="24dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"/>
+
+    <RadioGroup
+        android:layout_marginTop="30dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:background="@drawable/rounded_rec"
+        android:id="@+id/linearLayout"
+        >
+
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="show answer after every question"
+            android:id="@+id/radioButton"
+            android:checked="false"/>
+
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="show right answer when your answer is wrong"
+            android:id="@+id/radioButton2"
+            android:checked="false"/>
+
+        <RadioButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="show answer after the test"
+            android:id="@+id/radioButton3"
+            android:checked="false"/>
+    </RadioGroup>
+
+    <TextView
+        android:textColor="#7399c9"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Answer Setting"
+        android:id="@+id/textView2"
+        android:layout_marginLeft="30dp"
+        android:layout_marginTop="20dp"
+        android:textSize="17sp"
+        android:background="#fafafa"/>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/rounded_rec"
+        android:id="@+id/linearLayout2"
+        android:layout_centerVertical="true"
+        android:layout_alignLeft="@+id/linearLayout"
+        android:layout_alignStart="@+id/linearLayout"
+        android:layout_alignRight="@+id/linearLayout"
+        android:layout_alignEnd="@+id/linearLayout">
+
+        <Switch
+            android:padding="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Multi Choice"
+            android:id="@+id/multi_choice"
+            android:checked="true"
+            />
+
+        <Switch
+            android:padding="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="True or False"
+            android:id="@+id/true_false"
+            android:checked="true"
+            />
+
+        <Switch
+            android:padding="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="One Choice"
+            android:id="@+id/one_choice"
+            android:checked="true"
+            />
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Questions Type"
+        android:id="@+id/textView3"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:textSize="17sp"
+        android:background="#fafafa"
+        android:layout_marginLeft="30dp"
+        android:layout_marginTop="180dp"
+        android:textColor="#7399c9" />
+
 </RelativeLayout>
