@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,13 +11,26 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.Switch;
 
+import java.util.ArrayList;
+import java.util.Collections;
+
 
 public class TestCategoriesFragment extends Fragment {
+
 
     Button next;
     Test test;
     Switch s1,s2,s3,s4,s5,s6,s7,s8,s9;
     static final String TEST_BUNDLE="test2";
+    public static int LEED_PROCESS=0;
+    public static int INTEGRATIVE_STRATEGIES=1;
+    public static int LOCATION_AND_TRANSPORTATION=2;
+    public static int SUSTAINABLE_SITES=3;
+    public static int PROJECT_SURROUNDINGS=4;
+    public static int WATER_EFFICIENCY=5;
+    public static int ENERGY_AND_ATMOSPHERE=6;
+    public static int MATERIAL_AND_RESOURCES=7;
+    public static int INDOOR_ENVIRO_QUALITY=8;
 
     boolean[] chapters=new boolean[9];
 
@@ -48,7 +60,6 @@ public class TestCategoriesFragment extends Fragment {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 updateSwitchesStatusTest();
-                Log.i("ggg",String.valueOf(buttonView.getId())+"was clicked");
             }
         };
         definingSwitches(view ,listener);
@@ -56,6 +67,9 @@ public class TestCategoriesFragment extends Fragment {
         next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                ArrayList<Question> questions=new DBHelper(getContext(),TestFragment.DATABASE_NAME).getAll(test.getChapters(),test.getcountPerCategory(),test.getQuestionTypes());
+                Collections.shuffle(questions);
+                test.setQuestions(questions);
                 FragmentManager fragmentManager=getFragmentManager();
                 FragmentTransaction fragmentTransaction=fragmentManager.beginTransaction();
                 TestFragment singleChoiceFragment=new TestFragment();
@@ -68,6 +82,8 @@ public class TestCategoriesFragment extends Fragment {
             }
         });
     }
+
+
 
     private void definingSwitches(View view, CompoundButton.OnCheckedChangeListener listener) {
         s1= (Switch) view.findViewById(R.id.switch1);

@@ -7,41 +7,50 @@ import java.util.ArrayList;
  * Created by Muhammad Workstation on 14/09/2016.
  */
 public class Test implements Serializable {
-    boolean typeTrueFalse,typeOneChoice,typeMultiChoice;
-    boolean []  chapters;
+    boolean []  chapters,questionTypes;
 
-    ArrayList<SingleChoiceQuestion> singleQuestions;
-    ArrayList<MultiChoiceQuestion> multiQuestions;
-    public Test(ArrayList <SingleChoiceQuestion> singleQuestions ,ArrayList<MultiChoiceQuestion> multiQuestions,boolean typeTrueFalse , boolean typeOneChoice , boolean typeMultiChoice,
-                boolean [] chapters){
+    int [] numberPerCategory;
+
+    ArrayList<Question> questions;
+    int numberOfQuestions;
+
+    public Test(ArrayList<Question> questions,boolean [] chapters,int [] numberPerCategory , boolean [] questionTypes,int numberOfQuestions){
         this.chapters=chapters;
-        this.typeTrueFalse=typeTrueFalse;
-        this.typeOneChoice=typeOneChoice;
-        this.typeMultiChoice=typeMultiChoice;
+        this.questions=questions;
+        this.questionTypes=questionTypes;
+        this.numberOfQuestions=numberOfQuestions;
+        this.numberPerCategory=numberPerCategory;
+
+    }
+
+    public boolean[] getQuestionTypes() {
+        return questionTypes;
+    }
+
+    public void setQuestionTypes(boolean[] questionTypes) {
+        this.questionTypes = questionTypes;
     }
 
 
 
-
-
-    public ArrayList<SingleChoiceQuestion> getSingleQuestions() {
-        return singleQuestions;
+    public ArrayList<Question> getQuestions() {
+        return questions;
     }
 
-    public void setSingleQuestions(ArrayList<SingleChoiceQuestion> singleQuestions) {
-        this.singleQuestions = singleQuestions;
-    }
-
-    public ArrayList<MultiChoiceQuestion> getMultiQuestions() {
-        return multiQuestions;
-    }
-
-    public void setMultiQuestions(ArrayList<MultiChoiceQuestion> multiQuestions) {
-        this.multiQuestions = multiQuestions;
+    public void setQuestions(ArrayList<Question> multiQuestions) {
+        this.questions = multiQuestions;
     }
 
     public Test(){
 
+    }
+
+    public int getNumberOfQuestions() {
+        return numberOfQuestions;
+    }
+
+    public void setNumberOfQuestions(int numberOfQuestions) {
+        this.numberOfQuestions = numberOfQuestions;
     }
 
     public boolean[] getChapters() {
@@ -52,34 +61,41 @@ public class Test implements Serializable {
         this.chapters = chapters;
     }
 
-    public boolean isTypeTrueFalse() {
-        return typeTrueFalse;
+
+    public void prepareQuestions(DBHelper helper){
+
     }
 
-    public void setTypeTrueFalse(boolean typeTrueFalse) {
-        this.typeTrueFalse = typeTrueFalse;
+    public int [] getcountPerCategory(){
+        numberPerCategory =new int[9];
+        int unitCount=0;
+        int j=0;
+        for (int i=0; i<getNumberOfQuestions();i++){
+            if (j>8){
+                j=0;
+            }
+            if (chapters[j]) {
+                numberPerCategory[j] = numberPerCategory[j] + 1;
+                j++;
+            }else {
+                numberPerCategory[j] =0;
+                j++;
+                i--;
+            }
+        }
+
+        return numberPerCategory;
+
     }
 
-    public boolean isTypeOneChoice() {
-        return typeOneChoice;
-    }
 
-    public void setTypeOneChoice(boolean typeOneChoice) {
-        this.typeOneChoice = typeOneChoice;
-    }
 
-    public boolean isTypeMultiChoice() {
-        return typeMultiChoice;
-    }
 
-    public void setTypeMultiChoice(boolean typeMultiChoice) {
-        this.typeMultiChoice = typeMultiChoice;
-    }
 
-    public void prepaireQuestions (DBHelper helper){
-        multiQuestions=helper.getMultiChoice();
-        singleQuestions=helper.getSingleChoice();
-    }
+
+
+
+
 
 
 

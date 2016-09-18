@@ -72,6 +72,7 @@
         android:layout_alignStart="@+id/linearLayout"
         android:layout_alignRight="@+id/linearLayout"
         android:layout_alignEnd="@+id/linearLayout">
+        
 
         <Switch
             android:padding="10dp"
@@ -106,12 +107,33 @@
         android:layout_height="wrap_content"
         android:text="Questions Type"
         android:id="@+id/textView3"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
         android:textSize="17sp"
         android:background="#fafafa"
-        android:layout_marginLeft="30dp"
-        android:layout_marginTop="180dp"
-        android:textColor="#7399c9" />
+        android:textColor="#7399c9"
+        android:layout_above="@+id/linearLayout2"
+        android:layout_alignRight="@+id/textView2"
+        android:layout_alignEnd="@+id/textView2"/>
+
+    <SeekBar
+
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/seekBar"
+        android:layout_below="@+id/linearLayout2"
+        android:layout_alignLeft="@+id/linearLayout2"
+        android:layout_alignStart="@+id/linearLayout2"
+        android:layout_marginTop="52dp"
+        android:layout_alignRight="@+id/linearLayout2"
+        android:layout_alignEnd="@+id/linearLayout2"
+        android:indeterminate="false"/>
+
+    <TextView
+        android:text="Questions"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/seekBarTxt"
+        android:layout_marginTop="27dp"
+        android:layout_below="@+id/seekBar"
+        android:layout_centerHorizontal="true"/>
 
 </RelativeLayout>

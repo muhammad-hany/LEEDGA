@@ -5,12 +5,15 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.SeekBar;
 import android.widget.Switch;
+import android.widget.TextView;
 
 
 public class TestTypeFragment extends Fragment {
@@ -20,7 +23,13 @@ public class TestTypeFragment extends Fragment {
     Switch multiChoice;
     View view;
     Test test;
+    SeekBar seekBar;
+    public static final int TRUE_FALSE=0;
+    public static final int SINGLE_CHOICE=1;
+    public static final int MULTI_CHOICE=2;
+    public boolean [] questionTypes;
     public static final String TEST_BUNDLE_NAME="test";
+    private int [] myValues={10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100};
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -30,8 +39,6 @@ public class TestTypeFragment extends Fragment {
 
     private void createNewTest() {
         test=new Test();
-        DBHelper dbHelper=new DBHelper(getContext(), TestFragment.DATABASE_NAME);
-        test.prepaireQuestions(dbHelper);
     }
 
     @Override
@@ -43,15 +50,33 @@ public class TestTypeFragment extends Fragment {
     }
 
     private void initViews(View view) {
+        questionTypes=new boolean[3];
+        definingSeekBar(view);
         trueFalse= (Switch) view.findViewById(R.id.true_false);
         oneChoice= (Switch) view.findViewById(R.id.one_choice);
         multiChoice= (Switch) view.findViewById(R.id.multi_choice);
+        questionTypes[TRUE_FALSE]=trueFalse.isChecked();
+        questionTypes[SINGLE_CHOICE]=oneChoice.isChecked();
+        questionTypes[MULTI_CHOICE]=multiChoice.isChecked();
         next= (Button) view.findViewById(R.id.next);
         FragmentManager fragmentManager=getFragmentManager();
         final FragmentTransaction fragmentTransaction=fragmentManager.beginTransaction();
         CompoundButton.OnCheckedChangeListener listener=new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+
+                switch (buttonView.getId()){
+                    case R.id.true_false:
+                        questionTypes[TRUE_FALSE]=isChecked;
+                        break;
+                    case R.id.one_choice :
+                        questionTypes[SINGLE_CHOICE]=isChecked;
+                        break;
+                    case R.id.multi_choice :
+                        questionTypes[MULTI_CHOICE]=isChecked;
+                        break;
+                }
+
                 updateTest();
             }
         };
@@ -83,10 +108,36 @@ public class TestTypeFragment extends Fragment {
 
 
 
+    private void definingSeekBar(View view) {
+        final TextView seekBarTxt= (TextView) view.findViewById(R.id.seekBarTxt);
+        seekBar= (SeekBar) view.findViewById(R.id.seekBar);
+        seekBar.setProgress(0);
+        seekBar.setMax(18);
+        seekBarTxt.setText(String.valueOf(myValues[seekBar.getProgress()])+" Questions");
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                seekBarTxt.setText(String.valueOf(myValues[progress])+" Questions");
+                updateTest();
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+    }
+
+
 
     private void updateTest() {
-        test.setTypeMultiChoice(multiChoice.isChecked());
-        test.setTypeOneChoice(oneChoice.isChecked());
-        test.setTypeTrueFalse(trueFalse.isChecked());
+        test.setQuestionTypes(questionTypes);
+        test.setNumberOfQuestions(myValues[seekBar.getProgress()]);
+        Log.i("hhg","ok");
     }
 }

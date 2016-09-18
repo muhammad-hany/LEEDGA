@@ -36,10 +36,28 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String NOTES_ON_ANSWER="notes";
 
 
-    public static final String MULTI_CHOICE_LEED_TABLE="leed_process_multi";
+    public static final String MULTI_CHOICE_LEED_TABLE="LeedGA";
     public static final String FIFTH_CHOICE="e";
     public static final String SIXITH_CHOICE="f";
     public static final String MULT_CHOICE_TABLE_TYPE="type";
+    public static final String CATEGORY="category";
+    public static final String KEY="key";
+
+    public String [] typesNames={"truefalse","single","multi"};
+
+
+    public static String LEED_PROCESS="LEED Process";
+    public static String INTEGRATIVE_STRATEGIES="Integrative Strategies";
+    public static String LOCATION_AND_TRANSPORTATION="Location and Transportation";
+    public static String SUSTAINABLE_SITES="Sustainable Sites";
+    public static String PROJECT_SURROUNDINGS="Project Surroundings";
+    public static String WATER_EFFICIENCY="Water Efficiency";
+    public static String ENERGY_AND_ATMOSPHERE="Energy & Atmosphere";
+    public static String MATERIAL_AND_RESOURCES="Materials & Resources";
+    public static String INDOOR_ENVIRO_QUALITY="Indoor Environmental Quality";
+
+    public String [] categoryNames={"LEED Process","Integrative Strategies","Location and Transportation","Sustainable Sites","Project Surroundings","Water Efficiency","Energy & Atmosphere","Materials & Resources","Indoor Environmental Quality"};
+
 
 
     public DBHelper(Context context, String db_name) {
@@ -150,6 +168,8 @@ public class DBHelper extends SQLiteOpenHelper {
         return checkDB != null ? true : false;
     }
 
+
+
     public Cursor execCursorQuery(String sql) {
         Cursor cursor = null;
         try {
@@ -173,61 +193,62 @@ public class DBHelper extends SQLiteOpenHelper {
         }
     }
 
-    protected ArrayList<SingleChoiceQuestion> getSingleChoice(){
-        if (db !=null){
-            /*Random random=new Random();
-            int max=getRowsCount(SINGLE_CHOICE_LEED_TABLE);
-            int min=1;
-            int i=random.nextInt(max-min+1)+min;
-            Cursor cursor=db.query(SINGLE_CHOICE_LEED_TABLE,null,ID+" = '"+i+"'",null,null,null,
-                    null);*/
-            ArrayList<SingleChoiceQuestion> singleChoiceQuestions=new ArrayList<>();
-            Cursor cursor=db.query(SINGLE_CHOICE_LEED_TABLE,null,null,null,null,null,"random()");
-            SingleChoiceQuestion q = null;
-            while (cursor.moveToNext()) {
-                String question=cursor.getString(cursor.getColumnIndex(QUESTION_KEY));
-                String ch1=cursor.getString(cursor.getColumnIndex(FIRST_CHOICE));
-                String ch2=cursor.getString(cursor.getColumnIndex(SECOND_CHOICE));
-                String ch3=cursor.getString(cursor.getColumnIndex(THIRD_CHOICE));
-                String ch4=cursor.getString(cursor.getColumnIndex(FOURTH_CHOICE));
-                String answer=cursor.getString(cursor.getColumnIndex(ANSWER));
-                String note=cursor.getString(cursor.getColumnIndex(NOTES_ON_ANSWER));
-                int id=cursor.getInt(cursor.getColumnIndex(ID));
-                q = new SingleChoiceQuestion(question,ch1,ch2,ch3,ch4,answer,note,id);
-                singleChoiceQuestions.add(q);
-            }
-            return singleChoiceQuestions;
-        }else {
-            return null;
-        }
-    }
 
-    protected ArrayList<MultiChoiceQuestion> getMultiChoice(){
-        if (db !=null){
-            ArrayList<MultiChoiceQuestion>multiChoiceQuestions=new ArrayList<>();
-            Cursor cursor=db.query(MULTI_CHOICE_LEED_TABLE,null,null,null,null,null,
-                    "random()");
-            MultiChoiceQuestion q = null;
-            while (cursor.moveToNext()) {
-                String question=cursor.getString(cursor.getColumnIndex(QUESTION_KEY));
-                String ch1=cursor.getString(cursor.getColumnIndex(FIRST_CHOICE));
-                String ch2=cursor.getString(cursor.getColumnIndex(SECOND_CHOICE));
-                String ch3=cursor.getString(cursor.getColumnIndex(THIRD_CHOICE));
-                String ch4=cursor.getString(cursor.getColumnIndex(FOURTH_CHOICE));
-                String ch5=cursor.getString(cursor.getColumnIndex(FIFTH_CHOICE));
-                String ch6=cursor.getString(cursor.getColumnIndex(SIXITH_CHOICE));
-                String answer=cursor.getString(cursor.getColumnIndex(ANSWER));
-                String note=cursor.getString(cursor.getColumnIndex(NOTES_ON_ANSWER));
 
-                int id=cursor.getInt(cursor.getColumnIndex(ID));
-                int type=cursor.getInt(cursor.getColumnIndex(MULT_CHOICE_TABLE_TYPE));
-                q = new MultiChoiceQuestion(question,ch1,ch2,ch3,ch4,ch5,ch6,note,answer,type,id);
-                multiChoiceQuestions.add(q);
+    protected ArrayList<Question> getAll(boolean[] chaptersTrueFalse,int [] numberPerCategory ,boolean [] questionsTypes){
+
+        ArrayList<Question> questions=new ArrayList<>();
+
+        for (int i=0;i<9;i++){
+            if (chaptersTrueFalse[i]) {
+                StringBuilder query=new StringBuilder();
+                if (questionsTypes[TestTypeFragment.SINGLE_CHOICE] &&
+                        questionsTypes[TestTypeFragment.MULTI_CHOICE] &&
+                        questionsTypes[TestTypeFragment.TRUE_FALSE]){
+
+                }
+                for (int j=0; j<typesNames.length;j++){
+                    if (questionsTypes[j]){
+                        query.append("'"+typesNames[j]+"'");
+                        query.append(" , ");
+
+                    }
+                }
+                query.delete(query.length()-3,query.length()-1);
+                String qw="( "+query.toString()+")";
+
+
+                Cursor cursor = db.query(MULTI_CHOICE_LEED_TABLE, null, CATEGORY + " = '" +categoryNames[i]+"' AND "+KEY+" IN "+qw,null,null,null,"random()");
+                Question q=null;
+                int count=0;
+                while (cursor.moveToNext()){
+                    count++;
+                    if (count>numberPerCategory[i]){
+                        cursor.close();
+                        break;
+                    }else {
+                        String question = cursor.getString(cursor.getColumnIndex(QUESTION_KEY));
+                        String ch1 = cursor.getString(cursor.getColumnIndex(FIRST_CHOICE));
+                        String ch2 = cursor.getString(cursor.getColumnIndex(SECOND_CHOICE));
+                        String ch3 = cursor.getString(cursor.getColumnIndex(THIRD_CHOICE));
+                        String ch4 = cursor.getString(cursor.getColumnIndex(FOURTH_CHOICE));
+                        String ch5 = cursor.getString(cursor.getColumnIndex(FIFTH_CHOICE));
+                        String ch6 = cursor.getString(cursor.getColumnIndex(SIXITH_CHOICE));
+                        String answer = cursor.getString(cursor.getColumnIndex(ANSWER));
+                        String note = cursor.getString(cursor.getColumnIndex(NOTES_ON_ANSWER));
+                        String categoty = cursor.getString(cursor.getColumnIndex(CATEGORY));
+                        String key=cursor.getString(cursor.getColumnIndex(KEY));
+
+                        int id = cursor.getInt(cursor.getColumnIndex(ID));
+                        int type = cursor.getInt(cursor.getColumnIndex(MULT_CHOICE_TABLE_TYPE));
+                        q = new Question(question, ch1, ch2, ch3, ch4, ch5, ch6, answer, note, categoty, type, id,key);
+                        questions.add(q);
+                    }
+                }
             }
-            return multiChoiceQuestions;
-        }else {
-            return null;
         }
+
+        return questions;
     }
 
 
