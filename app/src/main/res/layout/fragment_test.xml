@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:text="1/4"
-        android:id="@+id/textView"
+        android:id="@+id/progressText"
         android:layout_gravity="center_horizontal|top"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"/>
@@ -25,7 +25,7 @@
         android:text="question body"
         android:id="@+id/question_body"
         android:layout_marginTop="23dp"
-        android:layout_below="@+id/textView"
+        android:layout_below="@+id/progressText"
         android:layout_alignLeft="@+id/back"
         android:layout_alignStart="@+id/back"/>
 
@@ -70,45 +70,7 @@
             android:checked="false"/>
     </LinearLayout>
 
-    <RadioGroup
-        android:paddingTop="10dp"
-        android:visibility="invisible"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:id="@+id/radioGroup"
-        android:layout_below="@+id/question_body"
-        android:layout_alignLeft="@+id/question_body"
-        android:layout_alignStart="@+id/question_body">
-        <RadioButton
-            android:layout_marginTop="5dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="New RadioButton"
-            android:id="@+id/choice1"/>
-        <RadioButton
-            android:layout_marginTop="5dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="New RadioButton"
-            android:id="@+id/choice2"/>
-        <RadioButton
-            android:layout_marginTop="5dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="New RadioButton"
-            android:id="@+id/choice3"
-            android:checked="false"/>
 
-
-        <RadioButton
-            android:layout_marginTop="5dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="New RadioButton"
-            android:id="@+id/choice4"
-            android:checked="false"/>
-    </RadioGroup>
 
     <Button
         android:layout_marginBottom="45dp"
@@ -128,8 +90,8 @@
         android:text="next"
         android:id="@+id/next"
         android:layout_alignTop="@+id/back"
-        android:layout_alignRight="@+id/radioGroup"
-        android:layout_alignEnd="@+id/radioGroup"/>
+        android:layout_alignRight="@+id/check_box_group"
+        android:layout_alignEnd="@+id/check_box_group"/>
 
     <TextView
         android:textSize="15sp"
@@ -142,7 +104,8 @@
         android:id="@+id/answerText"
         android:layout_gravity="center"
         android:layout_below="@+id/next"
-        android:layout_centerHorizontal="true"/>
+        android:layout_toRightOf="@+id/question_body"
+        android:layout_toEndOf="@+id/question_body"/>
 
 
 </RelativeLayout>

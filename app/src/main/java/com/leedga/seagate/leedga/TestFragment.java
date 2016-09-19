@@ -12,17 +12,29 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+
 
 public class TestFragment extends Fragment {
 
     Button next;
     TextView questionBodyS;
     CheckBox checkBox1, checkBox2, checkBox3, checkBox4,checkBox5,checkBox6;
-    TextView answerText;
+    TextView answerText,progressText;
+    ArrayList<String> userAnswers;
     Test test;
+    Question question;
     int uniCount =0;
     public static final String DATABASE_NAME="leed.sqlite";
+    public static final String TRUE_FALSE_KEY="truefalse";
+    public static final String SINGLE_CHOICE_KEY="single";
+    public static final String MULTI_CHOICE_KEY="multi";
+    public static final String CHECK_BOX1="a",CHECK_BOX2="b",CHECK_BOX3="c",CHECK_BOX4="d",
+            CHECK_BOX5="e",CHECK_BOX6="f";
+    public String [] checkBoxRealName={"a","b","c","d","e","f"};
+
     CompoundButton lastCheckedBox;
+    private boolean[] userResult;
 
     public TestFragment() {
         // Required empty public constructor
@@ -51,31 +63,66 @@ public class TestFragment extends Fragment {
 
     private void previewNextQuestion(int count){
         next.setEnabled(false);
-
-        Question question=  test.getQuestions().get(count);
-        updateCheckBoxForAnswer(question.getType());
-        if (question.getAswersCount()==4){
+        progressText.setText((count+1)+"/"+test.getNumberOfQuestions());
+        question=  test.getQuestions().get(count);
+        settingUpListener(question.getType());
+        if (question.getKey().equals(SINGLE_CHOICE_KEY)){
+            checkBox1.setVisibility(View.VISIBLE);
+            checkBox2.setVisibility(View.VISIBLE);
+            checkBox3.setVisibility(View.VISIBLE);
+            checkBox4.setVisibility(View.VISIBLE);
             checkBox5.setVisibility(View.INVISIBLE);
             checkBox6.setVisibility(View.INVISIBLE);
-        }else if (question.getAswersCount()==5){
-            checkBox5.setVisibility(View.VISIBLE);
-            checkBox6.setVisibility(View.INVISIBLE);
+        }else if (question.getKey().equals(MULTI_CHOICE_KEY)){
+            if (question.getAswersCount()==4){
+                checkBox1.setVisibility(View.VISIBLE);
+                checkBox2.setVisibility(View.VISIBLE);
+                checkBox3.setVisibility(View.VISIBLE);
+                checkBox4.setVisibility(View.VISIBLE);
+                checkBox5.setVisibility(View.INVISIBLE);
+                checkBox6.setVisibility(View.INVISIBLE);
+            }else if (question.getAswersCount()==5){
+                checkBox1.setVisibility(View.VISIBLE);
+                checkBox2.setVisibility(View.VISIBLE);
+                checkBox3.setVisibility(View.VISIBLE);
+                checkBox4.setVisibility(View.VISIBLE);
+                checkBox5.setVisibility(View.VISIBLE);
+                checkBox6.setVisibility(View.INVISIBLE);
+            }else {
+                checkBox1.setVisibility(View.VISIBLE);
+                checkBox2.setVisibility(View.VISIBLE);
+                checkBox3.setVisibility(View.VISIBLE);
+                checkBox4.setVisibility(View.VISIBLE);
+                checkBox5.setVisibility(View.VISIBLE);
+                checkBox6.setVisibility(View.VISIBLE);
+            }
         }else {
-            checkBox5.setVisibility(View.VISIBLE);
-            checkBox6.setVisibility(View.VISIBLE);
+            checkBox1.setVisibility(View.VISIBLE);
+            checkBox2.setVisibility(View.VISIBLE);
+            checkBox3.setVisibility(View.INVISIBLE);
+            checkBox4.setVisibility(View.INVISIBLE);
+            checkBox5.setVisibility(View.INVISIBLE);
+            checkBox6.setVisibility(View.INVISIBLE);
+        }
+
+        if (question.getKey().equals(TRUE_FALSE_KEY)){
+            checkBox1.setText("True");
+            checkBox2.setText("False");
+        }else {
+            checkBox1.setText(question.getChoice1());
+            checkBox2.setText(question.getChoice2());
+            checkBox3.setText(question.getChoice3());
+            checkBox4.setText(question.getChoice4());
+            checkBox5.setText(question.getChoice5());
+            checkBox6.setText(question.getChoice6());
         }
         answerText.setText(question.getNote());
         questionBodyS.setText(question.getQuestionBody());
-        checkBox1.setText(question.getChoice1());
-        checkBox2.setText(question.getChoice2());
-        checkBox3.setText(question.getChoice3());
-        checkBox4.setText(question.getChoice4());
-        checkBox5.setText(question.getChoice5());
-        checkBox6.setText(question.getChoice6());
         this.uniCount++;
     }
 
-    private void updateCheckBoxForAnswer(final int minimumAnswer) {
+    private void settingUpListener(final int minimumAnswer) {
+
         CompoundButton.OnCheckedChangeListener listener=new CompoundButton.OnCheckedChangeListener() {
             int counter=0;
             @Override
@@ -102,6 +149,9 @@ public class TestFragment extends Fragment {
                 }else {
                     next.setEnabled(false);
                 }
+
+
+
             }
         };
 
@@ -113,7 +163,11 @@ public class TestFragment extends Fragment {
         checkBox6.setOnCheckedChangeListener(listener);
     }
 
+
     private void initViews(View v) {
+        userResult=new boolean[test.getNumberOfQuestions()];
+        userAnswers=new ArrayList<>();
+        progressText = (TextView) v.findViewById(R.id.progressText);
         answerText= (TextView) v.findViewById(R.id.answerText);
         answerText.setMovementMethod(new ScrollingMovementMethod());
         answerText.setVisibility(View.INVISIBLE);
@@ -137,16 +191,27 @@ public class TestFragment extends Fragment {
         next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                userAnswers.add(getUserAnswer());
+                userResult[uniCount-1]=getResult();
+                getResult();
+
                 if ( uniCount < test.getQuestions().size()) {
                     checkBoxesClearCheck();
                     previewNextQuestion(uniCount);
 
                 } else {
+                    test.setUserAnswers(userAnswers);
+                    test.setUserResult(userResult);
+                    Bundle bundle=new Bundle();
+                    bundle.putSerializable(TestCategoriesFragment.TEST_BUNDLE,test);
                     Intent i = new Intent(getContext(), ResultActivity.class);
+                    i.putExtra(TestCategoriesFragment.TEST_BUNDLE,bundle);
                     startActivity(i);
                 }
 
             }
+
+
 
 
         });
@@ -157,7 +222,32 @@ public class TestFragment extends Fragment {
 
     }
 
+    private boolean getResult() {
+        if (getUserAnswer().equals(question.getAnswer())){
+            return true;
+        }else {
+            return false;
+        }
+    }
 
+    private String getUserAnswer() {
+        StringBuilder answer=new StringBuilder();
+        CheckBox [] checkBoxes={checkBox1,checkBox2,checkBox3,checkBox4,checkBox5,
+                checkBox6};
+        for (int i=0;i<checkBoxes.length;i++){
+            if (checkBoxes[i].isChecked()){
+                answer.append(checkBoxRealName[i]+",");
+            }
+        }
+        answer.deleteCharAt(answer.length()-1);
+        String answerS=answer.toString();
+        return answerS;
+
+
+
+
+
+    }
 
 
     private void checkBoxesClearCheck() {

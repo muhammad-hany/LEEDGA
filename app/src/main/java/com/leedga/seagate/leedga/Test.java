@@ -12,15 +12,27 @@ public class Test implements Serializable {
     int [] numberPerCategory;
 
     ArrayList<Question> questions;
+    ArrayList<String> userAnswers;
+    boolean [] userResult;
     int numberOfQuestions;
 
-    public Test(ArrayList<Question> questions,boolean [] chapters,int [] numberPerCategory , boolean [] questionTypes,int numberOfQuestions){
+    public Test(ArrayList<Question> questions,boolean [] chapters,int [] numberPerCategory , boolean [] questionTypes,int numberOfQuestions,ArrayList<String> userAnswers,boolean [] userResult){
         this.chapters=chapters;
         this.questions=questions;
         this.questionTypes=questionTypes;
         this.numberOfQuestions=numberOfQuestions;
         this.numberPerCategory=numberPerCategory;
+        this.userAnswers=userAnswers;
+        this.userResult=userResult;
 
+    }
+
+    public boolean[] getUserResult() {
+        return userResult;
+    }
+
+    public void setUserResult(boolean[] userResult) {
+        this.userResult = userResult;
     }
 
     public boolean[] getQuestionTypes() {
@@ -32,6 +44,13 @@ public class Test implements Serializable {
     }
 
 
+    public ArrayList<String> getUserAnswers() {
+        return userAnswers;
+    }
+
+    public void setUserAnswers(ArrayList<String> userAnswers) {
+        this.userAnswers = userAnswers;
+    }
 
     public ArrayList<Question> getQuestions() {
         return questions;
