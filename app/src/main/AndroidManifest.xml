@@ -36,6 +36,15 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.leedga.seagate.leedga.TestActivity"/>
         </activity>
+        <activity
+            android:name=".TestSettingActivity"
+            android:label="@string/title_activity_test_type"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.leedga.seagate.leedga.MainActivity"/>
+        </activity>
     </application>
 
 </manifest>

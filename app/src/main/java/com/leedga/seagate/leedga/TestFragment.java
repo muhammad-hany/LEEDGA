@@ -29,8 +29,9 @@ public class TestFragment extends Fragment {
     public static final String TRUE_FALSE_KEY="truefalse";
     public static final String SINGLE_CHOICE_KEY="single";
     public static final String MULTI_CHOICE_KEY="multi";
-    public static final String CHECK_BOX1="a",CHECK_BOX2="b",CHECK_BOX3="c",CHECK_BOX4="d",
-            CHECK_BOX5="e",CHECK_BOX6="f";
+    public static final String TEST_BUNDLE_KEY ="test";
+    public static final String QUESTIONS_POSTITION_KEY="count";
+
     public String [] checkBoxRealName={"a","b","c","d","e","f"};
 
     CompoundButton lastCheckedBox;
@@ -38,6 +39,15 @@ public class TestFragment extends Fragment {
 
     public TestFragment() {
         // Required empty public constructor
+    }
+
+    public static Fragment init(Test test,int position){
+        TestFragment testFragment=new TestFragment();
+        Bundle bundle=new Bundle();
+        bundle.putSerializable(TEST_BUNDLE_KEY,test);
+        bundle.putInt(QUESTIONS_POSTITION_KEY,position);
+        testFragment.setArguments(bundle);
+        return testFragment;
     }
 
     @Override
@@ -50,7 +60,8 @@ public class TestFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Bundle bundle=getArguments();
-        test= (Test) bundle.getSerializable(TestCategoriesFragment.TEST_BUNDLE);
+        test= (Test) bundle.getSerializable(TEST_BUNDLE_KEY);
+        uniCount=bundle.getInt(QUESTIONS_POSTITION_KEY);
         View view=inflater.inflate(R.layout.fragment_test, container, false);
         initViews(view);
         previewNextQuestion(uniCount);
@@ -195,9 +206,10 @@ public class TestFragment extends Fragment {
                 userResult[uniCount-1]=getResult();
                 getResult();
 
-                if ( uniCount < test.getQuestions().size()) {
-                    checkBoxesClearCheck();
-                    previewNextQuestion(uniCount);
+                if ( uniCount-1  < test.getQuestions().size()) {
+                   // checkBoxesClearCheck();
+                  //  previewNextQuestion(uniCount);
+                    ((TestActivity)getActivity()).setCurrentItem(uniCount);
 
                 } else {
                     test.setUserAnswers(userAnswers);

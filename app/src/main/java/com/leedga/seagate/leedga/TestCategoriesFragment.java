@@ -1,9 +1,8 @@
 package com.leedga.seagate.leedga;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -70,15 +69,9 @@ public class TestCategoriesFragment extends Fragment {
                 ArrayList<Question> questions=new DBHelper(getContext(),TestFragment.DATABASE_NAME).getAll(test.getChapters(),test.getcountPerCategory(),test.getQuestionTypes());
                 Collections.shuffle(questions);
                 test.setQuestions(questions);
-                FragmentManager fragmentManager=getFragmentManager();
-                FragmentTransaction fragmentTransaction=fragmentManager.beginTransaction();
-                TestFragment singleChoiceFragment=new TestFragment();
-                Bundle bundle=new Bundle();
-                bundle.putSerializable(TEST_BUNDLE,test);
-                singleChoiceFragment.setArguments(bundle);
-                fragmentTransaction.replace(R.id.test_relative_layout,singleChoiceFragment);
-                fragmentTransaction.addToBackStack(null);
-                fragmentTransaction.commit();
+                Intent i=new Intent(getContext(),TestActivity.class);
+                i.putExtra(TEST_BUNDLE,test);
+                startActivity(i);
             }
         });
     }
