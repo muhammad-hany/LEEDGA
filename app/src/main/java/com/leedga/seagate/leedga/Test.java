@@ -2,6 +2,7 @@ package com.leedga.seagate.leedga;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * Created by Muhammad Workstation on 14/09/2016.
@@ -15,8 +16,9 @@ public class Test implements Serializable {
     ArrayList<String> userAnswers;
     boolean [] userResult;
     int numberOfQuestions;
+    Date savingDate;
 
-    public Test(ArrayList<Question> questions,boolean [] chapters,int [] numberPerCategory , boolean [] questionTypes,int numberOfQuestions,ArrayList<String> userAnswers,boolean [] userResult){
+    public Test(ArrayList<Question> questions, boolean [] chapters, int [] numberPerCategory , boolean [] questionTypes, int numberOfQuestions, ArrayList<String> userAnswers, boolean [] userResult, Date savingDate){
         this.chapters=chapters;
         this.questions=questions;
         this.questionTypes=questionTypes;
@@ -24,7 +26,16 @@ public class Test implements Serializable {
         this.numberPerCategory=numberPerCategory;
         this.userAnswers=userAnswers;
         this.userResult=userResult;
+        this.savingDate=savingDate;
 
+    }
+
+    public Date getSavingDate() {
+        return savingDate;
+    }
+
+    public void setSavingDate(Date savingDate) {
+        this.savingDate = savingDate;
     }
 
     public boolean[] getUserResult() {
@@ -33,6 +44,13 @@ public class Test implements Serializable {
 
     public void setUserResult(boolean[] userResult) {
         this.userResult = userResult;
+    }
+
+    public void setUserResultElement(boolean result , int index){
+        if (userResult==null){
+            userResult=new boolean[numberOfQuestions];
+        }
+        this.userResult[index]=result;
     }
 
     public boolean[] getQuestionTypes() {
@@ -50,6 +68,14 @@ public class Test implements Serializable {
 
     public void setUserAnswers(ArrayList<String> userAnswers) {
         this.userAnswers = userAnswers;
+    }
+
+    public void setUserAnswerElement(String answer,int index){
+        if (this.userAnswers==null){
+            userAnswers=new ArrayList<>(numberOfQuestions);
+        }
+        this.userAnswers.add(index, answer);
+
     }
 
     public ArrayList<Question> getQuestions() {
@@ -81,9 +107,6 @@ public class Test implements Serializable {
     }
 
 
-    public void prepareQuestions(DBHelper helper){
-
-    }
 
     public int [] getcountPerCategory(){
         numberPerCategory =new int[9];

@@ -6,18 +6,17 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.RelativeLayout;
 import android.widget.Switch;
 
 import java.util.ArrayList;
 import java.util.Collections;
 
 
-public class TestCategoriesFragment extends Fragment {
+public class TestCategoriesFragment extends Fragment  {
 
-
-    Button next;
+    RelativeLayout next;
     Test test;
     Switch s1,s2,s3,s4,s5,s6,s7,s8,s9;
     static final String TEST_BUNDLE="test2";
@@ -43,6 +42,10 @@ public class TestCategoriesFragment extends Fragment {
         return view;
     }
 
+    public static Fragment init(){
+        return new TestCategoriesFragment();
+    }
+
     private void updateSwitchesStatusTest() {
         Switch [] switches={s1,s2,s3,s4,s5,s6,s7,s8,s9};
         for (int i=0 ; i<9;i++){
@@ -62,7 +65,7 @@ public class TestCategoriesFragment extends Fragment {
             }
         };
         definingSwitches(view ,listener);
-        next= (Button) view.findViewById(R.id.next);
+        next= (RelativeLayout) view.findViewById(R.id.nextt);
         next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -103,6 +106,9 @@ public class TestCategoriesFragment extends Fragment {
     }
 
 
+    public void setTest(Test test){
+        this.test=test;
+    }
 
 
 

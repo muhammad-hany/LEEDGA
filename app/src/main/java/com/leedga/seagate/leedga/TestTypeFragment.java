@@ -1,5 +1,6 @@
 package com.leedga.seagate.leedga;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -30,11 +31,16 @@ public class TestTypeFragment extends Fragment {
     public boolean [] questionTypes;
     public static final String TEST_BUNDLE_NAME="test";
     private int [] myValues={10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100};
+    private FragmentTypeListener testHandleCallback;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         createNewTest();
+    }
+
+    public static Fragment init(){
+        return new TestTypeFragment();
     }
 
     private void createNewTest() {
@@ -91,6 +97,7 @@ public class TestTypeFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 updateTest();
+                testHandleCallback.testToActivity(test);
                 Bundle bundle=new Bundle();
                 bundle.putSerializable(TEST_BUNDLE_NAME,test);
                 TestCategoriesFragment testCategoriesFragment=new TestCategoriesFragment();
@@ -139,5 +146,12 @@ public class TestTypeFragment extends Fragment {
         test.setQuestionTypes(questionTypes);
         test.setNumberOfQuestions(myValues[seekBar.getProgress()]);
         Log.i("hhg","ok");
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        testHandleCallback= (FragmentTypeListener) activity;
     }
 }

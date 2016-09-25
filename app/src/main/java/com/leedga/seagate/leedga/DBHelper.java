@@ -56,7 +56,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public static String MATERIAL_AND_RESOURCES="Materials & Resources";
     public static String INDOOR_ENVIRO_QUALITY="Indoor Environmental Quality";
 
-    public String [] categoryNames={"LEED Process","Integrative Strategies","Location and Transportation","Sustainable Sites","Project Surroundings","Water Efficiency","Energy & Atmosphere","Materials & Resources","Indoor Environmental Quality"};
+    public static final String [] CATEGORY_NAMES ={"LEED Process","Integrative Strategies","Location and Transportation","Sustainable Sites","Project Surroundings","Water Efficiency","Energy & Atmosphere","Materials & Resources","Indoor Environmental Quality"};
 
 
 
@@ -218,7 +218,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 String qw="( "+query.toString()+")";
 
 
-                Cursor cursor = db.query(MULTI_CHOICE_LEED_TABLE, null, CATEGORY + " = '" +categoryNames[i]+"' AND "+KEY+" IN "+qw,null,null,null,"random()");
+                Cursor cursor = db.query(MULTI_CHOICE_LEED_TABLE, null, CATEGORY + " = '" + CATEGORY_NAMES[i]+"' AND "+KEY+" IN "+qw,null,null,null,"random()");
                 Question q=null;
                 int count=0;
                 while (cursor.moveToNext()){

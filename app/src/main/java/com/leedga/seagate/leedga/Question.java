@@ -1,6 +1,8 @@
 package com.leedga.seagate.leedga;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Muhammad Workstation on 14/09/2016.
@@ -9,6 +11,7 @@ public class Question implements Serializable {
 
     String questionBody,choice1,choice2,choice3,choice4,choice5,choice6,answer,note,category,key;
     int id,type;
+
 
 
     public Question(String questionBody, String choice1, String choice2, String choice3, String choice4, String choice5, String choice6, String answer , String note,String category, int type , int id,String key){
@@ -33,6 +36,17 @@ public class Question implements Serializable {
 
     public String getKey() {
         return key;
+    }
+
+    public List<String> getChoices(){
+        List<String> choices=new ArrayList<>();
+        choices.add(choice1);
+        choices.add(choice2);
+        choices.add(choice3);
+        choices.add(choice4);
+        if (choice5!=null) choices.add(choice5);
+        if (choice6!=null) choices.add(choice6);
+        return choices;
     }
 
     public void setKey(String key) {

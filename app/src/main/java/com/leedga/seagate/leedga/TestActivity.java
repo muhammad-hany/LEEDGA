@@ -4,9 +4,11 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
-public class TestActivity extends AppCompatActivity {
+public class TestActivity extends AppCompatActivity{
 
     TestViewPager pager;
+    PagerAdapter pagerAdapter;
+    private Test test;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -16,28 +18,31 @@ public class TestActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+
+
         pager= (TestViewPager) findViewById(R.id.pager);
-        Test test= (Test) getIntent().getSerializableExtra(TestCategoriesFragment.TEST_BUNDLE);
-        PagerAdapter pagerAdapter=new PagerAdapter(getSupportFragmentManager(),test);
+        test= (Test) getIntent().getSerializableExtra(TestCategoriesFragment.TEST_BUNDLE);
+
+        pagerAdapter=new PagerAdapter(getSupportFragmentManager(),test,PagerAdapter.TEST);
         assert pager != null;
         pager.setAdapter(pagerAdapter);
+        pager.setOffscreenPageLimit(3);
 
-
-
-        /*FragmentManager manager=getSupportFragmentManager();
-        FragmentTransaction transaction=manager.beginTransaction();
-        TestTypeFragment test1Fragment=new TestTypeFragment();
-        transaction.add(R.id.test_relative_layout,test1Fragment,"TEST1");
-        transaction.commit();*/
 
 
 
     }
 
+
+    protected int getCurrentFragmentPosition(){
+        return pager.getCurrentItem();
+    }
 
     public void setCurrentItem(int i){
         pager.setCurrentItem(i,true);
     }
+
+
 
 
 

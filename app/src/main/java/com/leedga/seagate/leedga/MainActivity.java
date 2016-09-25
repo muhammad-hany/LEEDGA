@@ -29,6 +29,15 @@ public class MainActivity extends AppCompatActivity  {
             }
         });
 
+        Button testHistory= (Button) findViewById(R.id.testHistory);
+        testHistory.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i=new Intent(MainActivity.this,HistoryActivity.class);
+                startActivity(i);
+            }
+        });
+
 
     }
 
