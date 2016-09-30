@@ -17,8 +17,9 @@ public class Test implements Serializable {
     boolean [] userResult;
     int numberOfQuestions;
     Date savingDate;
+    boolean saved;
 
-    public Test(ArrayList<Question> questions, boolean [] chapters, int [] numberPerCategory , boolean [] questionTypes, int numberOfQuestions, ArrayList<String> userAnswers, boolean [] userResult, Date savingDate){
+    public Test(ArrayList<Question> questions, boolean [] chapters, int [] numberPerCategory , boolean [] questionTypes, int numberOfQuestions, ArrayList<String> userAnswers, boolean [] userResult, Date savingDate,boolean saved){
         this.chapters=chapters;
         this.questions=questions;
         this.questionTypes=questionTypes;
@@ -27,7 +28,16 @@ public class Test implements Serializable {
         this.userAnswers=userAnswers;
         this.userResult=userResult;
         this.savingDate=savingDate;
+        this.saved=saved;
 
+    }
+
+    public boolean isSaved() {
+        return saved;
+    }
+
+    public void setSaved(boolean saved) {
+        this.saved = saved;
     }
 
     public Date getSavingDate() {

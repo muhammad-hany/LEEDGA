@@ -54,6 +54,21 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.leedga.seagate.leedga.MainActivity"/>
         </activity>
+        <activity
+            android:name=".AnswersActivity"
+            android:label="@string/title_activity_answers"
+            android:parentActivityName=".ResultActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.leedga.seagate.leedga.ResultActivity"/>
+        </activity>
+        <activity
+            android:name=".AnswerViewActivity"
+            android:label="@string/title_activity_answer_view_acivity"
+            android:theme="@style/AppTheme.NoActionBar">
+
+        </activity>
     </application>
 
 </manifest>
