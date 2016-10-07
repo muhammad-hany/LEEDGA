@@ -1,5 +1,6 @@
 package com.leedga.seagate.leedga;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
@@ -18,13 +19,6 @@ import java.util.ArrayList;
  */
 
 public class DBHelper extends SQLiteOpenHelper {
-    public int GetCursor;
-    private Context myContext;
-    public String DB_PATH = "data/data/com.leedga.seagate.leedga/databases/";
-    public static String DB_NAME;// your database name
-    private SQLiteDatabase db;
-
-
     public static final String SINGLE_CHOICE_LEED_TABLE ="leed_process_14";
     public static final String ID="id";
     public static final String QUESTION_KEY ="question";
@@ -34,18 +28,15 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String THIRD_CHOICE="c";
     public static final String FOURTH_CHOICE="d";
     public static final String NOTES_ON_ANSWER="notes";
-
-
+    public static final String FLAGGED = "flagged";
     public static final String MULTI_CHOICE_LEED_TABLE="LeedGA";
     public static final String FIFTH_CHOICE="e";
     public static final String SIXITH_CHOICE="f";
     public static final String MULT_CHOICE_TABLE_TYPE="type";
     public static final String CATEGORY="category";
     public static final String KEY="key";
-
-    public String [] typesNames={"truefalse","single","multi"};
-
-
+    public static final String[] CATEGORY_NAMES = {"LEED Process", "Integrative Strategies", "Location and Transportation", "Sustainable Sites", "Project Surroundings", "Water Efficiency", "Energy & Atmosphere", "Materials & Resources", "Indoor Environmental Quality"};
+    public static String DB_NAME;// your database name
     public static String LEED_PROCESS="LEED Process";
     public static String INTEGRATIVE_STRATEGIES="Integrative Strategies";
     public static String LOCATION_AND_TRANSPORTATION="Location and Transportation";
@@ -55,8 +46,11 @@ public class DBHelper extends SQLiteOpenHelper {
     public static String ENERGY_AND_ATMOSPHERE="Energy & Atmosphere";
     public static String MATERIAL_AND_RESOURCES="Materials & Resources";
     public static String INDOOR_ENVIRO_QUALITY="Indoor Environmental Quality";
-
-    public static final String [] CATEGORY_NAMES ={"LEED Process","Integrative Strategies","Location and Transportation","Sustainable Sites","Project Surroundings","Water Efficiency","Energy & Atmosphere","Materials & Resources","Indoor Environmental Quality"};
+    public int GetCursor;
+    public String DB_PATH = "data/data/com.leedga.seagate.leedga/databases/";
+    public String[] typesNames = {"truefalse", "single", "multi"};
+    private Context myContext;
+    private SQLiteDatabase db;
 
 
 
@@ -165,7 +159,7 @@ public class DBHelper extends SQLiteOpenHelper {
             // System.out.println("My db is:- " + checkDB.isOpen());
         }
 
-        return checkDB != null ? true : false;
+        return checkDB != null;
     }
 
 
@@ -239,13 +233,57 @@ public class DBHelper extends SQLiteOpenHelper {
                         String categoty = cursor.getString(cursor.getColumnIndex(CATEGORY));
                         String key=cursor.getString(cursor.getColumnIndex(KEY));
 
+                        int flagString = cursor.getInt(cursor.getColumnIndex(FLAGGED));
                         int id = cursor.getInt(cursor.getColumnIndex(ID));
                         int type = cursor.getInt(cursor.getColumnIndex(MULT_CHOICE_TABLE_TYPE));
-                        q = new Question(question, ch1, ch2, ch3, ch4, ch5, ch6, answer, note, categoty, type, id,key);
+                        boolean flag;
+                        flag = flagString != 0;
+                        q = new Question(question, ch1, ch2, ch3, ch4, ch5, ch6, answer, note,
+                                categoty, type, id, key, flag);
                         questions.add(q);
                     }
                 }
             }
+        }
+
+        return questions;
+    }
+
+
+    public void updateFlag(int id, boolean flag) {
+        ContentValues contentValues = new ContentValues();
+        if (flag) {
+            contentValues.put(FLAGGED, 1);
+        } else {
+            contentValues.put(FLAGGED, 0);
+        }
+        db.update(MULTI_CHOICE_LEED_TABLE, contentValues, ID + " = '" + id + "'", null);
+    }
+
+    public ArrayList<Question> getFlaggedQuestions() {
+        Cursor cursor = db.query(MULTI_CHOICE_LEED_TABLE, null, FLAGGED + " = 1", null, null, null, null);
+        ArrayList<Question> questions = new ArrayList<>();
+        while (cursor.moveToNext()) {
+            String question = cursor.getString(cursor.getColumnIndex(QUESTION_KEY));
+            String ch1 = cursor.getString(cursor.getColumnIndex(FIRST_CHOICE));
+            String ch2 = cursor.getString(cursor.getColumnIndex(SECOND_CHOICE));
+            String ch3 = cursor.getString(cursor.getColumnIndex(THIRD_CHOICE));
+            String ch4 = cursor.getString(cursor.getColumnIndex(FOURTH_CHOICE));
+            String ch5 = cursor.getString(cursor.getColumnIndex(FIFTH_CHOICE));
+            String ch6 = cursor.getString(cursor.getColumnIndex(SIXITH_CHOICE));
+            String answer = cursor.getString(cursor.getColumnIndex(ANSWER));
+            String note = cursor.getString(cursor.getColumnIndex(NOTES_ON_ANSWER));
+            String categoty = cursor.getString(cursor.getColumnIndex(CATEGORY));
+            String key = cursor.getString(cursor.getColumnIndex(KEY));
+
+            int flagString = cursor.getInt(cursor.getColumnIndex(FLAGGED));
+            int id = cursor.getInt(cursor.getColumnIndex(ID));
+            int type = cursor.getInt(cursor.getColumnIndex(MULT_CHOICE_TABLE_TYPE));
+            boolean flag;
+            flag = flagString != 0;
+            Question q = new Question(question, ch1, ch2, ch3, ch4, ch5, ch6, answer, note,
+                    categoty, type, id, key, flag);
+            questions.add(q);
         }
 
         return questions;

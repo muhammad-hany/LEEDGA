@@ -11,10 +11,10 @@ public class Question implements Serializable {
 
     String questionBody,choice1,choice2,choice3,choice4,choice5,choice6,answer,note,category,key;
     int id,type;
+    boolean flagged;
 
 
-
-    public Question(String questionBody, String choice1, String choice2, String choice3, String choice4, String choice5, String choice6, String answer , String note,String category, int type , int id,String key){
+    public Question(String questionBody, String choice1, String choice2, String choice3, String choice4, String choice5, String choice6, String answer, String note, String category, int type, int id, String key, boolean flagged) {
         this.questionBody=questionBody;
         this.choice1=choice1;
         this.choice2=choice2;
@@ -28,14 +28,27 @@ public class Question implements Serializable {
         this.id=id;
         this.category=category;
         this.key=key;
+        this.flagged = flagged;
 
     }
     public Question(){
 
     }
 
+    public boolean isFlagged() {
+        return flagged;
+    }
+
+    public void setFlagged(boolean flagged) {
+        this.flagged = flagged;
+    }
+
     public String getKey() {
         return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
     }
 
     public List<String> getChoices(){
@@ -47,10 +60,6 @@ public class Question implements Serializable {
         if (choice5!=null) choices.add(choice5);
         if (choice6!=null) choices.add(choice6);
         return choices;
-    }
-
-    public void setKey(String key) {
-        this.key = key;
     }
 
     public String getCategory() {

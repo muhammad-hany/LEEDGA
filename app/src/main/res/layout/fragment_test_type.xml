@@ -6,134 +6,134 @@
 
 
     <Button
+        android:id="@+id/next"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Next"
-        android:id="@+id/next"
-        android:layout_marginBottom="24dp"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"/>
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="24dp"
+        android:text="Next"/>
 
     <RadioGroup
-        android:layout_marginTop="30dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:orientation="vertical"
+        android:id="@+id/radioGroup"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="30dp"
         android:background="@drawable/rounded_rec"
-        android:id="@+id/linearLayout"
+        android:orientation="vertical"
         >
 
         <RadioButton
+            android:id="@+id/radio1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="show answer after every question"
-            android:id="@+id/radioButton"
-            android:checked="false"/>
+            android:checked="false"
+            android:text="show answer after every question"/>
 
         <RadioButton
+            android:id="@+id/radio2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="show right answer when your answer is wrong"
-            android:id="@+id/radioButton2"
-            android:checked="false"/>
+            android:checked="false"
+            android:text="show right answer when your answer is wrong"/>
 
         <RadioButton
+            android:id="@+id/radio3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="show answer after the test"
-            android:id="@+id/radioButton3"
-            android:checked="false"/>
+            android:checked="true"
+            android:text="show answer after the test"/>
     </RadioGroup>
 
     <TextView
-        android:textColor="#7399c9"
+        android:id="@+id/textView2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Answer Setting"
-        android:id="@+id/textView2"
         android:layout_marginLeft="30dp"
         android:layout_marginTop="20dp"
-        android:textSize="17sp"
-        android:background="#fafafa"/>
+        android:background="#fafafa"
+        android:text="Answer Setting"
+        android:textColor="#7399c9"
+        android:textSize="17sp"/>
 
     <LinearLayout
-        android:orientation="vertical"
+        android:id="@+id/linearLayout2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/rounded_rec"
-        android:id="@+id/linearLayout2"
+        android:layout_alignEnd="@+id/radioGroup"
+        android:layout_alignLeft="@+id/radioGroup"
+        android:layout_alignRight="@+id/radioGroup"
+        android:layout_alignStart="@+id/radioGroup"
         android:layout_centerVertical="true"
-        android:layout_alignLeft="@+id/linearLayout"
-        android:layout_alignStart="@+id/linearLayout"
-        android:layout_alignRight="@+id/linearLayout"
-        android:layout_alignEnd="@+id/linearLayout">
+        android:background="@drawable/rounded_rec"
+        android:orientation="vertical">
         
 
         <Switch
-            android:padding="10dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Multi Choice"
             android:id="@+id/multi_choice"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:checked="true"
+            android:padding="10dp"
+            android:text="Multi Choice"
             />
 
         <Switch
-            android:padding="10dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="True or False"
             android:id="@+id/true_false"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:checked="true"
+            android:padding="10dp"
+            android:text="True or False"
             />
 
         <Switch
-            android:padding="10dp"
+            android:id="@+id/one_choice"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="One Choice"
-            android:id="@+id/one_choice"
             android:checked="true"
+            android:padding="10dp"
+            android:text="One Choice"
             />
     </LinearLayout>
 
     <TextView
+        android:id="@+id/textView3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Questions Type"
-        android:id="@+id/textView3"
-        android:textSize="17sp"
-        android:background="#fafafa"
-        android:textColor="#7399c9"
         android:layout_above="@+id/linearLayout2"
+        android:layout_alignEnd="@+id/textView2"
         android:layout_alignRight="@+id/textView2"
-        android:layout_alignEnd="@+id/textView2"/>
+        android:background="#fafafa"
+        android:text="Questions Type"
+        android:textColor="#7399c9"
+        android:textSize="17sp"/>
 
     <SeekBar
 
+        android:id="@+id/seekBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/seekBar"
-        android:layout_below="@+id/linearLayout2"
-        android:layout_alignLeft="@+id/linearLayout2"
-        android:layout_alignStart="@+id/linearLayout2"
-        android:layout_marginTop="52dp"
-        android:layout_alignRight="@+id/linearLayout2"
         android:layout_alignEnd="@+id/linearLayout2"
+        android:layout_alignLeft="@+id/linearLayout2"
+        android:layout_alignRight="@+id/linearLayout2"
+        android:layout_alignStart="@+id/linearLayout2"
+        android:layout_below="@+id/linearLayout2"
+        android:layout_marginTop="52dp"
         android:indeterminate="false"/>
 
     <TextView
-        android:text="Questions"
+        android:id="@+id/seekBarTxt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/seekBarTxt"
-        android:layout_marginTop="27dp"
         android:layout_below="@+id/seekBar"
-        android:layout_centerHorizontal="true"/>
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="27dp"
+        android:text="Questions"/>
 
 </RelativeLayout>

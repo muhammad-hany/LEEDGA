@@ -9,7 +9,7 @@
     tools:context="com.leedga.seagate.leedga.ResultActivity"
     tools:showIn="@layout/activity_result">
 
-    <android.support.constraint.ConstraintLayout
+    <!--<android.support.constraint.ConstraintLayout
         android:id="@+id/toolbar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -68,7 +68,7 @@
             android:text="2/10"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/score"
+            android:id="@+id/exams"
             app:layout_constraintRight_toRightOf="parent"
             android:layout_marginEnd="20dp"
             android:layout_marginRight="20dp"
@@ -84,37 +84,37 @@
             android:layout_width="50dp"
             android:layout_height="50dp"/>
 
-    </android.support.constraint.ConstraintLayout>
+    </android.support.constraint.ConstraintLayout>-->
 
     <ListView
+        android:id="@+id/resultList"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:id="@+id/resultList"
-        android:layout_marginStart="4dp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        android:layout_marginLeft="4dp"
-        android:layout_marginEnd="4dp"
-        app:layout_constraintRight_toRightOf="parent"
-        android:layout_marginRight="4dp"
-        app:layout_constraintBottom_toBottomOf="parent"
         android:layout_marginBottom="4dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginEnd="4dp"
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="4dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="4dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/showAll"/>
 
     <Button
-        android:text="Show all Questions"
-        android:layout_width="0dp"
         android:id="@+id/showAll"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-        android:background="@drawable/select_style_color"
-        android:textColor="@color/white"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_next"
+        android:background="@drawable/select_style_color"
         android:drawableEnd="@drawable/ic_next"
-        android:drawableRight="@drawable/ic_next"/>
+        android:drawableRight="@drawable/ic_next"
+        android:src="@drawable/ic_next"
+        android:text="Show all Questions"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        android:textColor="@color/white"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
 
 
 </android.support.constraint.ConstraintLayout>

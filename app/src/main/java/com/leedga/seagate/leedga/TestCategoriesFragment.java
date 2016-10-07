@@ -16,9 +16,6 @@ import java.util.Collections;
 
 public class TestCategoriesFragment extends Fragment  {
 
-    RelativeLayout next;
-    Test test;
-    Switch s1,s2,s3,s4,s5,s6,s7,s8,s9;
     static final String TEST_BUNDLE="test2";
     public static int LEED_PROCESS=0;
     public static int INTEGRATIVE_STRATEGIES=1;
@@ -29,8 +26,14 @@ public class TestCategoriesFragment extends Fragment  {
     public static int ENERGY_AND_ATMOSPHERE=6;
     public static int MATERIAL_AND_RESOURCES=7;
     public static int INDOOR_ENVIRO_QUALITY=8;
-
+    RelativeLayout next;
+    Test test;
+    Switch s1, s2, s3, s4, s5, s6, s7, s8, s9;
     boolean[] chapters=new boolean[9];
+
+    public static Fragment init() {
+        return new TestCategoriesFragment();
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -40,10 +43,6 @@ public class TestCategoriesFragment extends Fragment  {
         initViews(view);
         updateSwitchesStatusTest();
         return view;
-    }
-
-    public static Fragment init(){
-        return new TestCategoriesFragment();
     }
 
     private void updateSwitchesStatusTest() {
@@ -73,6 +72,7 @@ public class TestCategoriesFragment extends Fragment  {
                 Collections.shuffle(questions);
                 test.setQuestions(questions);
                 Intent i=new Intent(getContext(),TestActivity.class);
+                i.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                 i.putExtra(TEST_BUNDLE,test);
                 startActivity(i);
             }

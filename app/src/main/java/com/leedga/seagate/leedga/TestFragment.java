@@ -1,16 +1,17 @@
 package com.leedga.seagate.leedga;
 
-import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -18,11 +19,21 @@ import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
+
 import java.util.ArrayList;
 
 
 public class TestFragment extends Fragment  {
-
+    public static final String DATABASE_NAME = "leed.sqlite";
+    public static final String TRUE_FALSE_KEY = "truefalse";
+    public static final String SINGLE_CHOICE_KEY = "single";
+    public static final String MULTI_CHOICE_KEY = "multi";
+    public static final String TEST_BUNDLE_KEY = "test";
+    public static final String QUESTIONS_POSTITION_KEY = "count";
+    public static final String QUESTION_KEY = "question";
+    public String[] checkBoxRealName = {"a", "b", "c", "d", "e", "f"};
+    listCallback listener;
     View line4,line5, line6, line7;
     Button next,back,seeExplaination;
     ConstraintLayout r1,r2,r3,r4,r5,r6;
@@ -37,19 +48,11 @@ public class TestFragment extends Fragment  {
     int fragmentPosition=0;
     int uniCount =0;
     int position;
-    public static final String DATABASE_NAME="leed.sqlite";
-    public static final String TRUE_FALSE_KEY="truefalse";
-    public static final String SINGLE_CHOICE_KEY="single";
-    public static final String MULTI_CHOICE_KEY="multi";
-    public static final String TEST_BUNDLE_KEY ="test";
-    public static final String QUESTIONS_POSTITION_KEY="count";
-
-    public String [] checkBoxRealName={"a","b","c","d","e","f"};
+    int nextCounter = 0;
     ArrayList<CheckBox> checkBoxes;
 
     CompoundButton lastCheckedBox;
     boolean isItAnswerShow=false;
-    private ValueAnimator mAnimator;
 
     public TestFragment() {
         // Required empty public constructor
@@ -68,6 +71,7 @@ public class TestFragment extends Fragment  {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
 
 
     }
@@ -109,8 +113,6 @@ public class TestFragment extends Fragment  {
             image2.setVisibility(View.VISIBLE);
             image3.setVisibility(View.VISIBLE);
             image4.setVisibility(View.VISIBLE);
-            /*image5.setVisibility(View.VISIBLE);
-            image6.setVisibility(View.VISIBLE);*/
 
             if (question.note==null){
                 seeExplaination.setVisibility(View.GONE);
@@ -167,8 +169,8 @@ public class TestFragment extends Fragment  {
 
             if (isItAnswerShow){
                 String userAnswer=test.getUserAnswers().get(uniCount);
-                boolean result=test.getUserResult()[uniCount];
-                String answer=test.getQuestions().get(uniCount).getAnswer();
+                boolean result = test.getUserResult().get(uniCount);
+                String answer = test.getAnsweredQuestions().get(uniCount).getAnswer();
                 switch (answer){
                     case "a":
                         image1.setImageResource(R.drawable.ic_correct);
@@ -331,7 +333,7 @@ public class TestFragment extends Fragment  {
                         }
                     }
                 }
-                String answer=test.getQuestions().get(uniCount).getAnswer();
+                String answer = test.getAnsweredQuestions().get(uniCount).getAnswer();
                 String letter;
 
                 for (int i=0;i<answer.length();i++){
@@ -368,6 +370,8 @@ public class TestFragment extends Fragment  {
 
 
         }else {
+
+            // true or false question
             radio1.setVisibility(View.VISIBLE);
             radio2.setVisibility(View.VISIBLE);
             radio3.setVisibility(View.INVISIBLE);
@@ -392,13 +396,16 @@ public class TestFragment extends Fragment  {
             checkBox6.setVisibility(View.INVISIBLE);
             if (isItAnswerShow) {
                 String answer = test.getUserAnswers().get(uniCount);
-                boolean result=test.getUserResult()[count];
+                boolean result = test.getUserResult().get(uniCount);
                 switch (answer) {
                     case "1":
                         radio1.setChecked(true);
                         if (result){
                             image1.setImageResource(R.drawable.ic_correct);
                             image2.setImageResource(R.drawable.ic_incorrect);
+                        } else {
+                            image1.setImageResource(R.drawable.ic_incorrect);
+                            image2.setImageResource(R.drawable.ic_correct);
                         }
                         break;
                     case "0":
@@ -406,11 +413,15 @@ public class TestFragment extends Fragment  {
                         if (result){
                             image1.setImageResource(R.drawable.ic_incorrect);
                             image2.setImageResource(R.drawable.ic_correct);
+                        } else {
+                            image1.setImageResource(R.drawable.ic_correct);
+                            image2.setImageResource(R.drawable.ic_incorrect);
                         }
                         break;
                 }
             }
         }
+
         //displaying the text
         if (question.getKey().equals(TRUE_FALSE_KEY)){
             text1.setText("True");
@@ -446,37 +457,37 @@ public class TestFragment extends Fragment  {
                 switch (v.getId()){
                     case R.id.r1:
                         if (question.getKey().equals(MULTI_CHOICE_KEY)) {
-                            checkBox1.setChecked(checkBox1.isChecked() ? false : true);
+                            checkBox1.setChecked(!checkBox1.isChecked());
                         }else {
-                            radio1.setChecked(radio1.isChecked() ? false : true);
+                            radio1.setChecked(!radio1.isChecked());
                         }
                         break;
                     case R.id.r2:
                         if (question.getKey().equals(MULTI_CHOICE_KEY)) {
-                            checkBox2.setChecked(checkBox2.isChecked() ? false : true);
+                            checkBox2.setChecked(!checkBox2.isChecked());
                         }else {
-                            radio2.setChecked(radio2.isChecked() ? false : true);
+                            radio2.setChecked(!radio2.isChecked());
                         }
                         break;
                     case R.id.r3:
                         if (question.getKey().equals(MULTI_CHOICE_KEY)) {
-                            checkBox3.setChecked(checkBox3.isChecked() ? false : true);
+                            checkBox3.setChecked(!checkBox3.isChecked());
                         }else {
-                            radio3.setChecked(radio3.isChecked() ? false : true);
+                            radio3.setChecked(!radio3.isChecked());
                         }
                         break;
                     case R.id.r4:
                         if (question.getKey().equals(MULTI_CHOICE_KEY)) {
-                            checkBox4.setChecked(checkBox4.isChecked() ? false : true);
+                            checkBox4.setChecked(!checkBox4.isChecked());
                         }else {
-                            radio4.setChecked(radio4.isChecked() ? false : true);
+                            radio4.setChecked(!radio4.isChecked());
                         }
                         break;
                     case R.id.r5:
-                        checkBox5.setChecked(checkBox5.isChecked() ? false : true);
+                        checkBox5.setChecked(!checkBox5.isChecked());
                         break;
                     case R.id.r6:
-                        checkBox6.setChecked(checkBox6.isChecked() ? false : true);
+                        checkBox6.setChecked(!checkBox6.isChecked());
                         break;
 
                 }
@@ -519,10 +530,8 @@ public class TestFragment extends Fragment  {
                 }
 
                 if (counter==minimumAnswer){
-                    /*next.setEnabled(true);*/
                     next.setEnabled(true);
                 }else {
-                    /*next.setEnabled(false);*/
                     next.setEnabled(false);
 
                 }
@@ -611,20 +620,48 @@ public class TestFragment extends Fragment  {
         next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                fragmentPosition=((TestActivity)getActivity()).getCurrentFragmentPosition();
-                String answer=getUserAnswer();
-                /*userAnswers.add(getUserAnswer());*/
-                /*userResult[fragmentPosition]=getResult(answer);*/
-                test.setUserAnswerElement(answer,fragmentPosition);
-                test.setUserResultElement(getResult(answer),fragmentPosition);
 
-                ((TestActivity)getActivity()).setCurrentItem(fragmentPosition+1);
-                 if (fragmentPosition+1>=test.getNumberOfQuestions()) {
-                    Bundle bundle=new Bundle();
-                    bundle.putSerializable(TestCategoriesFragment.TEST_BUNDLE,test);
-                    Intent i = new Intent(getContext(), ResultActivity.class);
-                    i.putExtra(TestCategoriesFragment.TEST_BUNDLE,bundle);
-                    startActivity(i);
+
+                if (test.getAnswerShow() == TestTypeFragment.ANSWER_AFTER_ALL) {
+                    updateTest();
+                } else if (test.getAnswerShow() == TestTypeFragment.ANSWER_AFTER_EVERY) {
+                    nextCounter++;
+                    if (nextCounter > 1) {
+                        updateTest();
+                    } else if (nextCounter == 1) {
+                        next.setText("Next");
+                        answerText.setText(question.getNote());
+                        answerText.setVisibility(View.VISIBLE);
+                        if (question.getKey().equals(SINGLE_CHOICE_KEY)) {
+                            showSingleAnswersToUser(getUserAnswer(), getResult(getUserAnswer()), question.getAnswer());
+                        } else if (question.getKey().equals(MULTI_CHOICE_KEY)) {
+                            showMultiAnswersToUser();
+                        } else {
+                            showTrueFalseAnswerToUser();
+                        }
+                    }
+                } else {
+                    String userAnswer = getUserAnswer();
+                    boolean result = getResult(userAnswer);
+                    if (!result) {
+                        nextCounter++;
+                        if (nextCounter > 1) {
+                            updateTest();
+                        } else if (nextCounter == 1) {
+                            next.setText("Next");
+                            answerText.setText(question.getNote());
+                            answerText.setVisibility(View.VISIBLE);
+                            if (question.getKey().equals(SINGLE_CHOICE_KEY)) {
+                                showSingleAnswersToUser(getUserAnswer(), getResult(getUserAnswer()), question.getAnswer());
+                            } else if (question.getKey().equals(MULTI_CHOICE_KEY)) {
+                                showMultiAnswersToUser();
+                            } else {
+                                showTrueFalseAnswerToUser();
+                            }
+                        }
+                    } else {
+                        updateTest();
+                    }
                 }
 
             }
@@ -643,21 +680,149 @@ public class TestFragment extends Fragment  {
         });
 
 
+    }
 
 
+    private void updateTest() {
+        fragmentPosition = ((TestActivity) getActivity()).getCurrentFragmentPosition();
+        String answer = getUserAnswer();
+        test.setUserAnswerElement(answer, fragmentPosition);
+        test.setUserResultElement(getResult(answer), fragmentPosition);
+        test.addToAnsweredQuestions(question, uniCount);
+        ((TestActivity) getActivity()).setCurrentItem(fragmentPosition + 1);
+        if (fragmentPosition + 1 >= test.getNumberOfQuestions()) {
+            Bundle bundle = new Bundle();
+            bundle.putSerializable(TestCategoriesFragment.TEST_BUNDLE, test);
+            Intent i = new Intent(getContext(), ResultActivity.class);
+            i.putExtra(TestCategoriesFragment.TEST_BUNDLE, bundle);
+            startActivity(i);
+        }
+    }
 
+    private void showTrueFalseAnswerToUser() {
+        String userAnswer = getUserAnswer();
+        String answer = question.getAnswer();
+        boolean result = getResult(userAnswer);
+        if (result) {
+            image1.setImageResource(R.drawable.ic_correct);
+            image2.setImageResource(R.drawable.ic_incorrect);
+        } else {
+            image1.setImageResource(R.drawable.ic_incorrect);
+            image2.setImageResource(R.drawable.ic_correct);
+        }
+
+
+    }
+
+    private void showSingleAnswersToUser(String userAnswer, boolean result, String actualAnswer) {
+
+        image1.setVisibility(View.VISIBLE);
+        image2.setVisibility(View.VISIBLE);
+        image3.setVisibility(View.VISIBLE);
+        image4.setVisibility(View.VISIBLE);
+        switch (actualAnswer) {
+            case "a":
+
+                image1.setImageResource(R.drawable.ic_correct);
+                break;
+            case "b":
+                image2.setImageResource(R.drawable.ic_correct);
+                break;
+            case "c":
+                image3.setImageResource(R.drawable.ic_correct);
+                break;
+            case "d":
+                image4.setImageResource(R.drawable.ic_correct);
+                break;
+        }
+        int id = result ? R.drawable.ic_correct : R.drawable.ic_incorrect;
+        switch (userAnswer) {
+            case "a":
+                image1.setImageResource(id);
+                break;
+            case "b":
+                image2.setImageResource(id);
+                break;
+            case "c":
+                image3.setImageResource(id);
+                break;
+            case "d":
+                image4.setImageResource(id);
+                break;
+        }
+
+    }
+
+    private void showMultiAnswersToUser() {
+        image1.setVisibility(View.VISIBLE);
+        image2.setVisibility(View.VISIBLE);
+        image3.setVisibility(View.VISIBLE);
+        image4.setVisibility(View.VISIBLE);
+        image5.setVisibility(View.VISIBLE);
+        image6.setVisibility(View.VISIBLE);
+        String userAnswer = getUserAnswer();
+        String actualAnswer = question.getAnswer();
+        boolean result = getResult(userAnswer);
+        String userLetter;
+        for (int i = 0; i < userAnswer.length(); i++) {
+            userLetter = Character.toString(userAnswer.charAt(i));
+            if (!userLetter.equals(",")) {
+                switch (userLetter) {
+                    case "a":
+                        image1.setImageResource(R.drawable.ic_incorrect);
+                        break;
+                    case "b":
+                        image2.setImageResource(R.drawable.ic_incorrect);
+                        break;
+                    case "c":
+                        image3.setImageResource(R.drawable.ic_incorrect);
+                        break;
+                    case "d":
+                        image4.setImageResource(R.drawable.ic_incorrect);
+                        break;
+                    case "e":
+                        image5.setImageResource(R.drawable.ic_incorrect);
+                        break;
+                    case "f":
+                        image6.setImageResource(R.drawable.ic_incorrect);
+                        break;
+                }
+            }
+        }
+
+        String letter;
+        for (int i = 0; i < actualAnswer.length(); i++) {
+            letter = Character.toString(actualAnswer.charAt(i));
+            if (!letter.equals(",")) {
+                switch (letter) {
+                    case "a":
+                        image1.setImageResource(R.drawable.ic_correct);
+                        break;
+                    case "b":
+                        image2.setImageResource(R.drawable.ic_correct);
+                        break;
+                    case "c":
+                        image3.setImageResource(R.drawable.ic_correct);
+                        break;
+                    case "d":
+                        image4.setImageResource(R.drawable.ic_correct);
+                        break;
+                    case "e":
+                        image5.setImageResource(R.drawable.ic_correct);
+                        break;
+                    case "f":
+                        image6.setImageResource(R.drawable.ic_correct);
+                        break;
+                }
+            }
+        }
 
 
     }
 
 
-
     private boolean getResult(String answer) {
-        if (answer.equals(question.getAnswer())){
-            return true;
-        }else {
-            return false;
-        }
+        return answer.equals(question.getAnswer());
     }
 
 
@@ -696,73 +861,60 @@ public class TestFragment extends Fragment  {
 
     }
 
-
-    private void expand(View summary,int endHeight) {
-        //set Visible
-        summary.setVisibility(View.VISIBLE);
-
-        final int widthSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
-        summary.measure(widthSpec, endHeight);
-
-        mAnimator = slideAnimator(summary.getHeight(), endHeight, summary);
-
-        mAnimator.start();
+    public Test getTest() {
+        return test;
     }
 
-
-    private ValueAnimator slideAnimator(int start, int end, final View summary) {
-
-        ValueAnimator animator = ValueAnimator.ofInt(start, end);
-
-
-        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                //Update Height
-                int value = (Integer) valueAnimator.getAnimatedValue();
-
-                ViewGroup.LayoutParams layoutParams = summary.getLayoutParams();
-                layoutParams.height = value;
-                summary.setLayoutParams(layoutParams);
-            }
-        });
-
-        return animator;
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_test, menu);
+        super.onCreateOptionsMenu(menu, inflater);
     }
 
-
-   /* private int getTextHeight(Context context, String text,View checkRadio){
-        TextView textView=new TextView(context);
-        textView.setText(text);
-        int widthMeasureSpec=View.MeasureSpec.makeMeasureSpec(textView.getWidth()-checkRadio.getWidth(), View.MeasureSpec.UNSPECIFIED);
-        int heightMeasureSpec=View.MeasureSpec.makeMeasureSpec(textView.getHeight(), View.MeasureSpec.UNSPECIFIED);
-        textView.measure(widthMeasureSpec,heightMeasureSpec);
-        return textView.getMeasuredHeight()+100;
-
-    }*/
-
-    private int getTextHeight( TextView textView){
-        int widthMeasureSpec=View.MeasureSpec.makeMeasureSpec(textView.getWidth(), View.MeasureSpec.UNSPECIFIED);
-        int heightMeasureSpec=View.MeasureSpec.makeMeasureSpec(textView.getHeight(), View.MeasureSpec.AT_MOST);
-        textView.measure(widthMeasureSpec,heightMeasureSpec);
-        return textView.getMeasuredHeight();
-
-    }
-
-    public void slide_down(Context context,TextView view,String note){
-        view.setVisibility(View.VISIBLE);
-        view.setText(note);
-        Animation animation= AnimationUtils.loadAnimation(context,R.anim.slide_down);
-        if (animation!=null){
-            animation.reset();
-            if (view!=null){
-                view.clearAnimation();
-                view.startAnimation(animation);
-            }
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        MenuItem item = menu.findItem(R.id.flagged);
+        if (question.isFlagged()) {
+            item.setIcon(R.drawable.ic_flaggold);
+        } else {
+            item.setIcon(R.drawable.ic_flaglight);
         }
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
 
+
+        if (item.getItemId() == R.id.flagged) {
+            DBHelper helper = new DBHelper(getContext(), DATABASE_NAME);
+            if (question.isFlagged()) {
+                item.setIcon(R.drawable.ic_flaglight);
+                question.setFlagged(false);
+                helper.updateFlag(question.getId(), false);
+
+            } else {
+                item.setIcon(R.drawable.ic_flaggold);
+                question.setFlagged(true);
+                helper.updateFlag(question.getId(), true);
+            }
+            if (isItAnswerShow) {
+                SharedPreferences preferences = getContext().getSharedPreferences(ResultActivity.TESTS_PREFS, Context.MODE_PRIVATE);
+                preferences.edit().putString(test.getTestId(), new Gson().toJson(test)).apply();
+
+            }
+        } else if (item.getItemId() == R.id.myReport) {
+            Intent intent = new Intent(getContext(), ReportActivity.class);
+            intent.putExtra(QUESTION_KEY, question);
+            startActivity(intent);
+        }
+
+
+        return true;
+
+
+
+    }
 
 
 

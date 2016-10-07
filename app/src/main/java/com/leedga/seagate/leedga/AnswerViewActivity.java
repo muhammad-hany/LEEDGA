@@ -8,9 +8,9 @@ import android.support.v7.widget.Toolbar;
 
 public class AnswerViewActivity extends AppCompatActivity {
 
+    public static boolean AnswerShowFlag = true;
     private Test test;
     private String questionBody;
-    public static boolean AnswerShowFlag=true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,12 +30,13 @@ public class AnswerViewActivity extends AppCompatActivity {
 
     private int  fetchPosition() {
         int i=0;
-        for (Question question:test.getQuestions()){
+        for (Question question : test.getAnsweredQuestions()) {
             if (question.getQuestionBody().equals(questionBody)) return i;
             i++;
         }
         return -1;
 
     }
+
 
 }

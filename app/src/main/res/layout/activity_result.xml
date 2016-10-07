@@ -8,7 +8,78 @@
     android:fitsSystemWindows="true"
     tools:context="com.leedga.seagate.leedga.ResultActivity">
 
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/AppTheme.AppBarOverlay">
 
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            app:layout_collapseMode="pin"
+            app:popupTheme="@style/AppTheme.PopupOverlay">
+
+            <TextView
+                android:id="@+id/header"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_alignParentTop="true"
+                android:gravity="center"
+                android:text="Test Results"
+                android:textColor="#fff"
+                android:textSize="25sp"/>
+        </android.support.v7.widget.Toolbar>
+
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+
+            <TextView
+                android:id="@+id/exams"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_below="@+id/date"
+                android:layout_marginEnd="30dp"
+                android:layout_marginRight="30dp"
+                android:text="2/10"
+                android:textColor="#fff"
+                android:textSize="35sp"/>
+
+            <TextView
+                android:id="@+id/overallPrecntage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_below="@+id/date"
+                android:layout_marginLeft="30dp"
+                android:layout_marginStart="30dp"
+                android:text="30%"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                android:textColor="@android:color/white"
+                android:textSize="36sp"/>
+
+            <TextView
+                android:id="@+id/date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="10dp"
+                android:text="Date"
+                android:textColor="#c1bcbc"
+                android:textSize="25sp"/>
+
+        </RelativeLayout>
+
+
+    </android.support.design.widget.AppBarLayout>
 
     <include layout="@layout/content_result"/>
 

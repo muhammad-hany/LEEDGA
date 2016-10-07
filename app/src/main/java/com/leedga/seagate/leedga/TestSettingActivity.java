@@ -6,7 +6,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
-public class TestSettingActivity extends AppCompatActivity implements FragmentTypeListener {
+public class TestSettingActivity extends AppCompatActivity implements FragmentListener {
 
     PagerAdapter adapter;
     TestViewPager pager;
@@ -29,6 +29,7 @@ public class TestSettingActivity extends AppCompatActivity implements FragmentTy
         pager= (TestViewPager) findViewById(R.id.pager);
         adapter=new PagerAdapter(getSupportFragmentManager(),null,PagerAdapter.TYPE);
     }
+
 
     @Override
     public void testToActivity(Test test) {

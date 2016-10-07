@@ -25,6 +25,7 @@ public class MainActivity extends AppCompatActivity  {
             @Override
             public void onClick(View v) {
                 Intent i=new Intent(MainActivity.this,TestSettingActivity.class);
+                i.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                 startActivity(i);
             }
         });

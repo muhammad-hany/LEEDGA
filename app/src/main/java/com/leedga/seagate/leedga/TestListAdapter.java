@@ -6,7 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -17,23 +17,23 @@ import java.util.ArrayList;
 public class TestListAdapter extends ArrayAdapter<String>  {
 
 
-    String [] categoryNames;
-    int [] numberofQuestionsPerCategory;
-    boolean [] userResult;
+    ArrayList<String> categoryNames;
+    ArrayList<Integer> numberofQuestionsPerCategory;
+    ArrayList<Boolean> userResult;
     int [] numberOfCorrectQuestionPerCategory;
     ArrayList<Question> questions;
     int position;
     private int[] correctPerCat;
 
 
-    public TestListAdapter(Context context, String [] categoryNames, int [] numberofQuestionsPerCategory, boolean[] userResult, ArrayList<Question> questions) {
+    public TestListAdapter(Context context, ArrayList<String> categoryNames, ArrayList<Integer> numberofQuestionsPerCategory, ArrayList<Boolean> userResult, ArrayList<Question> questions) {
         super(context, R.layout.test_row,categoryNames);
 
         this.categoryNames=categoryNames;
         this.numberofQuestionsPerCategory=numberofQuestionsPerCategory;
         this.userResult=userResult;
         this.questions=questions;
-        numberOfCorrectQuestionPerCategory=new int[categoryNames.length];
+        numberOfCorrectQuestionPerCategory = new int[categoryNames.size()];
 
     }
 
@@ -50,23 +50,26 @@ public class TestListAdapter extends ArrayAdapter<String>  {
             holder=new ViewHolder();
             holder.categoryName= (TextView) convertView.findViewById(R.id.categoryName);
             holder.result= (TextView) convertView.findViewById(R.id.correct);
-            holder.colorResult= (LinearLayout) convertView.findViewById(R.id.colorResult);
+            holder.colorResult = (RelativeLayout) convertView.findViewById(R.id.colorResult);
+            holder.precPerCateg = (TextView) convertView.findViewById(R.id.prec);
             convertView.setTag(holder);
         }else {
             holder= (ViewHolder) convertView.getTag();
         }
         this.position=position;
 
-        holder.categoryName.setText(categoryNames[position]);
+        holder.categoryName.setText(categoryNames.get(position));
          correctPerCat=calculateResultPerCategory();
-        holder.result.setText(String.valueOf(correctPerCat[position])+"/"+String.valueOf(numberofQuestionsPerCategory[position])+" Correct Answers");
+        holder.result.setText(String.valueOf(correctPerCat[position]) + "/" + String.valueOf(numberofQuestionsPerCategory.get(position)) + " Correct Answers");
         holder.colorResult.setBackgroundColor(getColorForCategory());
+        double x = ((double) correctPerCat[position] / (double) numberofQuestionsPerCategory.get(position)) * 100;
+        holder.precPerCateg.setText(String.valueOf((int) x) + "%");
         return convertView;
     }
 
     private int getColorForCategory() {
         double scoreDouble=correctPerCat[position];
-        double noOfQuestionPerCat=numberofQuestionsPerCategory[position];
+        double noOfQuestionPerCat = numberofQuestionsPerCategory.get(position);
         double precDoubl=(scoreDouble/noOfQuestionPerCat)*100;
         int score=(int) precDoubl;
 
@@ -89,12 +92,12 @@ public class TestListAdapter extends ArrayAdapter<String>  {
     }
 
     int [] calculateResultPerCategory(){
-        numberOfCorrectQuestionPerCategory=new int[categoryNames.length];
-        for (int i=0;i<categoryNames.length;i++){
+        numberOfCorrectQuestionPerCategory = new int[categoryNames.size()];
+        for (int i = 0; i < categoryNames.size(); i++) {
             int j=0;
             for (Question question:questions){
-                if (categoryNames[i].equals(question.getCategory())){
-                    if (userResult[j]){
+                if (categoryNames.get(i).equals(question.getCategory())) {
+                    if (userResult.get(j)) {
                         numberOfCorrectQuestionPerCategory[i]++;
                     }
                 }
@@ -112,7 +115,8 @@ public class TestListAdapter extends ArrayAdapter<String>  {
     private class ViewHolder{
         TextView categoryName;
         TextView result;
-        LinearLayout colorResult;
+        RelativeLayout colorResult;
+        TextView precPerCateg;
 
     }
 }

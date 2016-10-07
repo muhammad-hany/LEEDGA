@@ -12,12 +12,21 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
 
 
 public class TestTypeFragment extends Fragment {
+    public static final int TRUE_FALSE = 0;
+    public static final int SINGLE_CHOICE = 1;
+    public static final int MULTI_CHOICE = 2;
+    public static final String TEST_BUNDLE_NAME = "test";
+    public static final int ANSWER_AFTER_ALL = 0;
+    public static final int ANSWER_AFTER_EVERY = 1;
+    public static final int ANSWER_WHEN_WRONG = 2;
+    public boolean[] questionTypes;
     Button next;
     Switch trueFalse;
     Switch oneChoice;
@@ -25,22 +34,18 @@ public class TestTypeFragment extends Fragment {
     View view;
     Test test;
     SeekBar seekBar;
-    public static final int TRUE_FALSE=0;
-    public static final int SINGLE_CHOICE=1;
-    public static final int MULTI_CHOICE=2;
-    public boolean [] questionTypes;
-    public static final String TEST_BUNDLE_NAME="test";
+    RadioGroup radioGroup;
     private int [] myValues={10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100};
-    private FragmentTypeListener testHandleCallback;
+    private FragmentListener testHandleCallback;
+
+    public static Fragment init() {
+        return new TestTypeFragment();
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         createNewTest();
-    }
-
-    public static Fragment init(){
-        return new TestTypeFragment();
     }
 
     private void createNewTest() {
@@ -56,6 +61,7 @@ public class TestTypeFragment extends Fragment {
     }
 
     private void initViews(View view) {
+        radioGroup = (RadioGroup) view.findViewById(R.id.radioGroup);
         questionTypes=new boolean[3];
         definingSeekBar(view);
         trueFalse= (Switch) view.findViewById(R.id.true_false);
@@ -110,7 +116,6 @@ public class TestTypeFragment extends Fragment {
         });
 
 
-
     }
 
 
@@ -145,6 +150,19 @@ public class TestTypeFragment extends Fragment {
     private void updateTest() {
         test.setQuestionTypes(questionTypes);
         test.setNumberOfQuestions(myValues[seekBar.getProgress()]);
+        int answerShow = 0;
+        switch (radioGroup.getCheckedRadioButtonId()) {
+            case R.id.radio1:
+                answerShow = ANSWER_AFTER_EVERY;
+                break;
+            case R.id.radio2:
+                answerShow = ANSWER_WHEN_WRONG;
+                break;
+            case R.id.radio3:
+                answerShow = ANSWER_AFTER_ALL;
+                break;
+        }
+        test.setAnswerShow(answerShow);
         Log.i("hhg","ok");
     }
 
@@ -152,6 +170,6 @@ public class TestTypeFragment extends Fragment {
     public void onAttach(Activity activity) {
         super.onAttach(activity);
 
-        testHandleCallback= (FragmentTypeListener) activity;
+        testHandleCallback = (FragmentListener) activity;
     }
 }

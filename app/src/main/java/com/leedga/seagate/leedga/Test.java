@@ -11,15 +11,16 @@ public class Test implements Serializable {
     boolean []  chapters,questionTypes;
 
     int [] numberPerCategory;
-
+    ArrayList<Question> answeredQuestions;
     ArrayList<Question> questions;
     ArrayList<String> userAnswers;
-    boolean [] userResult;
-    int numberOfQuestions;
+    ArrayList<Boolean> userResult;
+    int numberOfQuestions, answerShow;
     Date savingDate;
     boolean saved;
+    String testPercentage, ratio, testId;
 
-    public Test(ArrayList<Question> questions, boolean [] chapters, int [] numberPerCategory , boolean [] questionTypes, int numberOfQuestions, ArrayList<String> userAnswers, boolean [] userResult, Date savingDate,boolean saved){
+    public Test(ArrayList<Question> questions, boolean[] chapters, int[] numberPerCategory, boolean[] questionTypes, int numberOfQuestions, ArrayList<String> userAnswers, ArrayList<Boolean> userResult, Date savingDate, boolean saved, String testPercentage, String ratio, String testId, int answerShow) {
         this.chapters=chapters;
         this.questions=questions;
         this.questionTypes=questionTypes;
@@ -29,7 +30,68 @@ public class Test implements Serializable {
         this.userResult=userResult;
         this.savingDate=savingDate;
         this.saved=saved;
+        this.testPercentage = testPercentage;
+        this.ratio = ratio;
+        this.testId = testId;
+        this.answerShow = answerShow;
 
+
+    }
+
+    public Test() {
+
+    }
+
+    public int getNumberOfAnsweredQuestions() {
+        return answeredQuestions.size();
+    }
+
+    public int getAnswerShow() {
+        return answerShow;
+    }
+
+    public void setAnswerShow(int answerShow) {
+        this.answerShow = answerShow;
+    }
+
+    public ArrayList<Question> getAnsweredQuestions() {
+        return answeredQuestions;
+    }
+
+    public void addToAnsweredQuestions(Question question, int position) {
+        if (answeredQuestions == null) {
+            answeredQuestions = new ArrayList<>();
+        }
+        try {
+            answeredQuestions.set(position, question);
+        } catch (Exception e) {
+            answeredQuestions.add(question);
+        }
+
+    }
+
+    public String getTestId() {
+        return testId;
+    }
+
+    public void setTestId(String testId) {
+        this.testId = testId;
+    }
+
+    public String getRatio() {
+        return ratio;
+    }
+
+    public void setRatio(String ratio) {
+        this.ratio = ratio;
+    }
+
+    public String getTestPercentage() {
+        return testPercentage;
+    }
+
+    public void setTestPercentage(String testPercentage) {
+        this.testPercentage = testPercentage;
     }
 
     public boolean isSaved() {
@@ -48,19 +110,24 @@ public class Test implements Serializable {
         this.savingDate = savingDate;
     }
 
-    public boolean[] getUserResult() {
+    public ArrayList<Boolean> getUserResult() {
         return userResult;
     }
 
-    public void setUserResult(boolean[] userResult) {
+    public void setUserResult(ArrayList<Boolean> userResult) {
         this.userResult = userResult;
     }
 
     public void setUserResultElement(boolean result , int index){
         if (userResult==null){
-            userResult=new boolean[numberOfQuestions];
+            userResult = new ArrayList<>();
         }
-        this.userResult[index]=result;
+        try {
+            this.userResult.set(index, result);
+        } catch (Exception e) {
+            this.userResult.add(result);
+        }
+
     }
 
     public boolean[] getQuestionTypes() {
@@ -70,7 +137,6 @@ public class Test implements Serializable {
     public void setQuestionTypes(boolean[] questionTypes) {
         this.questionTypes = questionTypes;
     }
-
 
     public ArrayList<String> getUserAnswers() {
         return userAnswers;
@@ -94,10 +160,6 @@ public class Test implements Serializable {
 
     public void setQuestions(ArrayList<Question> multiQuestions) {
         this.questions = multiQuestions;
-    }
-
-    public Test(){
-
     }
 
     public int getNumberOfQuestions() {
