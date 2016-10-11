@@ -16,6 +16,7 @@ import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 public class TestTypeFragment extends Fragment {
@@ -90,6 +91,12 @@ public class TestTypeFragment extends Fragment {
                 }
 
                 updateTest();
+                if (isAllTypesFalse()) {
+                    next.setEnabled(false);
+                    Toast.makeText(getContext(), "You must chosse one of Question type at least", Toast.LENGTH_LONG).show();
+                } else {
+                    next.setEnabled(true);
+                }
             }
         };
 
@@ -164,6 +171,16 @@ public class TestTypeFragment extends Fragment {
         }
         test.setAnswerShow(answerShow);
         Log.i("hhg","ok");
+    }
+
+    private boolean isAllTypesFalse() {
+        for (boolean state : questionTypes) {
+            if (state) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     @Override

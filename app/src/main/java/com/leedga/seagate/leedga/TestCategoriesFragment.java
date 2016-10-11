@@ -72,7 +72,7 @@ public class TestCategoriesFragment extends Fragment  {
                 Collections.shuffle(questions);
                 test.setQuestions(questions);
                 Intent i=new Intent(getContext(),TestActivity.class);
-                i.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                /*i.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);*/
                 i.putExtra(TEST_BUNDLE,test);
                 startActivity(i);
             }

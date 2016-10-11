@@ -24,7 +24,7 @@ import com.google.gson.Gson;
 import java.util.ArrayList;
 
 
-public class TestFragment extends Fragment  {
+public class TestFragment extends Fragment {
     public static final String DATABASE_NAME = "leed.sqlite";
     public static final String TRUE_FALSE_KEY = "truefalse";
     public static final String SINGLE_CHOICE_KEY = "single";
@@ -97,13 +97,9 @@ public class TestFragment extends Fragment  {
     private void previewNextQuestion(int count,View v){
 
         question=  test.getQuestions().get(count);
-        if (!isItAnswerShow) {
-            next.setEnabled(false);
-            progressText.setText((count + 1) + "/" + test.getNumberOfQuestions());
-            settingUpClickListener();
-            settingUpCheckListener(question.getType());
-            seeExplaination.setVisibility(View.INVISIBLE);
-        }else {
+
+
+        if (isItAnswerShow) {
             progressText.setVisibility(View.GONE);
             next.setVisibility(View.INVISIBLE);
             back.setVisibility(View.INVISIBLE);
@@ -134,6 +130,20 @@ public class TestFragment extends Fragment  {
 
                     }
                 });
+            }
+        /*}else if (test.getTestId().equals(TestActivity.UNFINISHED)){
+            // displaying the unfinished test
+            progressText.setText((count + 1) + "/" + test.getNumberOfQuestions());
+            displayUnfinishedTest();*/
+        } else {
+            next.setEnabled(false);
+            progressText.setText((count + 1) + "/" + test.getNumberOfQuestions());
+            settingUpClickListener();
+            settingUpCheckListener(question.getType());
+            seeExplaination.setVisibility(View.INVISIBLE);
+            if (test.getTestId() != null) {
+                // displaying the unfinished test
+                displayUnfinishedTest();
             }
 
 
@@ -442,6 +452,99 @@ public class TestFragment extends Fragment  {
 
     }
 
+    private void displayUnfinishedTest() {
+        if (test.getNumberOfAnsweredQuestions() > uniCount) {
+            disableAllViewClicks();
+            next.setVisibility(View.VISIBLE);
+            back.setVisibility(View.VISIBLE);
+            next.setEnabled(true);
+            back.setEnabled(true);
+            showingDetailedAnswer();
+            image1.setVisibility(View.INVISIBLE);
+            image2.setVisibility(View.INVISIBLE);
+            image3.setVisibility(View.INVISIBLE);
+            image4.setVisibility(View.INVISIBLE);
+            image5.setVisibility(View.INVISIBLE);
+            image6.setVisibility(View.INVISIBLE);
+            if (test.getAnswerShow() == TestTypeFragment.ANSWER_AFTER_ALL) {
+                answerText.setVisibility(View.GONE);
+            } else if (test.getAnswerShow() == TestTypeFragment.ANSWER_WHEN_WRONG) {
+                if (!test.getUserResult().get(uniCount)) {
+                    answerText.setVisibility(View.VISIBLE);
+                    image1.setVisibility(View.VISIBLE);
+                    image2.setVisibility(View.VISIBLE);
+                    image3.setVisibility(View.VISIBLE);
+                    image4.setVisibility(View.VISIBLE);
+                    image5.setVisibility(View.VISIBLE);
+                    image6.setVisibility(View.VISIBLE);
+                }
+            } else {
+                answerText.setVisibility(View.VISIBLE);
+                image1.setVisibility(View.VISIBLE);
+                image2.setVisibility(View.VISIBLE);
+                image3.setVisibility(View.VISIBLE);
+                image4.setVisibility(View.VISIBLE);
+                image5.setVisibility(View.VISIBLE);
+                image6.setVisibility(View.VISIBLE);
+            }
+            if (question.getKey().equals(SINGLE_CHOICE_KEY)) {
+                String userAnswer = test.getUserAnswers().get(uniCount);
+                switch (userAnswer) {
+                    case "a":
+                        radio1.setChecked(true);
+                        break;
+                    case "b":
+                        radio2.setChecked(true);
+                        break;
+                    case "c":
+                        radio3.setChecked(true);
+                        break;
+                    case "d":
+                        radio4.setChecked(true);
+                        break;
+                }
+            } else if (question.getKey().equals(MULTI_CHOICE_KEY)) {
+                String userAnswer = test.getUserAnswers().get(uniCount);
+                String userLetter;
+                for (int i = 0; i < userAnswer.length(); i++) {
+                    userLetter = Character.toString(userAnswer.charAt(i));
+                    if (!userLetter.equals(",")) {
+                        switch (userLetter) {
+                            case "a":
+                                checkBox1.setChecked(true);
+                                break;
+                            case "b":
+                                checkBox2.setChecked(true);
+                                break;
+                            case "c":
+                                checkBox3.setChecked(true);
+                                break;
+                            case "d":
+                                checkBox4.setChecked(true);
+                                break;
+                            case "e":
+                                checkBox5.setChecked(true);
+                                break;
+                            case "f":
+                                checkBox6.setChecked(true);
+                                break;
+                        }
+                    }
+                }
+            } else {
+                String answer = test.getUserAnswers().get(uniCount);
+                switch (answer) {
+                    case "1":
+                        radio1.setChecked(true);
+                        break;
+                    case "0":
+                        radio2.setChecked(true);
+                        break;
+                }
+            }
+        }
+    }
+
     private void disableAllViewClicks() {
         View[] array=new View[]{r1,r2,r3,r4,r5,r6,checkBox1, checkBox2, checkBox3, checkBox4,checkBox5,checkBox6,radio1,radio2,radio3,radio4};
         for (View view: array){
@@ -625,39 +728,32 @@ public class TestFragment extends Fragment  {
                 if (test.getAnswerShow() == TestTypeFragment.ANSWER_AFTER_ALL) {
                     updateTest();
                 } else if (test.getAnswerShow() == TestTypeFragment.ANSWER_AFTER_EVERY) {
+                    disableAllViewClicks();
+                    if (test.getTestId() != null && test.getNumberOfAnsweredQuestions() > uniCount) {
+                        nextCounter++;
+                    }
                     nextCounter++;
+                    //mdoify next counter for unfinished test
                     if (nextCounter > 1) {
                         updateTest();
                     } else if (nextCounter == 1) {
-                        next.setText("Next");
-                        answerText.setText(question.getNote());
-                        answerText.setVisibility(View.VISIBLE);
-                        if (question.getKey().equals(SINGLE_CHOICE_KEY)) {
-                            showSingleAnswersToUser(getUserAnswer(), getResult(getUserAnswer()), question.getAnswer());
-                        } else if (question.getKey().equals(MULTI_CHOICE_KEY)) {
-                            showMultiAnswersToUser();
-                        } else {
-                            showTrueFalseAnswerToUser();
-                        }
+                        showingDetailedAnswer();
+
                     }
                 } else {
+                    disableAllViewClicks();
                     String userAnswer = getUserAnswer();
                     boolean result = getResult(userAnswer);
+                    if (test.getTestId() != null && test.getNumberOfAnsweredQuestions() > uniCount) {
+                        nextCounter++;
+                    }
                     if (!result) {
                         nextCounter++;
                         if (nextCounter > 1) {
+                            //moving to next test
                             updateTest();
                         } else if (nextCounter == 1) {
-                            next.setText("Next");
-                            answerText.setText(question.getNote());
-                            answerText.setVisibility(View.VISIBLE);
-                            if (question.getKey().equals(SINGLE_CHOICE_KEY)) {
-                                showSingleAnswersToUser(getUserAnswer(), getResult(getUserAnswer()), question.getAnswer());
-                            } else if (question.getKey().equals(MULTI_CHOICE_KEY)) {
-                                showMultiAnswersToUser();
-                            } else {
-                                showTrueFalseAnswerToUser();
-                            }
+                            showingDetailedAnswer();
                         }
                     } else {
                         updateTest();
@@ -682,6 +778,31 @@ public class TestFragment extends Fragment  {
 
     }
 
+    private void showingDetailedAnswer() {
+        next.setText("Next");
+        answerText.setText(question.getNote());
+        answerText.setVisibility(View.VISIBLE);
+        if (question.getKey().equals(SINGLE_CHOICE_KEY)) {
+            if (test.getTestId() != null && test.getNumberOfAnsweredQuestions() > uniCount) {
+                showSingleAnswersToUser(test.getUserAnswers().get(uniCount), test.getUserResult().get(uniCount), question.getAnswer());
+            } else {
+                showSingleAnswersToUser(getUserAnswer(), getResult(getUserAnswer()), question.getAnswer());
+            }
+        } else if (question.getKey().equals(MULTI_CHOICE_KEY)) {
+            if (test.getTestId() != null && test.getNumberOfAnsweredQuestions() > uniCount) {
+                showMultiAnswersToUser(test.getUserAnswers().get(uniCount), question.getAnswer());
+            } else {
+                showMultiAnswersToUser(getUserAnswer(), question.getAnswer());
+            }
+        } else {
+            if (test.getTestId() != null && test.getNumberOfAnsweredQuestions() > uniCount) {
+                showTrueFalseAnswerToUser(test.getUserResult().get(uniCount));
+            } else {
+                showTrueFalseAnswerToUser(getResult(getUserAnswer()));
+            }
+        }
+    }
+
 
     private void updateTest() {
         fragmentPosition = ((TestActivity) getActivity()).getCurrentFragmentPosition();
@@ -695,14 +816,12 @@ public class TestFragment extends Fragment  {
             bundle.putSerializable(TestCategoriesFragment.TEST_BUNDLE, test);
             Intent i = new Intent(getContext(), ResultActivity.class);
             i.putExtra(TestCategoriesFragment.TEST_BUNDLE, bundle);
+            i.putExtra("clear", true);
             startActivity(i);
         }
     }
 
-    private void showTrueFalseAnswerToUser() {
-        String userAnswer = getUserAnswer();
-        String answer = question.getAnswer();
-        boolean result = getResult(userAnswer);
+    private void showTrueFalseAnswerToUser(boolean result) {
         if (result) {
             image1.setImageResource(R.drawable.ic_correct);
             image2.setImageResource(R.drawable.ic_incorrect);
@@ -753,15 +872,13 @@ public class TestFragment extends Fragment  {
 
     }
 
-    private void showMultiAnswersToUser() {
+    private void showMultiAnswersToUser(String userAnswer, String actualAnswer) {
         image1.setVisibility(View.VISIBLE);
         image2.setVisibility(View.VISIBLE);
         image3.setVisibility(View.VISIBLE);
         image4.setVisibility(View.VISIBLE);
         image5.setVisibility(View.VISIBLE);
         image6.setVisibility(View.VISIBLE);
-        String userAnswer = getUserAnswer();
-        String actualAnswer = question.getAnswer();
         boolean result = getResult(userAnswer);
         String userLetter;
         for (int i = 0; i < userAnswer.length(); i++) {
@@ -899,6 +1016,8 @@ public class TestFragment extends Fragment  {
                 helper.updateFlag(question.getId(), true);
             }
             if (isItAnswerShow) {
+                Question answerShowQuestion = test.getAnsweredQuestions().get(uniCount);
+                answerShowQuestion.setFlagged(!answerShowQuestion.isFlagged());
                 SharedPreferences preferences = getContext().getSharedPreferences(ResultActivity.TESTS_PREFS, Context.MODE_PRIVATE);
                 preferences.edit().putString(test.getTestId(), new Gson().toJson(test)).apply();
 

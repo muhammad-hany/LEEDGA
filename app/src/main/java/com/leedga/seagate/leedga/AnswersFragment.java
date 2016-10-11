@@ -237,6 +237,8 @@ public class AnswersFragment extends Fragment implements listCallback {
 
             if (test.getAnsweredQuestions().get(position).isFlagged()) {
                 viewHolder.flagImage.setVisibility(View.VISIBLE);
+            } else {
+                viewHolder.flagImage.setVisibility(View.INVISIBLE);
             }
 
             return convertView;

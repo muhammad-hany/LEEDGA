@@ -150,7 +150,12 @@ public class Test implements Serializable {
         if (this.userAnswers==null){
             userAnswers=new ArrayList<>(numberOfQuestions);
         }
-        this.userAnswers.add(index, answer);
+        try {
+            this.userAnswers.set(index, answer);
+        } catch (Exception e) {
+            this.userAnswers.add(answer);
+        }
+
 
     }
 

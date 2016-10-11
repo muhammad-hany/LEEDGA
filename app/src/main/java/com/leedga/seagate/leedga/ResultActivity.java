@@ -2,18 +2,25 @@ package com.leedga.seagate.leedga;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.github.mikephil.charting.charts.RadarChart;
+import com.github.mikephil.charting.data.RadarData;
+import com.github.mikephil.charting.data.RadarDataSet;
+import com.github.mikephil.charting.data.RadarEntry;
+import com.github.mikephil.charting.interfaces.datasets.IRadarDataSet;
 import com.google.gson.Gson;
 
 import java.text.SimpleDateFormat;
@@ -22,6 +29,8 @@ import java.util.Date;
 import java.util.UUID;
 
 import static com.leedga.seagate.leedga.HistoryActivity.TEST_ID_KEY;
+import static com.leedga.seagate.leedga.TestActivity.UNFINISHED;
+import static com.leedga.seagate.leedga.TestActivity.UNFINISHED_TEST;
 
 public class ResultActivity extends AppCompatActivity {
 
@@ -36,6 +45,8 @@ public class ResultActivity extends AppCompatActivity {
     private TextView score, precentage;
     private TextView dateTextView;
     private ArrayList<String> categoryNamesForAnsweredQuestions;
+    private RadarChart mChart;
+    private TestListAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,12 +61,15 @@ public class ResultActivity extends AppCompatActivity {
         if (bundle!=null) {
             test = (Test) bundle.getSerializable(TestCategoriesFragment.TEST_BUNDLE);
         }
+        if (getIntent().hasExtra("clear")) {
+            clearUnfinishedTestInPrefs();
+        }
 
 
         initViews();
 
 
-        listView= (ListView) findViewById(R.id.resultList);
+        // listView= (ListView) findViewById(R.id.resultList);
         ArrayList<Integer> numberOfAnsweredQuestionPerCategory = new ArrayList<>();
         categoryNamesForAnsweredQuestions = new ArrayList<>();
         for (int i = 0; i < 9; i++) {
@@ -76,12 +90,19 @@ public class ResultActivity extends AppCompatActivity {
         }
         ArrayList<Boolean> userResult = test.getUserResult();
         ArrayList<Question> questions = test.getAnsweredQuestions();
-        TestListAdapter adapter = new TestListAdapter(this, categoryNamesForAnsweredQuestions, numberOfAnsweredQuestionPerCategory, userResult,
+        /*adapter = new TestListAdapter(this, categoryNamesForAnsweredQuestions, numberOfAnsweredQuestionPerCategory, userResult,
                 questions);
-        listView.setAdapter(adapter);
+        listView.setAdapter(adapter);*/
+
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycle);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(layoutManager);
+        RecyclerAdaptor adaptor = new RecyclerAdaptor(categoryNamesForAnsweredQuestions, numberOfAnsweredQuestionPerCategory, userResult,
+                questions);
+        recyclerView.setAdapter(adaptor);
 
 
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        /*listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
@@ -91,7 +112,8 @@ public class ResultActivity extends AppCompatActivity {
                 i.putExtra(TEST_ID_KEY, testId);
                 startActivity(i);
             }
-        });
+        });*/
+
 
         showAll= (Button) findViewById(R.id.showAll);
         showAll.setOnClickListener(new View.OnClickListener() {
@@ -104,8 +126,53 @@ public class ResultActivity extends AppCompatActivity {
                 startActivity(i);
             }
         });
+        // settingRadarChart();
 
 
+    }
+
+    private void clearUnfinishedTestInPrefs() {
+        SharedPreferences sharedPreferences = getSharedPreferences(UNFINISHED_TEST, MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.clear().apply();
+
+    }
+
+    private void settingRadarChart() {
+        mChart = (RadarChart) findViewById(R.id.radarChart);
+        mChart.setBackgroundColor(Color.WHITE);
+        mChart.setWebLineWidth(1f);
+        mChart.setWebColor(Color.LTGRAY);
+        mChart.setWebLineWidthInner(1f);
+        mChart.setWebColorInner(Color.LTGRAY);
+        mChart.setWebAlpha(100);
+
+        setData();
+
+    }
+
+    private void setData() {
+        ArrayList<RadarEntry> entries = new ArrayList<>();
+        for (int i = 0; i < 9; i++) {
+            entries.add(new RadarEntry(adapter.calculateResultPerCategory()[i]));
+        }
+        RadarDataSet set1 = new RadarDataSet(entries, "TestResult");
+        set1.setColor(Color.rgb(103, 110, 129));
+        set1.setFillColor(Color.rgb(103, 110, 129));
+        set1.setDrawFilled(true);
+        set1.setFillAlpha(180);
+        set1.setLineWidth(2f);
+        set1.setDrawHighlightCircleEnabled(true);
+        set1.setDrawHighlightIndicators(false);
+
+        ArrayList<IRadarDataSet> sets = new ArrayList<>();
+        sets.add(set1);
+        RadarData data = new RadarData(sets);
+        data.setValueTextSize(8f);
+        data.setDrawValues(false);
+        data.setValueTextColor(Color.WHITE);
+        mChart.setData(data);
+        mChart.invalidate();
     }
 
     private void initViews() {
@@ -117,7 +184,7 @@ public class ResultActivity extends AppCompatActivity {
         java.text.DateFormat format = new SimpleDateFormat("MMM dd, yyyy h:mm a");
         date = format.format(new Date());
         dateTextView = (TextView) findViewById(R.id.date);
-        if (!test.isSaved()) {
+        if (!test.isSaved() || test.getTestId().equals(UNFINISHED)) {
             test.setSavingDate(new Date());
             test.setSaved(true);
             test.setRatio(ratio);
@@ -141,6 +208,7 @@ public class ResultActivity extends AppCompatActivity {
         String json=gson.toJson(test);
         editor.putString(testId, json);
         editor.apply();
+
 
     }
 
