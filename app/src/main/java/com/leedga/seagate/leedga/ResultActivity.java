@@ -4,10 +4,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -32,7 +30,7 @@ import static com.leedga.seagate.leedga.HistoryActivity.TEST_ID_KEY;
 import static com.leedga.seagate.leedga.TestActivity.UNFINISHED;
 import static com.leedga.seagate.leedga.TestActivity.UNFINISHED_TEST;
 
-public class ResultActivity extends AppCompatActivity {
+public class ResultActivity extends BaseActivity {
 
     public static final String TESTS_PREFS = "tests";
     public static final String CATEGORY_KEY = "category";
@@ -52,10 +50,7 @@ public class ResultActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_result);
-        Toolbar layout = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(layout);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        defineNavigationMenu();
 
         Bundle bundle=getIntent().getBundleExtra(TestCategoriesFragment.TEST_BUNDLE);
         if (bundle!=null) {
@@ -97,8 +92,17 @@ public class ResultActivity extends AppCompatActivity {
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycle);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
-        RecyclerAdaptor adaptor = new RecyclerAdaptor(categoryNamesForAnsweredQuestions, numberOfAnsweredQuestionPerCategory, userResult,
-                questions);
+        ResultRecyclerAdaptor adaptor = new ResultRecyclerAdaptor(categoryNamesForAnsweredQuestions, numberOfAnsweredQuestionPerCategory, userResult,
+                questions, Integer.parseInt(test.getTestPercentage()), test.getRatio(), new ResultRecyclerAdaptor.OnMyItemClick() {
+            @Override
+            public void onItemClick(int position) {
+                Intent i = new Intent(ResultActivity.this, AnswersActivity.class);
+                i.putExtra(CATEGORY_KEY, categoryNamesForAnsweredQuestions.get(position));
+                i.putExtra(TestCategoriesFragment.TEST_BUNDLE, test);
+                i.putExtra(TEST_ID_KEY, testId);
+                startActivity(i);
+            }
+        });
         recyclerView.setAdapter(adaptor);
 
 
@@ -176,11 +180,7 @@ public class ResultActivity extends AppCompatActivity {
     }
 
     private void initViews() {
-        score = (TextView) findViewById(R.id.exams);
-        precentage = (TextView) findViewById(R.id.overallPrecntage);
         String ratio = String.valueOf(calculateScore()) + "/" + test.getNumberOfAnsweredQuestions();
-        score.setText(ratio);
-        precentage.setText(String.valueOf(calculatePrecentage()) + "%");
         java.text.DateFormat format = new SimpleDateFormat("MMM dd, yyyy h:mm a");
         date = format.format(new Date());
         dateTextView = (TextView) findViewById(R.id.date);
@@ -255,5 +255,9 @@ public class ResultActivity extends AppCompatActivity {
 
     }
 
-
+    @Override
+    public void onBackPressed() {
+        setResult(5);
+        finish();
+    }
 }

@@ -72,9 +72,8 @@ public class TestCategoriesFragment extends Fragment  {
                 Collections.shuffle(questions);
                 test.setQuestions(questions);
                 Intent i=new Intent(getContext(),TestActivity.class);
-                /*i.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);*/
                 i.putExtra(TEST_BUNDLE,test);
-                startActivity(i);
+                startActivityForResult(i, 3);
             }
         });
     }
@@ -111,6 +110,12 @@ public class TestCategoriesFragment extends Fragment  {
     }
 
 
-
-
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == 5) {
+            getActivity().setResult(5);
+            getActivity().finish();
+        }
+    }
 }

@@ -1,14 +1,12 @@
 package com.leedga.seagate.leedga;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
 import android.view.Menu;
-import android.widget.Toast;
 
 import com.google.gson.Gson;
 
@@ -17,7 +15,7 @@ import java.util.UUID;
 
 import static com.leedga.seagate.leedga.ResultActivity.TESTS_PREFS;
 
-public class TestActivity extends AppCompatActivity{
+public class TestActivity extends BaseActivity {
 
     public static final String UNFINISHED = "UNFINISHED";
     public static final String UNFINISHED_TEST = "unfinished_test";
@@ -35,9 +33,8 @@ public class TestActivity extends AppCompatActivity{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_test);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        defineNavigationMenu();
+
 
 
 
@@ -190,7 +187,7 @@ public class TestActivity extends AppCompatActivity{
     protected void onStart() {
         if (isAppWentToBg) {
             isAppWentToBg = false;
-            Toast.makeText(this, "Foreground", Toast.LENGTH_LONG).show();
+            /*Toast.makeText(this, "Foreground", Toast.LENGTH_LONG).show();*/
 
         }
 
@@ -202,7 +199,7 @@ public class TestActivity extends AppCompatActivity{
         super.onStop();
         if (!isWindowFocused && !isBackPressed) {
             isAppWentToBg = true;
-            Toast.makeText(this, "Background", Toast.LENGTH_LONG).show();
+            /*Toast.makeText(this, "Background", Toast.LENGTH_LONG).show();*/
             //saving test item
             Test unFinishedTest = ((TestFragment) pagerAdapter.instantiateItem(pager, pager
                     .getCurrentItem())).getTest();
@@ -215,5 +212,20 @@ public class TestActivity extends AppCompatActivity{
         isMenuOpened = true;
         return super.onMenuOpened(featureId, menu);
 
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+    }
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == 5) {
+            finish();
+        }
     }
 }

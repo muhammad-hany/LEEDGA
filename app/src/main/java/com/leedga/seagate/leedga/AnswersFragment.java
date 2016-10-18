@@ -235,7 +235,7 @@ public class AnswersFragment extends Fragment implements listCallback {
                 viewHolder.image.setImageResource(R.drawable.ic_incorrect);
             }
 
-            if (test.getAnsweredQuestions().get(position).isFlagged()) {
+            if (test.getAnsweredQuestions().get(resultPosition).isFlagged()) {
                 viewHolder.flagImage.setVisibility(View.VISIBLE);
             } else {
                 viewHolder.flagImage.setVisibility(View.INVISIBLE);

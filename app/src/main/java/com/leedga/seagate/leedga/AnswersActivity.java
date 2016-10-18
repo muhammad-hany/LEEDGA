@@ -7,15 +7,13 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import com.google.gson.Gson;
 
-public class AnswersActivity extends AppCompatActivity {
+public class AnswersActivity extends BaseActivity {
 
     public static final String QUESTION_BODY="question_body";
     protected SectionsPagerAdapter mSectionsPagerAdapter;
@@ -28,10 +26,7 @@ public class AnswersActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_answers);
-
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
+        defineNavigationMenu();
 
         categoryName=getIntent().getStringExtra(ResultActivity.CATEGORY_KEY);
 

@@ -298,5 +298,36 @@ public class DBHelper extends SQLiteOpenHelper {
         return count;
     }
 
+    public Question getRandomQuestion() {
+        int i = 0;
+        Question q = null;
+        Cursor cursor = db.query(MULTI_CHOICE_LEED_TABLE, null, null, null, null, null, "random()");
+        while (cursor.moveToNext()) {
+
+            String question = cursor.getString(cursor.getColumnIndex(QUESTION_KEY));
+            String ch1 = cursor.getString(cursor.getColumnIndex(FIRST_CHOICE));
+            String ch2 = cursor.getString(cursor.getColumnIndex(SECOND_CHOICE));
+            String ch3 = cursor.getString(cursor.getColumnIndex(THIRD_CHOICE));
+            String ch4 = cursor.getString(cursor.getColumnIndex(FOURTH_CHOICE));
+            String ch5 = cursor.getString(cursor.getColumnIndex(FIFTH_CHOICE));
+            String ch6 = cursor.getString(cursor.getColumnIndex(SIXITH_CHOICE));
+            String answer = cursor.getString(cursor.getColumnIndex(ANSWER));
+            String note = cursor.getString(cursor.getColumnIndex(NOTES_ON_ANSWER));
+            String categoty = cursor.getString(cursor.getColumnIndex(CATEGORY));
+            String key = cursor.getString(cursor.getColumnIndex(KEY));
+
+            int flagString = cursor.getInt(cursor.getColumnIndex(FLAGGED));
+            int id = cursor.getInt(cursor.getColumnIndex(ID));
+            int type = cursor.getInt(cursor.getColumnIndex(MULT_CHOICE_TABLE_TYPE));
+            boolean flag;
+            flag = flagString != 0;
+            q = new Question(question, ch1, ch2, ch3, ch4, ch5, ch6, answer, note,
+                    categoty, type, id, key, flag);
+            i++;
+        }
+
+        return q;
+    }
+
 
 }

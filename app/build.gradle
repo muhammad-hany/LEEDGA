@@ -3,6 +3,10 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 23
     buildToolsVersion "24.0.0"
+    dexOptions {
+        maxProcessCount 2
+        javaMaxHeapSize "2g"
+    }
 
     defaultConfig {
         applicationId "com.leedga.seagate.leedga"
@@ -17,6 +21,8 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+
 }
 
 allprojects {

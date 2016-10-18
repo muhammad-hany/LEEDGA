@@ -32,6 +32,7 @@
         android:gravity="fill"
         android:maxLines="5"
         android:text="TextView"
+        android:textColor="#dfdfdf"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toRightOf="@+id/imageView"
         app:layout_constraintRight_toLeftOf="@+id/flag"

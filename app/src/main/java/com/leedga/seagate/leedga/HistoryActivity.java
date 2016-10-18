@@ -8,8 +8,6 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -21,6 +19,7 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.github.lzyzsd.circleprogress.DonutProgress;
 import com.google.gson.Gson;
 
 import java.text.DateFormat;
@@ -31,7 +30,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-public class HistoryActivity extends AppCompatActivity {
+public class HistoryActivity extends BaseActivity {
     static final String TEST_ID_KEY = "test_id";
     TextView exams, overAllRatio, overAllPercentage, examTxt;
     ArrayList<String> stringPref;
@@ -42,10 +41,7 @@ public class HistoryActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_history);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        defineNavigationMenu();
         initViews();
         gettingTestFromPref();
         settingValues();
@@ -203,6 +199,7 @@ public class HistoryActivity extends AppCompatActivity {
                 holder.ratio = (TextView) convertView.findViewById(R.id.correct);
                 holder.colorResult = (RelativeLayout) convertView.findViewById(R.id.colorResult);
                 holder.insidePrec = (TextView) convertView.findViewById(R.id.prec);
+                holder.donutProgress = (DonutProgress) convertView.findViewById(R.id.item_donut);
                 convertView.setTag(holder);
             } else {
                 holder = (ViewHolder) convertView.getTag();
@@ -211,8 +208,12 @@ public class HistoryActivity extends AppCompatActivity {
             holder.date.setText(format.format(test.getSavingDate()));
             holder.ratio.setText(test.getRatio() + " Correct Answer");
             holder.insidePrec.setText(test.getTestPercentage() + "%");
-            holder.colorResult.setBackgroundColor(getColorByScore(Integer.parseInt(
-                    (test.getTestPercentage()))));
+            /*GradientDrawable drawable= (GradientDrawable) holder.colorResult.getBackground();
+             drawable.setColor(getColorByScore(Integer.parseInt(
+                    (test.getTestPercentage()))));*/
+            holder.donutProgress.setProgress(Integer.parseInt(test.getTestPercentage()));
+            holder.donutProgress.setInnerBackgroundColor((getColorByScore(Integer.parseInt(
+                    (test.getTestPercentage())))));
             return convertView;
 
 
@@ -242,6 +243,7 @@ public class HistoryActivity extends AppCompatActivity {
             TextView date;
             TextView ratio, insidePrec;
             RelativeLayout colorResult;
+            DonutProgress donutProgress;
         }
     }
 

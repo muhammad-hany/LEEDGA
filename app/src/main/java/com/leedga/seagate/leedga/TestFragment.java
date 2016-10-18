@@ -815,9 +815,10 @@ public class TestFragment extends Fragment {
             Bundle bundle = new Bundle();
             bundle.putSerializable(TestCategoriesFragment.TEST_BUNDLE, test);
             Intent i = new Intent(getContext(), ResultActivity.class);
+            i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             i.putExtra(TestCategoriesFragment.TEST_BUNDLE, bundle);
             i.putExtra("clear", true);
-            startActivity(i);
+            startActivityForResult(i, 2);
         }
     }
 
@@ -1035,6 +1036,12 @@ public class TestFragment extends Fragment {
 
     }
 
-
-
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == 5) {
+            getActivity().setResult(5);
+            getActivity().finish();
+        }
+    }
 }

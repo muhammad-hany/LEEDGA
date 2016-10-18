@@ -51,8 +51,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:animateLayoutChanges="true"
-                android:background="@drawable/select_style_white"
-                android:clickable="true">
+                android:clickable="true"
+                android:foreground="?android:attr/selectableItemBackground">
 
                 <RadioButton
                     android:id="@+id/radio1"
@@ -124,8 +124,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:animateLayoutChanges="true"
-                android:background="@drawable/select_style_white"
-                android:clickable="true">
+                android:clickable="true"
+                android:foreground="?android:attr/selectableItemBackground">
 
                 <RadioButton
                     android:id="@+id/radio2"
@@ -196,8 +196,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:animateLayoutChanges="true"
-                android:background="@drawable/select_style_white"
-                android:clickable="true">
+                android:clickable="true"
+                android:foreground="?android:attr/selectableItemBackground">
 
                 <RadioButton
                     android:id="@+id/radio3"
@@ -267,8 +267,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:animateLayoutChanges="true"
-                android:background="@drawable/select_style_white"
-                android:clickable="true">
+                android:clickable="true"
+                android:foreground="?android:attr/selectableItemBackground">
 
                 <RadioButton
                     android:id="@+id/radio4"
@@ -338,8 +338,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:animateLayoutChanges="true"
-                android:background="@drawable/select_style_white"
-                android:clickable="true">
+                android:clickable="true"
+                android:foreground="?android:attr/selectableItemBackground">
 
 
                 <CheckBox
@@ -398,8 +398,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:animateLayoutChanges="true"
-                android:background="@drawable/select_style_white"
-                android:clickable="true">
+                android:clickable="true"
+                android:foreground="?android:attr/selectableItemBackground">
 
 
                 <CheckBox

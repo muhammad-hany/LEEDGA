@@ -1,6 +1,7 @@
 package com.leedga.seagate.leedga;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -188,5 +189,14 @@ public class TestTypeFragment extends Fragment {
         super.onAttach(activity);
 
         testHandleCallback = (FragmentListener) activity;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == 5) {
+            getActivity().setResult(5);
+            getActivity().finish();
+        }
     }
 }

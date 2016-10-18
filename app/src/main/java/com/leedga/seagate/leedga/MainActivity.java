@@ -6,31 +6,35 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Button;
 
 import com.google.gson.Gson;
 
+import static com.leedga.seagate.leedga.TestActivity.UNFINISHED;
+import static com.leedga.seagate.leedga.TestActivity.UNFINISHED_TEST;
 import static com.leedga.seagate.leedga.TestCategoriesFragment.TEST_BUNDLE;
 
-public class MainActivity extends AppCompatActivity  {
+public class MainActivity extends BaseActivity implements MainRecyclerAdaptor.OnMyItemClick {
 
+    public static final String DEFAULT_TEST_KEY = "default_test";
+    public static final String DEFAULT_TEST_PREF_KEY = "default_test_pref";
     AlertDialog.Builder builder;
     private Test test;
     private SharedPreferences preferences;
+    private RecyclerView recyclerView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        Button testButton= (Button) findViewById(R.id.test_btn);
+        defineNavigationMenu();
+        setDefaultTestPreferences();
+        /*getSupportActionBar().setDisplayShowTitleEnabled(false);*/
+        /*Button testButton= (Button) findViewById(R.id.test_btn);
         assert testButton != null;
         testButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -47,17 +51,50 @@ public class MainActivity extends AppCompatActivity  {
                 Intent i=new Intent(MainActivity.this,HistoryActivity.class);
                 startActivity(i);
             }
-        });
+        });*/
+
+        recyclerView = (RecyclerView) findViewById(R.id.main_recycler);
+        MainRecyclerAdaptor adaptor = new MainRecyclerAdaptor(this, this);
+        StaggeredGridLayoutManager staggeredGridLayoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(staggeredGridLayoutManager);
+        recyclerView.setAdapter(adaptor);
 
 
     }
 
-    private void checkThereIsUnfinishedTest() {
+    public Question getRandomQuestion() {
+        DBHelper helper = new DBHelper(this, TestFragment.DATABASE_NAME);
+        return helper.getRandomQuestion();
+    }
+
+    private void setDefaultTestPreferences() {
+        SharedPreferences preferences = getSharedPreferences(DEFAULT_TEST_PREF_KEY, MODE_PRIVATE);
+        if (!preferences.contains(DEFAULT_TEST_KEY)) {
+            SharedPreferences.Editor editor = preferences.edit();
+            Test test = createNewTest();
+            Gson gson = new Gson();
+            String json = gson.toJson(test);
+            editor.putString(DEFAULT_TEST_KEY, json);
+            editor.apply();
+        }
+    }
+
+    private Test createNewTest() {
+        Test test = new Test();
+        test.setQuestionTypes(new boolean[]{true, true, true});
+        test.setNumberOfQuestions(10);
+        test.setAnswerShow(TestTypeFragment.ANSWER_AFTER_ALL);
+        test.setChapters(new boolean[]{true, true, true, true, true, true, true, true, true});
+        return test;
+    }
+
+    protected void checkThereIsUnfinishedTest() {
         preferences = getSharedPreferences(TestActivity.UNFINISHED_TEST, Context.MODE_PRIVATE);
         buildDialog();
 
-        if (preferences.contains(TestActivity.UNFINISHED)) {
-            String jsonTest = preferences.getString(TestActivity.UNFINISHED, null);
+        if (preferences.contains(UNFINISHED)) {
+            String jsonTest = preferences.getString(UNFINISHED, null);
             Gson gson = new Gson();
             test = gson.fromJson(jsonTest, Test.class);
             AlertDialog dialog = builder.create();
@@ -67,7 +104,7 @@ public class MainActivity extends AppCompatActivity  {
             editor.clear();
             editor.apply();
             Intent i = new Intent(MainActivity.this, TestSettingActivity.class);
-            startActivity(i);
+            startActivityForResult(i, 1);
         }
     }
 
@@ -82,13 +119,13 @@ public class MainActivity extends AppCompatActivity  {
                 startActivity(i);
             }
         });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+        builder.setNegativeButton("Start New one", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 Intent i = new Intent(MainActivity.this, TestSettingActivity.class);
                 startActivity(i);
                 SharedPreferences.Editor editor = preferences.edit();
-                editor.remove(TestActivity.UNFINISHED);
+                editor.remove(UNFINISHED);
                 editor.apply();
             }
         });
@@ -111,5 +148,20 @@ public class MainActivity extends AppCompatActivity  {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == 5) {
+            SharedPreferences preferences = getSharedPreferences(UNFINISHED_TEST, MODE_PRIVATE);
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.clear().apply();
+        }
+    }
+
+    @Override
+    public void onItemClick(int position) {
+
     }
 }

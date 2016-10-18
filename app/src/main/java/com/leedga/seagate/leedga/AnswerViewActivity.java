@@ -3,10 +3,8 @@ package com.leedga.seagate.leedga;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 
-public class AnswerViewActivity extends AppCompatActivity {
+public class AnswerViewActivity extends BaseActivity {
 
     public static boolean AnswerShowFlag = true;
     private Test test;
@@ -16,9 +14,7 @@ public class AnswerViewActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_answer_view);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
+        defineNavigationMenu();
         test= (Test) getIntent().getSerializableExtra(TestCategoriesFragment.TEST_BUNDLE);
         questionBody=getIntent().getStringExtra(AnswersActivity.QUESTION_BODY);
 
