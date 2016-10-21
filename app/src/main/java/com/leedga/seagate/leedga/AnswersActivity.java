@@ -63,14 +63,6 @@ public class AnswersActivity extends BaseActivity {
     }
 
 
-
-   /* @Override
-    public void onDataChange() {
-        PlaceholderFragment fragment= (PlaceholderFragment) mSectionsPagerAdapter.getItem(mViewPager.getCurrentItem());
-        fragment.fetchForQuestionBodyList();
-        fragment.adapter.notifyDataSetChanged();
-    }*/
-
     @Override
     protected void onResume() {
         super.onResume();

@@ -24,7 +24,7 @@ public class TestTypeFragment extends Fragment {
     public static final int TRUE_FALSE = 0;
     public static final int SINGLE_CHOICE = 1;
     public static final int MULTI_CHOICE = 2;
-    public static final String TEST_BUNDLE_NAME = "test";
+    public static final String TEST_BUNDLE_NAME = "tests";
     public static final int ANSWER_AFTER_ALL = 0;
     public static final int ANSWER_AFTER_EVERY = 1;
     public static final int ANSWER_WHEN_WRONG = 2;

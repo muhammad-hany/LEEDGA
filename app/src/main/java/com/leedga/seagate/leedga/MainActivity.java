@@ -8,11 +8,17 @@ import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 
 import com.google.gson.Gson;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Map;
 
 import static com.leedga.seagate.leedga.TestActivity.UNFINISHED;
 import static com.leedga.seagate.leedga.TestActivity.UNFINISHED_TEST;
@@ -27,6 +33,7 @@ public class MainActivity extends BaseActivity implements MainRecyclerAdaptor.On
     private SharedPreferences preferences;
     private RecyclerView recyclerView;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,7 +41,7 @@ public class MainActivity extends BaseActivity implements MainRecyclerAdaptor.On
         defineNavigationMenu();
         setDefaultTestPreferences();
         /*getSupportActionBar().setDisplayShowTitleEnabled(false);*/
-        /*Button testButton= (Button) findViewById(R.id.test_btn);
+        Button testButton = (Button) findViewById(R.id.test_btn);
         assert testButton != null;
         testButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -51,13 +58,12 @@ public class MainActivity extends BaseActivity implements MainRecyclerAdaptor.On
                 Intent i=new Intent(MainActivity.this,HistoryActivity.class);
                 startActivity(i);
             }
-        });*/
-
+        });
+        ArrayList<Test> tests = getLastTests();
         recyclerView = (RecyclerView) findViewById(R.id.main_recycler);
-        MainRecyclerAdaptor adaptor = new MainRecyclerAdaptor(this, this);
-        StaggeredGridLayoutManager staggeredGridLayoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
+        MainRecyclerAdaptor adaptor = new MainRecyclerAdaptor(this, this, tests);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-        recyclerView.setLayoutManager(staggeredGridLayoutManager);
+        recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(adaptor);
 
 
@@ -164,4 +170,33 @@ public class MainActivity extends BaseActivity implements MainRecyclerAdaptor.On
     public void onItemClick(int position) {
 
     }
+
+    public ArrayList<Test> getLastTests() {
+        SharedPreferences prefs = getSharedPreferences(ResultActivity.TESTS_PREFS, MODE_PRIVATE);
+        ArrayList<String> stringPref = new ArrayList<>();
+        ArrayList<Test> testPref = new ArrayList<>();
+
+        Map<String, ?> tests = prefs.getAll();
+        for (Map.Entry<String, ?> test : tests.entrySet()) {
+            stringPref.add(test.getValue().toString());
+        }
+
+        Gson gson = new Gson();
+        if (stringPref.size() != 0) {
+            for (String entry : stringPref) {
+                Test test = gson.fromJson(entry, Test.class);
+                testPref.add(test);
+            }
+        }
+
+        Collections.sort(testPref, new Comparator<Test>() {
+            @Override
+            public int compare(Test lhs, Test rhs) {
+                return rhs.getSavingDate().compareTo(lhs.getSavingDate());
+            }
+        });
+        return testPref;
+    }
+
+
 }

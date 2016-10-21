@@ -110,7 +110,7 @@ public class TestActivity extends BaseActivity {
             editor.putString(testId, json);
             editor.apply();
         } else {
-            //saving test for retrieval when launching testActivity next time because user exit
+            //saving tests for retrieval when launching testActivity next time because user exit
             // from home key
             SharedPreferences prefs = getSharedPreferences(UNFINISHED_TEST, MODE_PRIVATE);
             SharedPreferences.Editor editor = prefs.edit();
@@ -200,7 +200,7 @@ public class TestActivity extends BaseActivity {
         if (!isWindowFocused && !isBackPressed) {
             isAppWentToBg = true;
             /*Toast.makeText(this, "Background", Toast.LENGTH_LONG).show();*/
-            //saving test item
+            //saving tests item
             Test unFinishedTest = ((TestFragment) pagerAdapter.instantiateItem(pager, pager
                     .getCurrentItem())).getTest();
             savingTestInMemmory(unFinishedTest, false);

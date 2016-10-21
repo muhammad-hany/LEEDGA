@@ -210,7 +210,7 @@ public class HistoryActivity extends BaseActivity {
             holder.insidePrec.setText(test.getTestPercentage() + "%");
             /*GradientDrawable drawable= (GradientDrawable) holder.colorResult.getBackground();
              drawable.setColor(getColorByScore(Integer.parseInt(
-                    (test.getTestPercentage()))));*/
+                    (tests.getTestPercentage()))));*/
             holder.donutProgress.setProgress(Integer.parseInt(test.getTestPercentage()));
             holder.donutProgress.setInnerBackgroundColor((getColorByScore(Integer.parseInt(
                     (test.getTestPercentage())))));

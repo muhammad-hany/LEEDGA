@@ -27,8 +27,6 @@ import static com.leedga.seagate.leedga.AnswersActivity.QUESTION_BODY;
 
 public class AnswersFragment extends Fragment implements listCallback {
 
-
-    public static final String RADIO_DATASET_CHANGED = "com.yourapp.app.RADIO_DATASET_CHANGED";
     private static final String ARG_SECTION_NUMBER = "section_number";
     public AnswerListAdapter adapter;
     List<String> questionsBodyList;
@@ -57,7 +55,7 @@ public class AnswersFragment extends Fragment implements listCallback {
     public void onAttach(Context context) {
         super.onAttach(context);
         testId=getArguments().getString(TestCategoriesFragment.TEST_BUNDLE);
-        test=fetchTest(testId);
+        tests=fetchTest(testId);
     }*/
 
     @Override
@@ -67,7 +65,7 @@ public class AnswersFragment extends Fragment implements listCallback {
         final View rootView = inflater.inflate(R.layout.fragment_answers, container, false);
         fragmentNumber = getArguments().getInt(ARG_SECTION_NUMBER);
         test = (Test) getArguments().getSerializable(TestCategoriesFragment.TEST_BUNDLE);
-        /*test=fetchTest(testId);*/
+        /*tests=fetchTest(testId);*/
         categoryName = getArguments().getString(ResultActivity.CATEGORY_KEY);
 
         ListView listView = (ListView) rootView.findViewById(R.id.answerList);

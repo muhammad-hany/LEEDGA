@@ -29,7 +29,7 @@ public class TestFragment extends Fragment {
     public static final String TRUE_FALSE_KEY = "truefalse";
     public static final String SINGLE_CHOICE_KEY = "single";
     public static final String MULTI_CHOICE_KEY = "multi";
-    public static final String TEST_BUNDLE_KEY = "test";
+    public static final String TEST_BUNDLE_KEY = "tests";
     public static final String QUESTIONS_POSTITION_KEY = "count";
     public static final String QUESTION_KEY = "question";
     public String[] checkBoxRealName = {"a", "b", "c", "d", "e", "f"};
@@ -131,9 +131,9 @@ public class TestFragment extends Fragment {
                     }
                 });
             }
-        /*}else if (test.getTestId().equals(TestActivity.UNFINISHED)){
-            // displaying the unfinished test
-            progressText.setText((count + 1) + "/" + test.getNumberOfQuestions());
+        /*}else if (tests.getTestId().equals(TestActivity.UNFINISHED)){
+            // displaying the unfinished tests
+            progressText.setText((count + 1) + "/" + tests.getNumberOfQuestions());
             displayUnfinishedTest();*/
         } else {
             next.setEnabled(false);
@@ -142,7 +142,7 @@ public class TestFragment extends Fragment {
             settingUpCheckListener(question.getType());
             seeExplaination.setVisibility(View.INVISIBLE);
             if (test.getTestId() != null) {
-                // displaying the unfinished test
+                // displaying the unfinished tests
                 displayUnfinishedTest();
             }
 
@@ -733,7 +733,7 @@ public class TestFragment extends Fragment {
                         nextCounter++;
                     }
                     nextCounter++;
-                    //mdoify next counter for unfinished test
+                    //mdoify next counter for unfinished tests
                     if (nextCounter > 1) {
                         updateTest();
                     } else if (nextCounter == 1) {
@@ -750,7 +750,7 @@ public class TestFragment extends Fragment {
                     if (!result) {
                         nextCounter++;
                         if (nextCounter > 1) {
-                            //moving to next test
+                            //moving to next tests
                             updateTest();
                         } else if (nextCounter == 1) {
                             showingDetailedAnswer();

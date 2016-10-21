@@ -8,51 +8,22 @@
     android:fitsSystemWindows="true"
     tools:context="com.leedga.seagate.leedga.MainActivity">
 
+
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:fitsSystemWindows="true"
         android:theme="@style/AppTheme.AppBarOverlay">
-
-        <android.support.design.widget.CollapsingToolbarLayout
-            android:id="@+id/main.collapsing"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:fitsSystemWindows="true"
-            app:contentScrim="?attr/colorPrimary"
-            app:expandedTitleMarginEnd="64dp"
-            app:expandedTitleMarginStart="48dp"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed"
-            >
-
-            <ImageView
-                android:id="@+id/image"
-                android:layout_width="match_parent"
-                android:layout_height="250dp"
-                android:fitsSystemWindows="true"
-                android:scaleType="centerCrop"
-                android:src="@drawable/mainphot"/>
 
             <android.support.v7.widget.Toolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                app:layout_collapseMode="pin"
-                app:popupTheme="@style/AppTheme.PopupOverlay"/>
-
-        </android.support.design.widget.CollapsingToolbarLayout>
+                android:title="@string/app_name"/>
 
     </android.support.design.widget.AppBarLayout>
 
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/main_recycler"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
-
-
-    <!--<include layout="@layout/content_main"/>-->
+    <include layout="@layout/content_main"/>
 
 
 

@@ -15,10 +15,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.RadarChart;
-import com.github.mikephil.charting.data.RadarData;
-import com.github.mikephil.charting.data.RadarDataSet;
-import com.github.mikephil.charting.data.RadarEntry;
-import com.github.mikephil.charting.interfaces.datasets.IRadarDataSet;
 import com.google.gson.Gson;
 
 import java.text.SimpleDateFormat;
@@ -112,7 +108,7 @@ public class ResultActivity extends BaseActivity {
 
                 Intent i=new Intent(ResultActivity.this,AnswersActivity.class);
                 i.putExtra(CATEGORY_KEY, categoryNamesForAnsweredQuestions.get(position));
-                i.putExtra(TestCategoriesFragment.TEST_BUNDLE,test);
+                i.putExtra(TestCategoriesFragment.TEST_BUNDLE,tests);
                 i.putExtra(TEST_ID_KEY, testId);
                 startActivity(i);
             }
@@ -151,11 +147,11 @@ public class ResultActivity extends BaseActivity {
         mChart.setWebColorInner(Color.LTGRAY);
         mChart.setWebAlpha(100);
 
-        setData();
+        //setData();
 
     }
 
-    private void setData() {
+    /*private void setData() {
         ArrayList<RadarEntry> entries = new ArrayList<>();
         for (int i = 0; i < 9; i++) {
             entries.add(new RadarEntry(adapter.calculateResultPerCategory()[i]));
@@ -177,7 +173,7 @@ public class ResultActivity extends BaseActivity {
         data.setValueTextColor(Color.WHITE);
         mChart.setData(data);
         mChart.invalidate();
-    }
+    }*/
 
     private void initViews() {
         String ratio = String.valueOf(calculateScore()) + "/" + test.getNumberOfAnsweredQuestions();

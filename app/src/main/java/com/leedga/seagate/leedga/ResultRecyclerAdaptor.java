@@ -15,10 +15,6 @@ import android.widget.TextView;
 import com.github.lzyzsd.circleprogress.ArcProgress;
 import com.github.lzyzsd.circleprogress.DonutProgress;
 import com.github.mikephil.charting.charts.RadarChart;
-import com.github.mikephil.charting.data.RadarData;
-import com.github.mikephil.charting.data.RadarDataSet;
-import com.github.mikephil.charting.data.RadarEntry;
-import com.github.mikephil.charting.interfaces.datasets.IRadarDataSet;
 
 import java.util.ArrayList;
 
@@ -186,14 +182,14 @@ public class ResultRecyclerAdaptor extends RecyclerView.Adapter<ResultRecyclerAd
             mChart.setDescription("");
             mChart.setWebAlpha(100);
 
-            setData();
+            //  setData();
 
         }
 
-        private void setData() {
+        /*private void setData() {
             ArrayList<RadarEntry> entries = new ArrayList<>();
             for (int i = 0; i < 9; i++) {
-                entries.add(new RadarEntry(/*adapter.calculateResultPerCategory()[i]*/20 * i));
+                entries.add(new RadarEntry(*//*adapter.calculateResultPerCategory()[i]*//*20 * i));
             }
             RadarDataSet set1 = new RadarDataSet(entries, "TestResult");
             set1.setColor(Color.rgb(103, 110, 129));
@@ -213,7 +209,7 @@ public class ResultRecyclerAdaptor extends RecyclerView.Adapter<ResultRecyclerAd
             mChart.setData(data);
             mChart.getYAxis().setEnabled(false);
             mChart.invalidate();
-        }
+        }*/
     }
 
     class ResultViewHolder extends ViewHolder {
