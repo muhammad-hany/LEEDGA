@@ -13,6 +13,8 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.components.XAxis;
@@ -36,7 +38,7 @@ public class MainRecyclerAdaptor extends RecyclerView.Adapter<MainRecyclerAdapto
     private OnMyItemClick listener;
 
     public MainRecyclerAdaptor(Context context, OnMyItemClick listener, ArrayList<Test> tests) {
-        cardsIds = new int[]{R.layout.main_card_chart};
+        cardsIds = new int[]{R.layout.main_card_chart, R.layout.main_card};
 
         this.context = context;
         MainRecyclerAdaptor.tests = tests;
@@ -57,18 +59,9 @@ public class MainRecyclerAdaptor extends RecyclerView.Adapter<MainRecyclerAdapto
             case 0:
                 holder = new MainChartHolder(v);
                 break;
-            /*case 1:
-                holder = new TestSettingHolder(v);
+            default:
+                holder = new MainMenuHolder(v);
                 break;
-            case 2:
-                holder = new HistoryHolder(v);
-                break;
-            case 3:
-                holder = new DayQuestionHolder(v);
-                break;
-            case 4:
-                holder = new CountDownHolder(v);
-                break;*/
 
 
         }
@@ -77,10 +70,54 @@ public class MainRecyclerAdaptor extends RecyclerView.Adapter<MainRecyclerAdapto
 
     @Override
     public void onBindViewHolder(MainRecyclerAdaptor.ViewHolder viewHolder, int position) {
+        MainMenuHolder holder1;
         switch (position) {
             case 0:
                 MainChartHolder holder = (MainChartHolder) viewHolder;
                 /*holder.setData();*/
+                break;
+            case 1:
+                holder1 = (MainMenuHolder) viewHolder;
+                holder1.textView.setText("Test");
+                holder1.icon.setImageResource(R.drawable.ic_test);
+                break;
+            case 2:
+                holder1 = (MainMenuHolder) viewHolder;
+                holder1.textView.setText("Test History");
+                holder1.icon.setImageResource(R.drawable.ic_history);
+                break;
+            case 3:
+                holder1 = (MainMenuHolder) viewHolder;
+                holder1.textView.setText("Lessons");
+                holder1.icon.setImageResource(R.drawable.ic_studying);
+                break;
+            case 4:
+                holder1 = (MainMenuHolder) viewHolder;
+                holder1.textView.setText("General Setting");
+                holder1.icon.setImageResource(R.drawable.ic_settings);
+                break;
+            case 5:
+                holder1 = (MainMenuHolder) viewHolder;
+                holder1.textView.setText("Key Terms and definitions");
+                holder1.icon.setImageResource(R.drawable.ic_job_search);
+                break;
+            case 6:
+                holder1 = (MainMenuHolder) viewHolder;
+                holder1.textView.setText("Reference Materials");
+                holder1.icon.setImageResource(R.drawable.ic_law);
+                break;
+            case 7:
+                holder1 = (MainMenuHolder) viewHolder;
+                holder1.textView.setText("Rate us");
+                holder1.icon.setImageResource(R.drawable.ic_star);
+                break;
+            case 8:
+                holder1 = (MainMenuHolder) viewHolder;
+                holder1.textView.setText("3 days until Exam");
+                holder1.icon.setImageResource(R.drawable.ic_calendar);
+                break;
+
+
         }
     }
 
@@ -92,12 +129,19 @@ public class MainRecyclerAdaptor extends RecyclerView.Adapter<MainRecyclerAdapto
 
     @Override
     public int getItemCount() {
-        return cardsIds.length;
+        return 8;
     }
 
     @Override
     public int getItemViewType(int position) {
-        return position;
+
+        switch (position) {
+            case 0:
+                return 0;
+            default:
+                return 1;
+        }
+
     }
 
     public interface onItemClickListener {
@@ -287,6 +331,18 @@ public class MainRecyclerAdaptor extends RecyclerView.Adapter<MainRecyclerAdapto
         }
 
 
+    }
+
+    public class MainMenuHolder extends ViewHolder {
+        ImageView icon;
+        TextView textView;
+
+        public MainMenuHolder(View itemView) {
+            super(itemView);
+
+            icon = (ImageView) itemView.findViewById(R.id.image);
+            textView = (TextView) itemView.findViewById(R.id.textView);
+        }
     }
 
 
