@@ -38,6 +38,7 @@ public class MainActivity extends BaseActivity implements MainRecyclerAdaptor.On
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         defineNavigationMenu();
         setDefaultTestPreferences();
         /*getSupportActionBar().setDisplayShowTitleEnabled(false);*/
