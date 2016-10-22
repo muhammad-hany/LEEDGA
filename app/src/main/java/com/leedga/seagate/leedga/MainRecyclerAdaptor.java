@@ -2,13 +2,10 @@ package com.leedga.seagate.leedga;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.ViewPager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -283,52 +280,32 @@ public class MainRecyclerAdaptor extends RecyclerView.Adapter<MainRecyclerAdapto
     }
 
     class MainChartHolder extends ViewHolder {
-        ViewPager pager;
+        TextView prec, bigNum1, bigNum2, smallText1, smallText2, mainText;
 
         public MainChartHolder(View view) {
             super(view);
 
+            prec = (TextView) view.findViewById(R.id.prec);
+            bigNum1 = (TextView) view.findViewById(R.id.bigNum1);
+            bigNum2 = (TextView) view.findViewById(R.id.bigNum2);
+            smallText1 = (TextView) view.findViewById(R.id.smallText1);
+            smallText2 = (TextView) view.findViewById(R.id.smallText2);
+            mainText = (TextView) view.findViewById(R.id.mainText);
 
-            pager = (ViewPager) view.findViewById(R.id.mainPager);
-            ChartPagerAdapter adapter = new ChartPagerAdapter(((MainActivity) context).getSupportFragmentManager());
-            pager.setAdapter(adapter);
-            TabLayout tabLayout = (TabLayout) view.findViewById(R.id.tabLayout);
-            tabLayout.setupWithViewPager(pager);
+            Typeface big = Typeface.createFromAsset(context.getAssets(), "fonts/big.otf");
+            Typeface small = Typeface.createFromAsset(context.getAssets(), "fonts/slim.otf");
 
 
+            smallText1.setTypeface(small);
+            smallText2.setTypeface(small);
+
+            bigNum1.setTypeface(big);
+            bigNum2.setTypeface(big);
+            mainText.setTypeface(big);
         }
 
 
-        public class ChartPagerAdapter extends FragmentPagerAdapter {
 
-            public ChartPagerAdapter(FragmentManager fm) {
-                super(fm);
-            }
-
-            @Override
-            public Fragment getItem(int position) {
-                return new ChartFragment();
-            }
-
-            @Override
-            public int getCount() {
-                return 2;
-            }
-
-            @Override
-            public CharSequence getPageTitle(int position) {
-                CharSequence sequence = new String();
-                switch (position) {
-                    case 0:
-                        sequence = "Correct Questions";
-                        break;
-                    case 1:
-                        sequence = "Wrong Questions";
-                        break;
-                }
-                return sequence;
-            }
-        }
 
 
     }
