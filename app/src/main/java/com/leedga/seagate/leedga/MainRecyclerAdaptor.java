@@ -230,8 +230,9 @@ public class MainRecyclerAdaptor extends RecyclerView.Adapter<MainRecyclerAdapto
                 String date = format.format(test.getSavingDate());
                 dates.add(date);
             }
+            List<String> subitems = dates.subList(0, Math.min(2, dates.size()));
 
-            return dates;
+            return subitems;
         }
 
 
