@@ -165,7 +165,7 @@ public class MainRecyclerAdaptor extends RecyclerView.Adapter<MainRecyclerAdapto
         public void onResume() {
             super.onResume();
             if (barChart != null) {
-                barChart.animateXY(2000, 2000);
+                barChart.animateXY(1000, 1000);
             }
         }
 
@@ -241,34 +241,47 @@ public class MainRecyclerAdaptor extends RecyclerView.Adapter<MainRecyclerAdapto
         public ArrayList<Integer> calculateResultPerCategory(ArrayList<Test> tests) {
 
             ArrayList<Integer> numberOfCorrectQuestionPerCategory = new ArrayList<>();
-            for (Test test : tests) {
-                ArrayList<Question> questions = test.getAnsweredQuestions();
-                ArrayList<Boolean> userResult = test.getUserResult();
-                for (int i = 0; i < DBHelper.CATEGORY_NAMES.length; i++) {
-                    int j = 0;
-                    for (Question question : questions) {
-                        if (DBHelper.CATEGORY_NAMES[i].equals(question.getCategory())) {
-                            if (userResult.get(j)) {
-                                try {
-                                    numberOfCorrectQuestionPerCategory.set(i, numberOfCorrectQuestionPerCategory.get(i) + 1);
-                                } catch (IndexOutOfBoundsException e) {
-                                    numberOfCorrectQuestionPerCategory.add(1);
-                                }
+            if (tests.size() == 0) {
+                numberOfCorrectQuestionPerCategory.add(3);
+                numberOfCorrectQuestionPerCategory.add(5);
+                numberOfCorrectQuestionPerCategory.add(2);
+                numberOfCorrectQuestionPerCategory.add(10);
+                numberOfCorrectQuestionPerCategory.add(6);
+                numberOfCorrectQuestionPerCategory.add(4);
+                numberOfCorrectQuestionPerCategory.add(6);
+                numberOfCorrectQuestionPerCategory.add(3);
+                numberOfCorrectQuestionPerCategory.add(7);
+            } else {
+                for (Test test : tests) {
+                    ArrayList<Question> questions = test.getAnsweredQuestions();
+                    ArrayList<Boolean> userResult = test.getUserResult();
+                    for (int i = 0; i < DBHelper.CATEGORY_NAMES.length; i++) {
+                        int j = 0;
+                        for (Question question : questions) {
+                            if (DBHelper.CATEGORY_NAMES[i].equals(question.getCategory())) {
+                                if (userResult.get(j)) {
+                                    try {
+                                        numberOfCorrectQuestionPerCategory.set(i, numberOfCorrectQuestionPerCategory.get(i) + 1);
+                                    } catch (IndexOutOfBoundsException e) {
+                                        numberOfCorrectQuestionPerCategory.add(1);
+                                    }
 
-                            } else {
-                                try {
-                                    numberOfCorrectQuestionPerCategory.set(i, numberOfCorrectQuestionPerCategory.get(i)
-                                    );
-                                } catch (IndexOutOfBoundsException e) {
-                                    numberOfCorrectQuestionPerCategory.add(0);
+                                } else {
+                                    try {
+                                        numberOfCorrectQuestionPerCategory.set(i, numberOfCorrectQuestionPerCategory.get(i)
+                                        );
+                                    } catch (IndexOutOfBoundsException e) {
+                                        numberOfCorrectQuestionPerCategory.add(0);
+                                    }
                                 }
                             }
+                            j++;
                         }
-                        j++;
-                    }
 
+                    }
                 }
             }
+
 
             return numberOfCorrectQuestionPerCategory;
         }
