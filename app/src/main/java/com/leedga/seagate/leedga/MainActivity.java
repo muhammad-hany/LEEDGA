@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
@@ -64,7 +65,20 @@ public class MainActivity extends BaseActivity implements MainRecyclerAdaptor.On
         recyclerView = (RecyclerView) findViewById(R.id.main_recycler);
         MainRecyclerAdaptor adaptor = new MainRecyclerAdaptor(this, this, tests);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-        recyclerView.setLayoutManager(linearLayoutManager);
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 2);
+        gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+            @Override
+            public int getSpanSize(int position) {
+                switch (position) {
+                    case 0:
+                        return 2;
+                    default:
+                        return 1;
+                }
+
+            }
+        });
+        recyclerView.setLayoutManager(gridLayoutManager);
         recyclerView.setAdapter(adaptor);
 
 
