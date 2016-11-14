@@ -23,8 +23,8 @@ import java.util.Date;
 import java.util.UUID;
 
 import static com.leedga.seagate.leedga.HistoryActivity.TEST_ID_KEY;
+import static com.leedga.seagate.leedga.REF.CATEGORY_NAMES;
 import static com.leedga.seagate.leedga.TestActivity.UNFINISHED;
-import static com.leedga.seagate.leedga.TestActivity.UNFINISHED_TEST;
 
 public class ResultActivity extends BaseActivity {
 
@@ -48,8 +48,8 @@ public class ResultActivity extends BaseActivity {
         setContentView(R.layout.activity_result);
         defineNavigationMenu();
 
-        Bundle bundle=getIntent().getBundleExtra(TestCategoriesFragment.TEST_BUNDLE);
-        if (bundle!=null) {
+        Bundle bundle = getIntent().getBundleExtra(TestCategoriesFragment.TEST_BUNDLE);
+        if (bundle != null) {
             test = (Test) bundle.getSerializable(TestCategoriesFragment.TEST_BUNDLE);
         }
         if (getIntent().hasExtra("clear")) {
@@ -66,12 +66,12 @@ public class ResultActivity extends BaseActivity {
         for (int i = 0; i < 9; i++) {
             int j = 0;
             for (Question q : test.getAnsweredQuestions()) {
-                if (q.getCategory().equals(DBHelper.CATEGORY_NAMES[i])) {
+                if (q.getCategory().equals(CATEGORY_NAMES[i])) {
                     j++;
                     try {
-                        categoryNamesForAnsweredQuestions.set(i, DBHelper.CATEGORY_NAMES[i]);
+                        categoryNamesForAnsweredQuestions.set(i, CATEGORY_NAMES[i]);
                     } catch (Exception e) {
-                        categoryNamesForAnsweredQuestions.add(DBHelper.CATEGORY_NAMES[i]);
+                        categoryNamesForAnsweredQuestions.add(CATEGORY_NAMES[i]);
                     }
                 }
             }
@@ -115,13 +115,13 @@ public class ResultActivity extends BaseActivity {
         });*/
 
 
-        showAll= (Button) findViewById(R.id.showAll);
+        showAll = (Button) findViewById(R.id.showAll);
         showAll.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent i=new Intent(ResultActivity.this,AnswersActivity.class);
-                i.putExtra(CATEGORY_KEY,"all");
-                i.putExtra(TestCategoriesFragment.TEST_BUNDLE,test);
+                Intent i = new Intent(ResultActivity.this, AnswersActivity.class);
+                i.putExtra(CATEGORY_KEY, "all");
+                i.putExtra(TestCategoriesFragment.TEST_BUNDLE, test);
                 i.putExtra(TEST_ID_KEY, testId);
                 startActivity(i);
             }
@@ -132,9 +132,13 @@ public class ResultActivity extends BaseActivity {
     }
 
     private void clearUnfinishedTestInPrefs() {
-        SharedPreferences sharedPreferences = getSharedPreferences(UNFINISHED_TEST, MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.clear().apply();
+        SharedPreferences sharedPreferences = getSharedPreferences(REF.UNCOMPLETED_PREF, MODE_PRIVATE);
+        if (sharedPreferences.contains(REF.UNCOMPLETED_TEST)) {
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.remove(REF.UNCOMPLETED_TEST);
+            editor.apply();
+        }
+
 
     }
 
@@ -196,27 +200,38 @@ public class ResultActivity extends BaseActivity {
     }
 
     private void savingTestInMemmory() {
+        deletingUnfinishedTest();
         SharedPreferences prefs = getSharedPreferences(TESTS_PREFS, MODE_PRIVATE);
-        SharedPreferences.Editor editor=prefs.edit();
-        Gson gson=new Gson();
+        SharedPreferences.Editor editor = prefs.edit();
+        Gson gson = new Gson();
         testId = UUID.randomUUID().toString();
         test.setTestId(testId);
-        String json=gson.toJson(test);
+        String json = gson.toJson(test);
         editor.putString(testId, json);
         editor.apply();
 
 
     }
 
+    private void deletingUnfinishedTest() {
+        SharedPreferences unfinished = getSharedPreferences(REF.UNCOMPLETED_PREF, MODE_PRIVATE);
+        if (unfinished.contains(REF.UNCOMPLETED_TEST)) {
+            SharedPreferences.Editor editor = unfinished.edit();
+            editor.remove(REF.UNCOMPLETED_TEST);
+            editor.apply();
+        }
+
+    }
+
     private int calculatePrecentage() {
-        double x=calculateScore();
+        double x = calculateScore();
         double y = test.getNumberOfAnsweredQuestions();
-        double r=(x/y)*100;
+        double r = (x / y) * 100;
         return (int) r;
     }
 
     private int calculateScore() {
-        int scoreCount=0;
+        int scoreCount = 0;
         for (int i = 0; i < test.getUserResult().size(); i++) {
             if (test.getUserResult().get(i)) {
                 scoreCount++;

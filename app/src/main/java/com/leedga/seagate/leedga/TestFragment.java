@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.CardView;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -23,47 +24,51 @@ import com.google.gson.Gson;
 
 import java.util.ArrayList;
 
+import static com.leedga.seagate.leedga.REF.DATABASE_NAME;
+import static com.leedga.seagate.leedga.REF.MULTI_CHOICE_KEY;
+import static com.leedga.seagate.leedga.REF.QUESTIONS_POSTITION_KEY;
+import static com.leedga.seagate.leedga.REF.SINGLE_CHOICE_KEY;
+import static com.leedga.seagate.leedga.REF.TEST_BUNDLE_KEY;
+import static com.leedga.seagate.leedga.REF.TRUE_FALSE_KEY;
+
 
 public class TestFragment extends Fragment {
-    public static final String DATABASE_NAME = "leed.sqlite";
-    public static final String TRUE_FALSE_KEY = "truefalse";
-    public static final String SINGLE_CHOICE_KEY = "single";
-    public static final String MULTI_CHOICE_KEY = "multi";
-    public static final String TEST_BUNDLE_KEY = "tests";
-    public static final String QUESTIONS_POSTITION_KEY = "count";
-    public static final String QUESTION_KEY = "question";
+
     public String[] checkBoxRealName = {"a", "b", "c", "d", "e", "f"};
+    public boolean nextState = false, nextSubmit = false, nextNext = false;
     listCallback listener;
-    View line4,line5, line6, line7;
-    Button next,back,seeExplaination;
-    ConstraintLayout r1,r2,r3,r4,r5,r6;
-    TextView questionBodyS,text1,text2,text3,text4,text5,text6,note1;
-    CheckBox checkBox1, checkBox2, checkBox3, checkBox4,checkBox5,checkBox6;
-    TextView answerText,progressText;
+    View line4, line5, line6, line3;
+    Button seeExplaination, explain;
+    ConstraintLayout r1, r2, r3, r4, r5, r6;
+    TextView questionBodyS, text1, text2, text3, text4, text5, text6, note1;
+    CheckBox checkBox1, checkBox2, checkBox3, checkBox4, checkBox5, checkBox6;
+    TextView answerText;
     ArrayList<String> userAnswers;
     Test test;
-    RadioButton radio1,radio2,radio3,radio4;
+    RadioButton radio1, radio2, radio3, radio4;
     Question question;
-    ImageView image1,image2,image3,image4,image5,image6;
-    int fragmentPosition=0;
-    int uniCount =0;
+    ImageView image1, image2, image3, image4, image5, image6;
+    int fragmentPosition = 0;
+    int uniCount = 0;
     int position;
     int nextCounter = 0;
     ArrayList<CheckBox> checkBoxes;
-
+    CardView answerCard;
+    TextView typeText, categoryText;
     CompoundButton lastCheckedBox;
-    boolean isItAnswerShow=false;
-
+    boolean isItAnswerShow = false;
+    boolean isExplainOn = false;
+    private CardView mainCard;
     public TestFragment() {
         // Required empty public constructor
     }
 
 
-    public static Fragment init(Test test,int position){
-        TestFragment testFragment=new TestFragment();
-        Bundle bundle=new Bundle();
-        bundle.putSerializable(TEST_BUNDLE_KEY,test);
-        bundle.putInt(QUESTIONS_POSTITION_KEY,position);
+    public static Fragment init(Test test, int position) {
+        TestFragment testFragment = new TestFragment();
+        Bundle bundle = new Bundle();
+        bundle.putSerializable(TEST_BUNDLE_KEY, test);
+        bundle.putInt(QUESTIONS_POSTITION_KEY, position);
         testFragment.setArguments(bundle);
         return testFragment;
     }
@@ -79,30 +84,27 @@ public class TestFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        Bundle bundle=getArguments();
-        test= (Test) bundle.getSerializable(TEST_BUNDLE_KEY);
-        isItAnswerShow=test.isSaved();
-        uniCount=bundle.getInt(QUESTIONS_POSTITION_KEY);
-        position=bundle.getInt(QUESTIONS_POSTITION_KEY);
-        View view=inflater.inflate(R.layout.fragment_test, container, false);
+        Bundle bundle = getArguments();
+        test = (Test) bundle.getSerializable(TEST_BUNDLE_KEY);
+        isItAnswerShow = test.isSaved();
+        uniCount = bundle.getInt(QUESTIONS_POSTITION_KEY);
+        position = bundle.getInt(QUESTIONS_POSTITION_KEY);
+        View view = inflater.inflate(R.layout.fragment_test, container, false);
         initViews(view);
-        previewNextQuestion(uniCount,view);
+        previewNextQuestion(uniCount, view);
         return view;
     }
 
 
+    private void previewNextQuestion(int count, View v) {
 
-
-
-    private void previewNextQuestion(int count,View v){
-
-        question=  test.getQuestions().get(count);
+        question = test.getQuestions().get(count);
 
 
         if (isItAnswerShow) {
-            progressText.setVisibility(View.GONE);
-            next.setVisibility(View.INVISIBLE);
-            back.setVisibility(View.INVISIBLE);
+            /*progressBar.setVisibility(View.GONE);*/
+            /*next.setVisibility(View.INVISIBLE);*/
+            /*back.setVisibility(View.INVISIBLE);*/
             seeExplaination.setVisibility(View.VISIBLE);
             disableAllViewClicks();
             image1.setVisibility(View.VISIBLE);
@@ -110,53 +112,86 @@ public class TestFragment extends Fragment {
             image3.setVisibility(View.VISIBLE);
             image4.setVisibility(View.VISIBLE);
 
-            if (question.note==null){
+            if (question.note == null) {
                 seeExplaination.setVisibility(View.GONE);
-            }else {
+            } else {
                 seeExplaination.setOnClickListener(new View.OnClickListener() {
-                    boolean ifItClicked=true;
+                    boolean ifItClicked = true;
+
                     @Override
                     public void onClick(View v) {
+
                         answerText.setText(question.getNote());
                         if (ifItClicked) {
                             answerText.setVisibility(View.VISIBLE);
-                            ifItClicked=false;
+                            answerCard.setVisibility(View.VISIBLE);
+                            ifItClicked = false;
                             seeExplaination.setText("hide explanation");
-                        }else {
+                        } else {
                             seeExplaination.setText("see explanation");
                             answerText.setVisibility(View.GONE);
-                            ifItClicked=true;
+                            answerCard.setVisibility(View.INVISIBLE);
+                            ifItClicked = true;
                         }
 
                     }
+
                 });
             }
-        /*}else if (tests.getTestId().equals(TestActivity.UNFINISHED)){
-            // displaying the unfinished tests
-            progressText.setText((count + 1) + "/" + tests.getNumberOfQuestions());
-            displayUnfinishedTest();*/
+        } else if (test.getQuestions().size() == 1) {
+            //question of the day
+            /*progressBar.setVisibility(View.GONE);*/
+            ((TestActivity) getActivity()).setVisibilityNext(View.GONE);
+
+            /*next.setVisibility(View.GONE);*/
+            /*back.setVisibility(View.GONE);*/
+            seeExplaination.setText("Submit Answer");
+            seeExplaination.setVisibility(View.VISIBLE);
+            seeExplaination.setEnabled(false);
+            seeExplaination.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    showAnswerOfDayQuestion();
+                }
+            });
+            settingUpClickListener();
+            settingUpCheckListener(question.getType());
         } else {
-            next.setEnabled(false);
-            progressText.setText((count + 1) + "/" + test.getNumberOfQuestions());
+            /*next.setEnabled(false);*/
+
+
+            /*progressText.setText((count + 1) + "/" + test.getNumberOfQuestions());*/
+            /*float progress=((float)(count)/(float)test.getNumberOfQuestions())*100;
+            progressBar.setProgress((int)progress);*/
             settingUpClickListener();
             settingUpCheckListener(question.getType());
             seeExplaination.setVisibility(View.INVISIBLE);
+            /*if (test.getNextState()!=null){
+                try {
+                    if (test.getNextState().get(uniCount)==null){
+                        disableNext();
+                    }else {
+                        enableNext();
+                    }
+                }catch (IndexOutOfBoundsException e){
+                    disableNext();
+                }
+            }else {
+                disableNext();
+            }*/
+            disableNext();
+            ((TestActivity) getActivity()).showExplainBtn(false);
+
             if (test.getTestId() != null) {
                 // displaying the unfinished tests
                 displayUnfinishedTest();
             }
 
 
-
         }
 
 
-
-
-
-
-
-        if (question.getKey().equals(SINGLE_CHOICE_KEY)){
+        if (question.getKey().equals(SINGLE_CHOICE_KEY)) {
             r1.setVisibility(View.VISIBLE);
             r2.setVisibility(View.VISIBLE);
             r3.setVisibility(View.VISIBLE);
@@ -164,7 +199,7 @@ public class TestFragment extends Fragment {
             r5.setVisibility(View.GONE);
             r6.setVisibility(View.GONE);
             line6.setVisibility(View.INVISIBLE);
-            line7.setVisibility(View.INVISIBLE);
+            line5.setVisibility(View.INVISIBLE);
             radio1.setVisibility(View.VISIBLE);
             radio2.setVisibility(View.VISIBLE);
             radio3.setVisibility(View.VISIBLE);
@@ -176,12 +211,11 @@ public class TestFragment extends Fragment {
             checkBox5.setVisibility(View.INVISIBLE);
             checkBox6.setVisibility(View.INVISIBLE);
 
-
-            if (isItAnswerShow){
-                String userAnswer=test.getUserAnswers().get(uniCount);
+            if (isItAnswerShow) {
+                String userAnswer = test.getUserAnswers().get(uniCount);
                 boolean result = test.getUserResult().get(uniCount);
                 String answer = test.getAnsweredQuestions().get(uniCount).getAnswer();
-                switch (answer){
+                switch (answer) {
                     case "a":
                         image1.setImageResource(R.drawable.ic_correct);
                         break;
@@ -196,45 +230,45 @@ public class TestFragment extends Fragment {
                         break;
                 }
 
-                switch (userAnswer){
+                switch (userAnswer) {
                     case "a":
                         radio1.setChecked(true);
-                        if (result){
+                        if (result) {
                             image1.setImageResource(R.drawable.ic_correct);
-                        }else {
+                        } else {
                             image1.setImageResource(R.drawable.ic_incorrect);
                         }
 
                         break;
                     case "b":
                         radio2.setChecked(true);
-                        if (result){
+                        if (result) {
                             image2.setImageResource(R.drawable.ic_correct);
-                        }else {
+                        } else {
                             image2.setImageResource(R.drawable.ic_incorrect);
                         }
                         break;
                     case "c":
                         radio3.setChecked(true);
-                        if (result){
+                        if (result) {
                             image3.setImageResource(R.drawable.ic_correct);
-                        }else {
+                        } else {
                             image3.setImageResource(R.drawable.ic_incorrect);
                         }
                         break;
                     case "d":
                         radio4.setChecked(true);
-                        if (result){
+                        if (result) {
                             image4.setImageResource(R.drawable.ic_correct);
-                        }else {
+                        } else {
                             image4.setImageResource(R.drawable.ic_incorrect);
                         }
                         break;
                 }
 
             }
-        }else if (question.getKey().equals(MULTI_CHOICE_KEY)){
-            if (question.getAswersCount()==4){
+        } else if (question.getKey().equals(MULTI_CHOICE_KEY)) {
+            if (question.getAswersCount() == 4) {
                 r1.setVisibility(View.VISIBLE);
                 r2.setVisibility(View.VISIBLE);
                 r3.setVisibility(View.VISIBLE);
@@ -242,7 +276,7 @@ public class TestFragment extends Fragment {
                 r5.setVisibility(View.GONE);
                 r6.setVisibility(View.GONE);
                 line6.setVisibility(View.GONE);
-                line7.setVisibility(View.GONE);
+                line5.setVisibility(View.GONE);
 
                 radio1.setVisibility(View.INVISIBLE);
                 radio2.setVisibility(View.INVISIBLE);
@@ -257,16 +291,14 @@ public class TestFragment extends Fragment {
                 checkBox6.setVisibility(View.VISIBLE);
 
 
-
-            }else if (question.getAswersCount()==5){
+            } else if (question.getAswersCount() == 5) {
                 r1.setVisibility(View.VISIBLE);
                 r2.setVisibility(View.VISIBLE);
                 r3.setVisibility(View.VISIBLE);
                 r4.setVisibility(View.VISIBLE);
                 r5.setVisibility(View.VISIBLE);
                 r6.setVisibility(View.GONE);
-                line6.setVisibility(View.VISIBLE);
-                line7.setVisibility(View.GONE);
+                line6.setVisibility(View.GONE);
 
                 radio1.setVisibility(View.INVISIBLE);
                 radio2.setVisibility(View.INVISIBLE);
@@ -279,7 +311,7 @@ public class TestFragment extends Fragment {
                 checkBox4.setVisibility(View.VISIBLE);
                 checkBox5.setVisibility(View.VISIBLE);
                 checkBox6.setVisibility(View.VISIBLE);
-            }else {
+            } else {
                 r1.setVisibility(View.VISIBLE);
                 r2.setVisibility(View.VISIBLE);
                 r3.setVisibility(View.VISIBLE);
@@ -287,7 +319,6 @@ public class TestFragment extends Fragment {
                 r5.setVisibility(View.VISIBLE);
                 r6.setVisibility(View.VISIBLE);
                 line6.setVisibility(View.VISIBLE);
-                line7.setVisibility(View.VISIBLE);
 
                 radio1.setVisibility(View.INVISIBLE);
                 radio2.setVisibility(View.INVISIBLE);
@@ -300,6 +331,7 @@ public class TestFragment extends Fragment {
                 checkBox4.setVisibility(View.VISIBLE);
                 checkBox5.setVisibility(View.VISIBLE);
                 checkBox6.setVisibility(View.VISIBLE);
+
             }
             if (isItAnswerShow) {
 
@@ -346,9 +378,9 @@ public class TestFragment extends Fragment {
                 String answer = test.getAnsweredQuestions().get(uniCount).getAnswer();
                 String letter;
 
-                for (int i=0;i<answer.length();i++){
-                    letter=Character.toString(answer.charAt(i));
-                    if (!letter.equals(",")){
+                for (int i = 0; i < answer.length(); i++) {
+                    letter = Character.toString(answer.charAt(i));
+                    if (!letter.equals(",")) {
                         switch (letter) {
                             case "a":
                                 image1.setImageResource(R.drawable.ic_correct);
@@ -371,15 +403,9 @@ public class TestFragment extends Fragment {
                         }
                     }
                 }
-
-
-
             }
 
-
-
-
-        }else {
+        } else {
 
             // true or false question
             radio1.setVisibility(View.VISIBLE);
@@ -393,11 +419,10 @@ public class TestFragment extends Fragment {
             r4.setVisibility(View.GONE);
             r5.setVisibility(View.GONE);
             r6.setVisibility(View.GONE);
+            line3.setVisibility(View.GONE);
             line4.setVisibility(View.GONE);
             line5.setVisibility(View.GONE);
             line6.setVisibility(View.GONE);
-            line7.setVisibility(View.GONE);
-
             checkBox1.setVisibility(View.INVISIBLE);
             checkBox2.setVisibility(View.INVISIBLE);
             checkBox3.setVisibility(View.INVISIBLE);
@@ -410,7 +435,7 @@ public class TestFragment extends Fragment {
                 switch (answer) {
                     case "1":
                         radio1.setChecked(true);
-                        if (result){
+                        if (result) {
                             image1.setImageResource(R.drawable.ic_correct);
                             image2.setImageResource(R.drawable.ic_incorrect);
                         } else {
@@ -420,7 +445,7 @@ public class TestFragment extends Fragment {
                         break;
                     case "0":
                         radio2.setChecked(true);
-                        if (result){
+                        if (result) {
                             image1.setImageResource(R.drawable.ic_incorrect);
                             image2.setImageResource(R.drawable.ic_correct);
                         } else {
@@ -433,10 +458,10 @@ public class TestFragment extends Fragment {
         }
 
         //displaying the text
-        if (question.getKey().equals(TRUE_FALSE_KEY)){
+        if (question.getKey().equals(TRUE_FALSE_KEY)) {
             text1.setText("True");
             text2.setText("False");
-        }else {
+        } else {
 
 
             text1.setText(question.choice1);
@@ -447,18 +472,28 @@ public class TestFragment extends Fragment {
             text6.setText(question.choice6);
 
         }
-        answerText.setText(question.getNote());
+        String note = null;
+        if (question.getNote() != null) {
+            note = question.getNote() + "\n\n";
+        }
+        answerText.setText(note);
         questionBodyS.setText(question.getQuestionBody());
+        categoryText.setText(question.getCategory());
+        typeText.setText("Choose " + question.getType());
 
     }
+
 
     private void displayUnfinishedTest() {
         if (test.getNumberOfAnsweredQuestions() > uniCount) {
             disableAllViewClicks();
-            next.setVisibility(View.VISIBLE);
-            back.setVisibility(View.VISIBLE);
-            next.setEnabled(true);
-            back.setEnabled(true);
+            nextNext = true;
+            /*next.setVisibility(View.VISIBLE);*/
+            ((TestActivity) getActivity()).setVisibilityNext(View.VISIBLE);
+            /*back.setVisibility(View.VISIBLE);*/
+            /*next.setEnabled(true);*/
+            enableNext();
+            /*back.setEnabled(true);*/
             showingDetailedAnswer();
             image1.setVisibility(View.INVISIBLE);
             image2.setVisibility(View.INVISIBLE);
@@ -468,9 +503,16 @@ public class TestFragment extends Fragment {
             image6.setVisibility(View.INVISIBLE);
             if (test.getAnswerShow() == TestTypeFragment.ANSWER_AFTER_ALL) {
                 answerText.setVisibility(View.GONE);
+                answerCard.setVisibility(View.GONE);
             } else if (test.getAnswerShow() == TestTypeFragment.ANSWER_WHEN_WRONG) {
                 if (!test.getUserResult().get(uniCount)) {
-                    answerText.setVisibility(View.VISIBLE);
+                    /*answerText.setVisibility(View.VISIBLE);
+                    if (question.getNote()!=null) {
+                        *//*answerCard.setVisibility(View.VISIBLE);*//*
+                        displayExplanations();
+                    }else {
+                        answerCard.setVisibility(View.GONE);
+                    }*/
                     image1.setVisibility(View.VISIBLE);
                     image2.setVisibility(View.VISIBLE);
                     image3.setVisibility(View.VISIBLE);
@@ -480,6 +522,12 @@ public class TestFragment extends Fragment {
                 }
             } else {
                 answerText.setVisibility(View.VISIBLE);
+                /*if (question.getNote()!=null) {
+                    *//*answerCard.setVisibility(View.VISIBLE);*//*
+                    displayExplanations();
+                }else {
+                    answerCard.setVisibility(View.GONE);
+                }*/
                 image1.setVisibility(View.VISIBLE);
                 image2.setVisibility(View.VISIBLE);
                 image3.setVisibility(View.VISIBLE);
@@ -546,43 +594,43 @@ public class TestFragment extends Fragment {
     }
 
     private void disableAllViewClicks() {
-        View[] array=new View[]{r1,r2,r3,r4,r5,r6,checkBox1, checkBox2, checkBox3, checkBox4,checkBox5,checkBox6,radio1,radio2,radio3,radio4};
-        for (View view: array){
+        View[] array = new View[]{r1, r2, r3, r4, r5, r6, checkBox1, checkBox2, checkBox3, checkBox4, checkBox5, checkBox6, radio1, radio2, radio3, radio4};
+        for (View view : array) {
             view.setClickable(false);
         }
     }
 
 
     private void settingUpClickListener() {
-        View.OnClickListener listener=new View.OnClickListener() {
+        View.OnClickListener listener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                switch (v.getId()){
+                switch (v.getId()) {
                     case R.id.r1:
                         if (question.getKey().equals(MULTI_CHOICE_KEY)) {
                             checkBox1.setChecked(!checkBox1.isChecked());
-                        }else {
+                        } else {
                             radio1.setChecked(!radio1.isChecked());
                         }
                         break;
                     case R.id.r2:
                         if (question.getKey().equals(MULTI_CHOICE_KEY)) {
                             checkBox2.setChecked(!checkBox2.isChecked());
-                        }else {
+                        } else {
                             radio2.setChecked(!radio2.isChecked());
                         }
                         break;
                     case R.id.r3:
                         if (question.getKey().equals(MULTI_CHOICE_KEY)) {
                             checkBox3.setChecked(!checkBox3.isChecked());
-                        }else {
+                        } else {
                             radio3.setChecked(!radio3.isChecked());
                         }
                         break;
                     case R.id.r4:
                         if (question.getKey().equals(MULTI_CHOICE_KEY)) {
                             checkBox4.setChecked(!checkBox4.isChecked());
-                        }else {
+                        } else {
                             radio4.setChecked(!radio4.isChecked());
                         }
                         break;
@@ -605,40 +653,52 @@ public class TestFragment extends Fragment {
         r6.setOnClickListener(listener);
 
 
+    }
+
+
+    @Override
+    public void onResume() {
+        super.onResume();
 
     }
 
     private void settingUpCheckListener(final int minimumAnswer) {
 
-        CompoundButton.OnCheckedChangeListener listener=new CompoundButton.OnCheckedChangeListener() {
-            int counter=0;
+        CompoundButton.OnCheckedChangeListener listener = new CompoundButton.OnCheckedChangeListener() {
+            int counter = 0;
+
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (!isChecked){
-                    if (counter==0){
-                        counter=0;
-                    }else {
+                if (!isChecked) {
+                    if (counter == 0) {
+                        counter = 0;
+                    } else {
                         counter--;
                     }
-                }else {
+                } else {
 
-                    if (counter == minimumAnswer ) {
+                    if (counter == minimumAnswer) {
                         lastCheckedBox.setChecked(false);
                     }
                     counter++;
                     lastCheckedBox = buttonView;
 
 
-
                 }
 
-                if (counter==minimumAnswer){
-                    next.setEnabled(true);
-                }else {
-                    next.setEnabled(false);
-
+                if (counter == minimumAnswer) {
+                    /*next.setEnabled(true);*/
+                    enableNext();
+                    nextSubmit = true;
+                    nextState = true;
+                    seeExplaination.setEnabled(true);
+                } else {
+                    /*next.setEnabled(false);*/
+                    disableNext();
+                    nextSubmit = false;
+                    nextState = false;
+                    seeExplaination.setEnabled(false);
                 }
-
 
 
             }
@@ -660,39 +720,40 @@ public class TestFragment extends Fragment {
     }
 
 
-
     private void initViews(View v) {
-        image1= (ImageView) v.findViewById(R.id.image1);
-        image2= (ImageView) v.findViewById(R.id.image2);
-        image3= (ImageView) v.findViewById(R.id.image3);
-        image4= (ImageView) v.findViewById(R.id.image4);
-        image5= (ImageView) v.findViewById(R.id.image5);
-        image6= (ImageView) v.findViewById(R.id.image6);
-        seeExplaination= (Button) v.findViewById(R.id.explain);
-        radio1= (RadioButton) v.findViewById(R.id.radio1);
-        radio2= (RadioButton) v.findViewById(R.id.radio2);
-        radio3= (RadioButton) v.findViewById(R.id.radio3);
-        radio4= (RadioButton) v.findViewById(R.id.radio4);
-        line4=v.findViewById(R.id.line4);
-        line5=v.findViewById(R.id.line5);
-        line6 =v.findViewById(R.id.line6);
-        line7 =v.findViewById(R.id.line7);
-        back= (Button) v.findViewById(R.id.back);
-        userAnswers=new ArrayList<>();
-        progressText = (TextView) v.findViewById(R.id.progressText);
-        answerText= (TextView) v.findViewById(R.id.answerText);/*
+        image1 = (ImageView) v.findViewById(R.id.image1);
+        image2 = (ImageView) v.findViewById(R.id.image2);
+        image3 = (ImageView) v.findViewById(R.id.image3);
+        image4 = (ImageView) v.findViewById(R.id.image4);
+        image5 = (ImageView) v.findViewById(R.id.image5);
+        image6 = (ImageView) v.findViewById(R.id.image6);
+        seeExplaination = (Button) v.findViewById(R.id.submit);
+        /*explain= (Button) v.findViewById(explain);*/
+        radio1 = (RadioButton) v.findViewById(R.id.radio1);
+        radio2 = (RadioButton) v.findViewById(R.id.radio2);
+        radio3 = (RadioButton) v.findViewById(R.id.radio3);
+        radio4 = (RadioButton) v.findViewById(R.id.radio4);
+        line4 = v.findViewById(R.id.line4);
+        line5 = v.findViewById(R.id.line5);
+        line6 = v.findViewById(R.id.line6);
+        line3 = v.findViewById(R.id.line3);
+        /*back = (Button) v.findViewById(back);*/
+        userAnswers = new ArrayList<>();
+        answerText = (TextView) v.findViewById(R.id.answerText);/*
         answerText.setMovementMethod(new ScrollingMovementMethod());*/
 
-        next= (Button)v.findViewById(R.id.nextt);
-        next.setEnabled(false);
+        mainCard = (CardView) v.findViewById(R.id.card);
+        answerCard = (CardView) v.findViewById(R.id.answerCard);
+        /*next = (Button) v.findViewById(R.id.nextt);*/
+        /*next.setEnabled(false);*/
         questionBodyS = (TextView) v.findViewById(R.id.question_body);
+        r1 = (ConstraintLayout) v.findViewById(R.id.r1);
+        r2 = (ConstraintLayout) v.findViewById(R.id.r2);
+        r3 = (ConstraintLayout) v.findViewById(R.id.r3);
+        r4 = (ConstraintLayout) v.findViewById(R.id.r4);
+        r5 = (ConstraintLayout) v.findViewById(R.id.r5);
+        r6 = (ConstraintLayout) v.findViewById(R.id.r6);
 
-        r1= (ConstraintLayout) v.findViewById(R.id.r1);
-        r2= (ConstraintLayout) v.findViewById(R.id.r2);
-        r3= (ConstraintLayout) v.findViewById(R.id.r3);
-        r4= (ConstraintLayout) v.findViewById(R.id.r4);
-        r5= (ConstraintLayout) v.findViewById(R.id.r5);
-        r6= (ConstraintLayout) v.findViewById(R.id.r6);
 
         checkBox1 = (CheckBox) v.findViewById(R.id.checkBox1);
         checkBox2 = (CheckBox) v.findViewById(R.id.checkBox2);
@@ -701,12 +762,12 @@ public class TestFragment extends Fragment {
         checkBox5 = (CheckBox) v.findViewById(R.id.checkBox5);
         checkBox6 = (CheckBox) v.findViewById(R.id.checkBox6);
 
-        text1= (TextView) v.findViewById(R.id.text1);
-        text2= (TextView) v.findViewById(R.id.text2);
-        text3= (TextView) v.findViewById(R.id.text3);
-        text4= (TextView) v.findViewById(R.id.text4);
-        text5= (TextView) v.findViewById(R.id.text5);
-        text6= (TextView) v.findViewById(R.id.text6);
+        text1 = (TextView) v.findViewById(R.id.text1);
+        text2 = (TextView) v.findViewById(R.id.text2);
+        text3 = (TextView) v.findViewById(R.id.text3);
+        text4 = (TextView) v.findViewById(R.id.text4);
+        text5 = (TextView) v.findViewById(R.id.text5);
+        text6 = (TextView) v.findViewById(R.id.text6);
 
         checkBoxes = new ArrayList<>();
         checkBoxes.add(checkBox1);
@@ -716,72 +777,105 @@ public class TestFragment extends Fragment {
         checkBoxes.add(checkBox5);
         checkBoxes.add(checkBox6);
 
-
-
-
-
-        next.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-
-                if (test.getAnswerShow() == TestTypeFragment.ANSWER_AFTER_ALL) {
-                    updateTest();
-                } else if (test.getAnswerShow() == TestTypeFragment.ANSWER_AFTER_EVERY) {
-                    disableAllViewClicks();
-                    if (test.getTestId() != null && test.getNumberOfAnsweredQuestions() > uniCount) {
-                        nextCounter++;
-                    }
-                    nextCounter++;
-                    //mdoify next counter for unfinished tests
-                    if (nextCounter > 1) {
-                        updateTest();
-                    } else if (nextCounter == 1) {
-                        showingDetailedAnswer();
-
-                    }
-                } else {
-                    disableAllViewClicks();
-                    String userAnswer = getUserAnswer();
-                    boolean result = getResult(userAnswer);
-                    if (test.getTestId() != null && test.getNumberOfAnsweredQuestions() > uniCount) {
-                        nextCounter++;
-                    }
-                    if (!result) {
-                        nextCounter++;
-                        if (nextCounter > 1) {
-                            //moving to next tests
-                            updateTest();
-                        } else if (nextCounter == 1) {
-                            showingDetailedAnswer();
-                        }
-                    } else {
-                        updateTest();
-                    }
-                }
-
-            }
-
-
-
-
-        });
-
-        back.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                fragmentPosition=((TestActivity)getActivity()).getCurrentFragmentPosition();
-                ((TestActivity)getActivity()).setCurrentItem(fragmentPosition-1);
-            }
-        });
+        typeText = (TextView) v.findViewById(R.id.textType);
+        categoryText = (TextView) v.findViewById(R.id.textCat);
 
 
     }
 
-    private void showingDetailedAnswer() {
-        next.setText("Next");
+    private void disableNext() {
+        ((TestActivity) getActivity()).setNextText("Submit");
+        ((TestActivity) getActivity()).setEnableNext(false);
+    }
+
+    private void enableNext() {
+        ((TestActivity) getActivity()).setEnableNext(true);
+    }
+
+    private void showAnswerOfDayQuestion() {
         answerText.setText(question.getNote());
         answerText.setVisibility(View.VISIBLE);
+        /*if (question.getNote()!=null) {
+            displayExplanations();
+        }else {
+            answerCard.setVisibility(View.GONE);
+        }*/
+
+        if (question.getKey().equals(SINGLE_CHOICE_KEY)) {
+            showSingleAnswersToUser(getUserAnswer(), getResult(getUserAnswer()), question.getAnswer());
+        } else if (question.getKey().equals(MULTI_CHOICE_KEY)) {
+            showMultiAnswersToUser(getUserAnswer(), question.getAnswer());
+        } else {
+            showTrueFalseAnswerToUser(getResult(getUserAnswer()));
+        }
+    }
+
+    public void displayExplanations() {
+        if (question.getNote() != null) {
+            isExplainOn = true;
+            mainCard.setVisibility(View.GONE);
+            answerCard.setVisibility(View.VISIBLE);
+        }
+    }
+
+    public void hideExplanations() {
+        isExplainOn = false;
+        mainCard.setVisibility(View.VISIBLE);
+        answerCard.setVisibility(View.GONE);
+    }
+
+    public void setNextCounter(int cont) {
+        nextCounter = cont;
+    }
+
+    public void next() {
+        if (test.getAnswerShow() == TestTypeFragment.ANSWER_AFTER_ALL) {
+            updateTest();
+        } else if (test.getAnswerShow() == TestTypeFragment.ANSWER_AFTER_EVERY) {
+            disableAllViewClicks();
+            if (test.getTestId() != null && test.getNumberOfAnsweredQuestions() > uniCount) {
+                nextCounter++;
+            }
+            nextCounter++;
+            //mdoify next counter for unfinished tests
+            if (nextCounter > 1) {
+                updateTest();
+            } else if (nextCounter == 1) {
+                showingDetailedAnswer();
+
+            }
+        } else {
+            disableAllViewClicks();
+            String userAnswer = getUserAnswer();
+            boolean result = getResult(userAnswer);
+            if (test.getTestId() != null && test.getNumberOfAnsweredQuestions() > uniCount) {
+                nextCounter++;
+            }
+            if (!result) {
+                nextCounter++;
+                if (nextCounter > 1) {
+                    //moving to next tests
+                    updateTest();
+                } else if (nextCounter == 1) {
+                    showingDetailedAnswer();
+                }
+            } else {
+                updateTest();
+            }
+        }
+    }
+
+    private void showingDetailedAnswer() {
+        /*next.setText("Next");*/
+        ((TestActivity) getActivity()).setNextText("Next");
+        nextNext = true;
+        answerText.setText(question.getNote());
+        answerText.setVisibility(View.VISIBLE);
+        if (question.getNote() != null) {
+            ((TestActivity) getActivity()).showExplainBtn(true);
+        }
+
+
         if (question.getKey().equals(SINGLE_CHOICE_KEY)) {
             if (test.getTestId() != null && test.getNumberOfAnsweredQuestions() > uniCount) {
                 showSingleAnswersToUser(test.getUserAnswers().get(uniCount), test.getUserResult().get(uniCount), question.getAnswer());
@@ -811,6 +905,8 @@ public class TestFragment extends Fragment {
         test.setUserResultElement(getResult(answer), fragmentPosition);
         test.addToAnsweredQuestions(question, uniCount);
         ((TestActivity) getActivity()).setCurrentItem(fragmentPosition + 1);
+        test.addToNextSate(true, uniCount);
+        nextNext = true;
         if (fragmentPosition + 1 >= test.getNumberOfQuestions()) {
             Bundle bundle = new Bundle();
             bundle.putSerializable(TestCategoriesFragment.TEST_BUNDLE, test);
@@ -826,9 +922,15 @@ public class TestFragment extends Fragment {
         if (result) {
             image1.setImageResource(R.drawable.ic_correct);
             image2.setImageResource(R.drawable.ic_incorrect);
+
+            r1.setBackgroundResource(R.color.correct);
+            r2.setBackgroundResource(R.color.incorrect);
         } else {
             image1.setImageResource(R.drawable.ic_incorrect);
             image2.setImageResource(R.drawable.ic_correct);
+
+            r1.setBackgroundResource(R.color.incorrect);
+            r2.setBackgroundResource(R.color.correct);
         }
 
 
@@ -844,30 +946,39 @@ public class TestFragment extends Fragment {
             case "a":
 
                 image1.setImageResource(R.drawable.ic_correct);
+                r1.setBackgroundResource(R.color.correct);
                 break;
             case "b":
                 image2.setImageResource(R.drawable.ic_correct);
+                r2.setBackgroundResource(R.color.correct);
                 break;
             case "c":
                 image3.setImageResource(R.drawable.ic_correct);
+                r3.setBackgroundResource(R.color.correct);
                 break;
             case "d":
                 image4.setImageResource(R.drawable.ic_correct);
+                r4.setBackgroundResource(R.color.correct);
                 break;
         }
         int id = result ? R.drawable.ic_correct : R.drawable.ic_incorrect;
+        int color = result ? R.color.correct : R.color.incorrect;
         switch (userAnswer) {
             case "a":
                 image1.setImageResource(id);
+                r1.setBackgroundResource(color);
                 break;
             case "b":
                 image2.setImageResource(id);
+                r2.setBackgroundResource(color);
                 break;
             case "c":
                 image3.setImageResource(id);
+                r3.setBackgroundResource(color);
                 break;
             case "d":
                 image4.setImageResource(id);
+                r4.setBackgroundResource(color);
                 break;
         }
 
@@ -887,22 +998,28 @@ public class TestFragment extends Fragment {
             if (!userLetter.equals(",")) {
                 switch (userLetter) {
                     case "a":
+                        r1.setBackgroundResource(R.color.incorrect);
                         image1.setImageResource(R.drawable.ic_incorrect);
                         break;
                     case "b":
                         image2.setImageResource(R.drawable.ic_incorrect);
+                        r2.setBackgroundResource(R.color.incorrect);
                         break;
                     case "c":
                         image3.setImageResource(R.drawable.ic_incorrect);
+                        r3.setBackgroundResource(R.color.incorrect);
                         break;
                     case "d":
                         image4.setImageResource(R.drawable.ic_incorrect);
+                        r4.setBackgroundResource(R.color.incorrect);
                         break;
                     case "e":
                         image5.setImageResource(R.drawable.ic_incorrect);
+                        r5.setBackgroundResource(R.color.incorrect);
                         break;
                     case "f":
                         image6.setImageResource(R.drawable.ic_incorrect);
+                        r6.setBackgroundResource(R.color.incorrect);
                         break;
                 }
             }
@@ -915,21 +1032,27 @@ public class TestFragment extends Fragment {
                 switch (letter) {
                     case "a":
                         image1.setImageResource(R.drawable.ic_correct);
+                        r1.setBackgroundResource(R.color.correct);
                         break;
                     case "b":
                         image2.setImageResource(R.drawable.ic_correct);
+                        r2.setBackgroundResource(R.color.correct);
                         break;
                     case "c":
                         image3.setImageResource(R.drawable.ic_correct);
+                        r3.setBackgroundResource(R.color.correct);
                         break;
                     case "d":
                         image4.setImageResource(R.drawable.ic_correct);
+                        r4.setBackgroundResource(R.color.correct);
                         break;
                     case "e":
                         image5.setImageResource(R.drawable.ic_correct);
+                        r5.setBackgroundResource(R.color.correct);
                         break;
                     case "f":
                         image6.setImageResource(R.drawable.ic_correct);
+                        r6.setBackgroundResource(R.color.correct);
                         break;
                 }
             }
@@ -958,20 +1081,20 @@ public class TestFragment extends Fragment {
                 String answerS = answer.toString();
                 return answerS;
             }
-        }else if (question.getKey().equals(SINGLE_CHOICE_KEY)){
-            if (radio1.isChecked()){
+        } else if (question.getKey().equals(SINGLE_CHOICE_KEY)) {
+            if (radio1.isChecked()) {
                 return "a";
-            }else if (radio2.isChecked()){
+            } else if (radio2.isChecked()) {
                 return "b";
-            }else if (radio3.isChecked()){
+            } else if (radio3.isChecked()) {
                 return "c";
-            }else {
+            } else {
                 return "d";
             }
-        }else {
-            if (radio1.isChecked()){
+        } else {
+            if (radio1.isChecked()) {
                 return "1";
-            }else {
+            } else {
                 return "0";
             }
         }
@@ -1025,13 +1148,12 @@ public class TestFragment extends Fragment {
             }
         } else if (item.getItemId() == R.id.myReport) {
             Intent intent = new Intent(getContext(), ReportActivity.class);
-            intent.putExtra(QUESTION_KEY, question);
+            intent.putExtra(REF.QUESTION_KEY, question);
             startActivity(intent);
         }
 
 
         return true;
-
 
 
     }

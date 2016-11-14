@@ -204,7 +204,7 @@ public class AnswersFragment extends Fragment implements listCallback {
                 convertView = inflater.inflate(R.layout.answer_row, null);
                 viewHolder = new ViewHolder();
                 viewHolder.image = (ImageView) convertView.findViewById(R.id.imageView);
-                viewHolder.textView = (TextView) convertView.findViewById(R.id.textView);
+                viewHolder.textView = (TextView) convertView.findViewById(R.id.textView15);
                 viewHolder.flagImage = (ImageView) convertView.findViewById(R.id.flag);
                 convertView.setTag(viewHolder);
 

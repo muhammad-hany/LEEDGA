@@ -68,7 +68,7 @@ public class TestCategoriesFragment extends Fragment  {
         next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ArrayList<Question> questions=new DBHelper(getContext(),TestFragment.DATABASE_NAME).getAll(test.getChapters(),test.getcountPerCategory(),test.getQuestionTypes());
+                ArrayList<Question> questions = new DBHelper(getContext(), REF.DATABASE_NAME).getAll(test.getChapters(), test.getcountPerCategory(), test.getQuestionTypes());
                 Collections.shuffle(questions);
                 test.setQuestions(questions);
                 Intent i=new Intent(getContext(),TestActivity.class);

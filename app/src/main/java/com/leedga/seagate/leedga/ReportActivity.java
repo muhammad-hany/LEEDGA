@@ -45,13 +45,13 @@ public class ReportActivity extends AppCompatActivity {
 
     private String makeEmailBody() {
 
-        Question question = (Question) getIntent().getSerializableExtra(TestFragment.QUESTION_KEY);
+        Question question = (Question) getIntent().getSerializableExtra(REF.QUESTION_KEY);
         String body = name.getText().toString() + " has reported the following question : \n\n " + String.valueOf(question.getId()) + ": " + question.getQuestionBody();
         String answer;
-        if (question.getKey().equals(TestFragment.SINGLE_CHOICE_KEY)) {
+        if (question.getKey().equals(REF.SINGLE_CHOICE_KEY)) {
             answer = "\n\n a) " + question.getChoice1() + "\n b) " + question.getChoice2() + "\n c) " +
                     "" + question.getChoice3() + "\n d) " + question.getChoice4();
-        } else if (question.getKey().equals(TestFragment.MULTI_CHOICE_KEY)) {
+        } else if (question.getKey().equals(REF.MULTI_CHOICE_KEY)) {
             answer = "\n\n a) " + question.getChoice1() + "\n b) " + question.getChoice2() + "\n c) " +
                     "" + question.getChoice3() + "\n d) " + question.getChoice4() + "\n e)" + question
                     .getChoice5() + "\n f) " + question.getChoice6();

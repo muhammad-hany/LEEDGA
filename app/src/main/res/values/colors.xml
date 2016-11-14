@@ -1,20 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#21CE99</color>
+    <color name="colorPrimary">#21ce99</color>
     <color name="colorPrimaryDark">#1da178</color>
-    <color name="colorAccent">#00BCD4</color>
+    <color name="colorAccent">#2660A4</color>
     <color name="background">#2e3d49</color>
     <color name="backgroundLight">#5d6d7b</color>
     <color name="unfinished_progress">#C8E6C9</color>
     <color name="white">#ffffff</color>
-    <color name="colorRipple">#A9A9F5</color>
+    <color name="colorRipple">#7adfc0</color>
     <color name="colorOffWhite">#fafafa</color>
     <color name="whiteTransperant">#00ffffff</color>
+    <color name="textColor">#116047</color>
+    <color name="correct">#7733c23a</color>
+    <color name="incorrect">#8bf23636</color>
 
-    <color name="fistCard">#FF4B66</color>
+    <color name="fistCard">#93ff4b66</color>
     <color name="secondCard">#00A9AC</color>
-    <color name="thirdColor">#0168B3</color>
-    <color name="fourthColor">#FEAF48</color>
+    <color name="thirdColor">#920168b3</color>
+    <color name="fourthColor">#95feaf48</color>
     <color name="fifthColor">#C64191</color>
     <color name="sixthColor">#2660A4</color>
     <color name="seventhColor">#7DD181</color>

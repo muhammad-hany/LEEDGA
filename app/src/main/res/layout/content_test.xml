@@ -1,23 +1,190 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<android.support.constraint.ConstraintLayout
+    android:id="@+id/main"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/tree2"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".TestActivity"
     tools:showIn="@layout/activity_test">
-    <com.leedga.seagate.leedga.TestViewPager
-        android:layout_width="match_parent"
+
+    <LinearLayout
+        android:id="@+id/bottomBar"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:animateLayoutChanges="true"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        >
+
+
+        <LinearLayout
+            android:id="@+id/back"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center"
+            android:layout_margin="10dp"
+            android:layout_weight="0.75"
+            android:background="@drawable/select_style_color"
+            android:clickable="true"
+            android:focusable="true"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="30dp"
+                android:layout_gravity="center"
+                android:layout_weight="2"
+                app:srcCompat="@drawable/ic_back"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:layout_weight="6"
+                android:gravity="center"
+                android:text="Back"
+                android:textColor="@android:color/primary_text_dark"
+                android:textSize="15sp"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/explain"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center"
+            android:layout_margin="10dp"
+            android:layout_weight="1.5"
+            android:background="@drawable/select_style_color"
+            android:clickable="true"
+            android:focusable="true"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/explainText"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:text="Show Explanation"
+                android:textColor="@android:color/primary_text_dark"
+                android:textSize="15sp"/>
+
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:id="@+id/nextt"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center"
+            android:layout_margin="10dp"
+            android:layout_weight="0.75"
+            android:background="@drawable/select_style_color"
+            android:clickable="true"
+            android:focusable="true"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/txt"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:layout_weight="6"
+                android:gravity="center"
+                android:paddingLeft="4dp"
+                android:text="Submit"
+                android:textColor="@android:color/primary_text_dark"
+                android:textSize="15sp"/>
+
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="30dp"
+                android:layout_gravity="center"
+                android:layout_weight="2"
+                app:srcCompat="@drawable/ic_next"/>
+        </LinearLayout>
+        <!--<Button
+            android:layout_gravity="center_vertical"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:drawableStart="@drawable/ic_back"
+            android:id="@+id/back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="back"
+            android:gravity="left"
+            android:drawableLeft="@drawable/ic_back"
+            />
+
+        <Button
+            android:gravity="center_horizontal"
+            android:layout_gravity="center_vertical"
+            android:layout_width="wrap_content"
+            android:id="@+id/explain"
+            android:text="see Explanations"
+            android:layout_height="wrap_content"/>
+
+        <Button
+            android:gravity="right"
+            android:layout_gravity="center_vertical"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:drawableEnd="@drawable/ic_next"
+            android:id="@+id/nextt"
+            android:layout_width="wrap_content"
+            android:text="submit answer"
+            android:drawableRight="@drawable/ic_next"
+            android:layout_height="wrap_content"/>-->
+    </LinearLayout>
+
+    <com.leedga.seagate.leedga.TestViewPager
         android:id="@+id/pager"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true">
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/bottomBar"
+        app:layout_constraintHorizontal_bias="0.62"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/progressBar2"
+        tools:layout_constraintLeft_creator="1"
+        tools:layout_constraintRight_creator="1"
+        tools:layout_constraintTop_creator="1"/>
 
-    </com.leedga.seagate.leedga.TestViewPager>
+    <com.akexorcist.roundcornerprogressbar.RoundCornerProgressBar
+        android:id="@+id/progressBar2"
+        android:layout_width="0dp"
+        android:layout_height="25dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:rcBackgroundColor="#7effffff"
+        app:rcBackgroundPadding="5dp"
+        app:rcProgressColor="@color/colorPrimary"/>
+
+    <TextView
+        android:id="@+id/progressTextt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@android:color/white"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toBottomOf="@+id/progressBar2"
+        app:layout_constraintLeft_toLeftOf="@+id/progressBar2"
+        app:layout_constraintRight_toRightOf="@+id/progressBar2"
+        app:layout_constraintTop_toTopOf="@+id/progressBar2"/>
 
 
-
-
-</RelativeLayout>
+</android.support.constraint.ConstraintLayout>

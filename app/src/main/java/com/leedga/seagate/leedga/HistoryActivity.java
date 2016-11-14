@@ -151,8 +151,7 @@ public class HistoryActivity extends BaseActivity {
             builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    SharedPreferences prefs = getSharedPreferences(ResultActivity.TESTS_PREFS,
-                            MODE_PRIVATE);
+                    SharedPreferences prefs = getSharedPreferences(ResultActivity.TESTS_PREFS, MODE_PRIVATE);
                     prefs.edit().clear().apply();
                     gettingTestFromPref();
                     settingValues();
@@ -246,8 +245,6 @@ public class HistoryActivity extends BaseActivity {
             DonutProgress donutProgress;
         }
     }
-
-
 
 
 }

@@ -14,8 +14,8 @@
     <string name="title_activity_answer_view_acivity">AnswerViewAcivity</string>
     <string name="title_activity_report">ReportActivity</string>
 
-	<string name="navigation_drawer_open">Open navigation drawer</string>
-	<string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <array name="my_colors">
         <item>#43A047</item>
@@ -28,4 +28,7 @@
         <item>#FF9800</item>
         <item>#FF5722</item>
     </array>
+    <string name="title_activity_lessons">LessonsActivity</string>
+    <string name="title_activity_setting">SettingActivity</string>
+
 </resources>

@@ -1,31 +1,34 @@
-<RelativeLayout android:id="@+id/testFragmentParent"
-                xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:app="http://schemas.android.com/apk/res-auto"
-                xmlns:tools="http://schemas.android.com/tools"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:animateLayoutChanges="true"
-                tools:context=".TestFragment">
+<android.support.constraint.ConstraintLayout android:id="@+id/testFragmentParent"
+                                             xmlns:android="http://schemas.android.com/apk/res/android"
+                                             xmlns:app="http://schemas.android.com/apk/res-auto"
+                                             xmlns:tools="http://schemas.android.com/tools"
+                                             android:layout_width="match_parent"
+                                             android:layout_height="match_parent"
+                                             android:animateLayoutChanges="true"
+                                             android:background="#00e1d2d2"
+                                             tools:context=".TestFragment">
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
 
-    </ScrollView>
-
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <TextView
-            android:id="@+id/progressText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
-            android:layout_gravity="center_horizontal|top"
-            android:textAppearance="?android:attr/textAppearanceSmall"/>
-
+    <android.support.v7.widget.CardView
+        android:id="@+id/card"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:animateLayoutChanges="true"
+        app:cardBackgroundColor="#7bffffff"
+        app:cardCornerRadius="10dp"
+        app:cardElevation="0dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/card2"
+        tools:layout_conversion_absoluteHeight="221dp"
+        tools:layout_conversion_absoluteWidth="340dp"
+        tools:layout_conversion_absoluteX="10dp"
+        tools:layout_conversion_absoluteY="124dp">
 
         <LinearLayout
             android:id="@+id/check_box_group"
@@ -38,12 +41,6 @@
             android:layout_below="@+id/question_body"
             android:animateLayoutChanges="true"
             android:orientation="vertical">
-
-            <View
-                android:id="@+id/line1"
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@android:color/darker_gray"/>
 
 
             <android.support.constraint.ConstraintLayout
@@ -447,65 +444,120 @@
                     app:layout_constraintTop_toTopOf="parent"/>
             </android.support.constraint.ConstraintLayout>
 
-            <View
-                android:id="@+id/line7"
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@android:color/darker_gray"/>
         </LinearLayout>
+    </android.support.v7.widget.CardView>
 
+    <android.support.v7.widget.CardView
+        android:id="@+id/card2"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        app:cardBackgroundColor="#7fffffff"
+        app:cardCornerRadius="10dp"
+        app:cardElevation="0dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_conversion_absoluteHeight="78dp"
+        tools:layout_conversion_absoluteWidth="340dp"
+        tools:layout_conversion_absoluteX="10dp"
+        tools:layout_conversion_absoluteY="26dp">
 
-        <TextView
-            android:id="@+id/question_body"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_below="@+id/progressText"
-            android:layout_marginTop="14dp"
-            android:padding="10dp"
-            android:text="question body"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textSize="15sp"/>
-
-        <Button
-            android:id="@+id/back"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:text="back"/>
-
-        <Button
-            android:id="@+id/nextt"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBaseline="@+id/back"
-            android:layout_alignBottom="@+id/back"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:text="submit answer"/>
-
-        <Button
-            android:id="@+id/explain"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:background="@drawable/select_style_color"
-            android:text="see explanation"
-            android:textColor="@color/white"/>
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/question_body"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:text="question body"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textSize="15sp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <TextView
+
+                    android:id="@+id/textType"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    android:background="@drawable/test_type"
+                    android:padding="5dp"
+                    android:text="Choose 1"
+                    android:textColor="@android:color/white"/>
+
+                <TextView
+                    android:id="@+id/textCat"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    android:background="@drawable/test_cat"
+                    android:padding="5dp"
+                    android:text="LEED GA"
+                    android:textColor="@android:color/white"/>
+            </LinearLayout>
+
+        </LinearLayout>
+    </android.support.v7.widget.CardView>
+
+
+    <Button
+        android:id="@+id/submit"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/select_style_color"
+        android:text="see explanation"
+        android:textColor="#116047"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        tools:layout_conversion_absoluteHeight="0dp"
+        tools:layout_conversion_absoluteWidth="0dp"
+        tools:layout_conversion_absoluteX="0dp"
+        tools:layout_conversion_absoluteY="0dp"
+        />
+
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/answerCard"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:visibility="invisible"
+        app:cardBackgroundColor="#7fffffff"
+        app:cardCornerRadius="10dp"
+        app:cardElevation="0dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/card"
+        app:layout_constraintVertical_bias="0.0"
+        tools:layout_conversion_absoluteHeight="100dp"
+        tools:layout_conversion_absoluteWidth="340dp"
+        tools:layout_conversion_absoluteX="10dp"
+        tools:layout_conversion_absoluteY="365dp">
 
         <ScrollView
+
+            android:id="@+id/scroll"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_above="@+id/explain"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentStart="true"
-            android:layout_below="@+id/check_box_group"
+            android:layout_above="@+id/submit"
             android:layout_gravity="center"
             android:animateLayoutChanges="true">
 
@@ -519,11 +571,11 @@
                 android:paddingTop="10dp"
                 android:text="the answer"
                 android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@android:color/primary_text_light"
                 android:textSize="15sp"
-                android:visibility="gone"
                 />
         </ScrollView>
-    </RelativeLayout>
+    </android.support.v7.widget.CardView>
 
 
-</RelativeLayout>
+</android.support.constraint.ConstraintLayout>

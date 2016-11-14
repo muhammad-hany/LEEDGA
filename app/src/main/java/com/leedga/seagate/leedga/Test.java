@@ -19,8 +19,9 @@ public class Test implements Serializable {
     Date savingDate;
     boolean saved;
     String testPercentage, ratio, testId;
+    ArrayList<Boolean> nextState;
 
-    public Test(ArrayList<Question> questions, boolean[] chapters, int[] numberPerCategory, boolean[] questionTypes, int numberOfQuestions, ArrayList<String> userAnswers, ArrayList<Boolean> userResult, Date savingDate, boolean saved, String testPercentage, String ratio, String testId, int answerShow) {
+    public Test(ArrayList<Question> questions, boolean[] chapters, int[] numberPerCategory, boolean[] questionTypes, int numberOfQuestions, ArrayList<String> userAnswers, ArrayList<Boolean> userResult, Date savingDate, boolean saved, String testPercentage, String ratio, String testId, int answerShow, ArrayList<Boolean> nextState) {
         this.chapters=chapters;
         this.questions=questions;
         this.questionTypes=questionTypes;
@@ -34,6 +35,7 @@ public class Test implements Serializable {
         this.ratio = ratio;
         this.testId = testId;
         this.answerShow = answerShow;
+        this.nextState = nextState;
 
 
     }
@@ -42,8 +44,29 @@ public class Test implements Serializable {
 
     }
 
+    public void addToNextSate(boolean state, int index) {
+        if (nextState == null) {
+            nextState = new ArrayList<>();
+        }
+        try {
+            nextState.set(index, state);
+        } catch (Exception e) {
+            nextState.add(state);
+        }
+
+    }
+
+    public ArrayList<Boolean> getNextState() {
+        return nextState;
+    }
+
     public int getNumberOfAnsweredQuestions() {
-        return answeredQuestions.size();
+        if (answeredQuestions == null) {
+            return 0;
+        } else {
+            return answeredQuestions.size();
+        }
+
     }
 
     public int getAnswerShow() {

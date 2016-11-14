@@ -1,5 +1,7 @@
 package com.leedga.seagate.leedga;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -11,17 +13,17 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Button;
 
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Map;
 
-import static com.leedga.seagate.leedga.TestActivity.UNFINISHED;
+import static com.leedga.seagate.leedga.REF.REFERENCES_KEY;
+import static com.leedga.seagate.leedga.REF.TERMS_KEY;
 import static com.leedga.seagate.leedga.TestActivity.UNFINISHED_TEST;
 import static com.leedga.seagate.leedga.TestCategoriesFragment.TEST_BUNDLE;
 
@@ -31,8 +33,11 @@ public class MainActivity extends BaseActivity implements MainRecyclerAdaptor.On
     public static final String DEFAULT_TEST_PREF_KEY = "default_test_pref";
     AlertDialog.Builder builder;
     private Test test;
-    private SharedPreferences preferences;
+    private SharedPreferences unFinishedTestPref;
     private RecyclerView recyclerView;
+    private SharedPreferences defaultTestPref;
+    private PendingIntent pendingIntent;
+    private AlarmManager alarmManager;
 
 
     @Override
@@ -42,28 +47,15 @@ public class MainActivity extends BaseActivity implements MainRecyclerAdaptor.On
 
         defineNavigationMenu();
         setDefaultTestPreferences();
+        setDefaultPrefrences();
+
+
         /*getSupportActionBar().setDisplayShowTitleEnabled(false);*/
-        Button testButton = (Button) findViewById(R.id.test_btn);
-        assert testButton != null;
-        testButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                checkThereIsUnfinishedTest();
 
-            }
-        });
-
-        Button testHistory= (Button) findViewById(R.id.testHistory);
-        testHistory.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i=new Intent(MainActivity.this,HistoryActivity.class);
-                startActivity(i);
-            }
-        });
         ArrayList<Test> tests = getLastTests();
         recyclerView = (RecyclerView) findViewById(R.id.main_recycler);
         MainRecyclerAdaptor adaptor = new MainRecyclerAdaptor(this, this, tests);
+
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 2);
         gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
@@ -79,20 +71,41 @@ public class MainActivity extends BaseActivity implements MainRecyclerAdaptor.On
             }
         });
         recyclerView.setLayoutManager(gridLayoutManager);
+        /*adaptor.setHasStableIds(true);*/
         recyclerView.setAdapter(adaptor);
 
 
     }
 
+
+    private void setDefaultPrefrences() {
+        SharedPreferences prefs = getSharedPreferences(REF.GENERAL_SETTING_PREF, MODE_PRIVATE);
+        if (!prefs.contains(REF.DAY_QUESTION_PREF)) {
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putBoolean(REF.DAY_QUESTION_PREF, true);
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(Calendar.HOUR_OF_DAY, 22);
+            calendar.set(Calendar.MINUTE, 9);
+            editor.apply();
+            Intent intent = new Intent(this, NotificationService.class);
+            intent.putExtra(REF.TRIGGER_MILLS_KEY, calendar.getTimeInMillis());
+            pendingIntent = PendingIntent.getBroadcast(this, REF.PENDING_INTENT_ID, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+            alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
+
+
+        }
+    }
+
     public Question getRandomQuestion() {
-        DBHelper helper = new DBHelper(this, TestFragment.DATABASE_NAME);
+        DBHelper helper = new DBHelper(this, REF.DATABASE_NAME);
         return helper.getRandomQuestion();
     }
 
     private void setDefaultTestPreferences() {
-        SharedPreferences preferences = getSharedPreferences(DEFAULT_TEST_PREF_KEY, MODE_PRIVATE);
-        if (!preferences.contains(DEFAULT_TEST_KEY)) {
-            SharedPreferences.Editor editor = preferences.edit();
+        defaultTestPref = getSharedPreferences(DEFAULT_TEST_PREF_KEY, MODE_PRIVATE);
+        if (!defaultTestPref.contains(DEFAULT_TEST_KEY)) {
+            SharedPreferences.Editor editor = defaultTestPref.edit();
             Test test = createNewTest();
             Gson gson = new Gson();
             String json = gson.toJson(test);
@@ -111,22 +124,37 @@ public class MainActivity extends BaseActivity implements MainRecyclerAdaptor.On
     }
 
     protected void checkThereIsUnfinishedTest() {
-        preferences = getSharedPreferences(TestActivity.UNFINISHED_TEST, Context.MODE_PRIVATE);
+        SharedPreferences preferences = getSharedPreferences(REF.UNCOMPLETED_PREF, Context.MODE_PRIVATE);
         buildDialog();
 
-        if (preferences.contains(UNFINISHED)) {
-            String jsonTest = preferences.getString(UNFINISHED, null);
+        if (preferences.contains(REF.UNCOMPLETED_TEST)) {
+            String jsonTest = preferences.getString(REF.UNCOMPLETED_TEST, null);
             Gson gson = new Gson();
             test = gson.fromJson(jsonTest, Test.class);
             AlertDialog dialog = builder.create();
             dialog.show();
         } else {
-            SharedPreferences.Editor editor = preferences.edit();
-            editor.clear();
-            editor.apply();
-            Intent i = new Intent(MainActivity.this, TestSettingActivity.class);
-            startActivityForResult(i, 1);
+            startNewTest();
+
         }
+    }
+
+    private void startNewTest() {
+        SharedPreferences preferences = getSharedPreferences(REF.UNCOMPLETED_PREF, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.clear();
+        editor.apply();
+        Intent i = new Intent(MainActivity.this, TestActivity.class);
+        //todo change that after adding test setting
+        String decode = defaultTestPref.getString(DEFAULT_TEST_KEY, null);
+        Gson gson = new Gson();
+        Test test = gson.fromJson(decode, Test.class);
+        ArrayList<Question> questions = new DBHelper(this, REF.DATABASE_NAME).getAll(test.getChapters(), test.getcountPerCategory(), test.getQuestionTypes());
+        Collections.shuffle(questions);
+        test.setQuestions(questions);
+        i.putExtra(REF.TEST_FRAGMENT_TYPE, REF.FULL_QUESTIONS);
+        i.putExtra(TEST_BUNDLE, test);
+        startActivityForResult(i, 1);
     }
 
     private void buildDialog() {
@@ -136,6 +164,7 @@ public class MainActivity extends BaseActivity implements MainRecyclerAdaptor.On
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 Intent i = new Intent(MainActivity.this, TestActivity.class);
+                i.putExtra(REF.TEST_FRAGMENT_TYPE, REF.FULL_QUESTIONS);
                 i.putExtra(TEST_BUNDLE, test);
                 startActivity(i);
             }
@@ -143,11 +172,11 @@ public class MainActivity extends BaseActivity implements MainRecyclerAdaptor.On
         builder.setNegativeButton("Start New one", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Intent i = new Intent(MainActivity.this, TestSettingActivity.class);
-                startActivity(i);
+                SharedPreferences preferences = getSharedPreferences(REF.UNCOMPLETED_PREF, Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = preferences.edit();
-                editor.remove(UNFINISHED);
+                editor.remove(REF.UNCOMPLETED_TEST);
                 editor.apply();
+                startNewTest();
             }
         });
     }
@@ -183,7 +212,53 @@ public class MainActivity extends BaseActivity implements MainRecyclerAdaptor.On
 
     @Override
     public void onItemClick(int position) {
+        Intent i;
+        switch (position) {
+            case 1:
+                checkThereIsUnfinishedTest();
+                break;
+            case 2:
+                i = new Intent(MainActivity.this, TestSettingActivity.class);
+                startActivity(i);
+                break;
+            case 3:
+                i = new Intent(MainActivity.this, HistoryActivity.class);
+                startActivity(i);
+                break;
+            case 4:
+                //question of the day
+                i = new Intent(this, TestActivity.class);
+                i.putExtra(REF.TEST_FRAGMENT_TYPE, REF.SINGLE_QUESTION);
+                startActivity(i);
+                break;
+            case 5:
+                //lessons
+                Intent intent = new Intent(MainActivity.this, LessonsActivity.class);
+                startActivity(intent);
+                break;
+            case 6:
+                //general setting
+                Intent itent2 = new Intent(this, SettingActivity.class);
+                startActivity(itent2);
+                break;
+            case 7:
+                // key terms and definitions
 
+                android.support.v4.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.main, LessonShowFragment.newInstance(0, TERMS_KEY));
+                transaction.addToBackStack(null);
+                transaction.commit();
+                break;
+            case 8:
+                // references
+                android.support.v4.app.FragmentTransaction transaction2 = getSupportFragmentManager().beginTransaction();
+                transaction2.replace(R.id.main, LessonShowFragment.newInstance(0, REFERENCES_KEY));
+                transaction2.addToBackStack(null);
+                transaction2.commit();
+                break;
+            case 9:
+
+        }
     }
 
     public ArrayList<Test> getLastTests() {
