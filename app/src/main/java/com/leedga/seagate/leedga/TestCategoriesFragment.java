@@ -10,9 +10,6 @@ import android.widget.CompoundButton;
 import android.widget.RelativeLayout;
 import android.widget.Switch;
 
-import java.util.ArrayList;
-import java.util.Collections;
-
 
 public class TestCategoriesFragment extends Fragment  {
 
@@ -64,7 +61,7 @@ public class TestCategoriesFragment extends Fragment  {
             }
         };
         definingSwitches(view ,listener);
-        next= (RelativeLayout) view.findViewById(R.id.nextt);
+       /* next= (RelativeLayout) view.findViewById(R.id.nextt);
         next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -75,7 +72,7 @@ public class TestCategoriesFragment extends Fragment  {
                 i.putExtra(TEST_BUNDLE,test);
                 startActivityForResult(i, 3);
             }
-        });
+        });*/
     }
 
 

@@ -1,10 +1,15 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:app="http://schemas.android.com/apk/res-auto"
       xmlns:tools="http://schemas.android.com/tools"
-      tools:context="com.leedga.seagate.leedga.MainActivity">
+      tools:context="com.seagate.test.leedga.MainActivity">
     <item
-        android:id="@+id/action_settings"
+        android:id="@+id/upgrarde"
+        android:title="@string/upgrade_to_full_version"
+        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/rating"
         android:orderInCategory="100"
-        android:title="@string/action_settings"
+        android:title="@string/rate_us"
         app:showAsAction="never"/>
 </menu>

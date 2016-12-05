@@ -18,7 +18,8 @@ public class ReportActivity extends AppCompatActivity {
         setContentView(R.layout.activity_report);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle("Report");
         name = (EditText) findViewById(R.id.name);
         subject = (EditText) findViewById(R.id.subject);
 
@@ -76,6 +77,10 @@ public class ReportActivity extends AppCompatActivity {
                 if (!subject.getText().toString().trim().equalsIgnoreCase("")) {
                     sendReport();
                 }
+                return true;
+            case android.R.id.home:
+                onBackPressed();
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }

@@ -1,14 +1,17 @@
 package com.leedga.seagate.leedga;
 
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -47,6 +50,7 @@ public class LessonShowFragment extends Fragment {
         if (fragmentType == LESSONS_KEY) {
             position = getArguments().getInt(POSITION_KEY);
             ((LessonsActivity) getActivity()).getSupportActionBar().setTitle(chapterNames[position]);
+            ((LessonsActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(false);
             switch (position) {
                 case 0:
                     url = "ch1.html";
@@ -87,9 +91,14 @@ public class LessonShowFragment extends Fragment {
             }
             url = "file:///android_asset/" + url;
         } else if (fragmentType == TERMS_KEY) {
+            ((LessonsActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             url = "file:///android_asset/terms.html";
+            ((LessonsActivity) getActivity()).getSupportActionBar().setTitle(REF.KEY_TERMS);
         } else {
             url = "file:///android_asset/references.html";
+            ((LessonsActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            ((LessonsActivity) getActivity()).getSupportActionBar().setTitle(REF.REFERENCE);
+
         }
     }
 
@@ -114,14 +123,32 @@ public class LessonShowFragment extends Fragment {
             });
 
         } else {
+            final ProgressDialog dialog = new ProgressDialog(getContext());
+            dialog.setIndeterminate(false);
+            dialog.setMessage("Please wait");
+            dialog.show();
             listView.setVisibility(View.GONE);
             webView.setVisibility(View.VISIBLE);
             webView.loadUrl(url);
+            webView.setWebViewClient(new WebViewClient() {
+                @Override
+                public void onPageFinished(WebView view, String url) {
+                    super.onPageFinished(view, url);
+                    dialog.dismiss();
+                }
+            });
         }
-
-        webView.loadUrl(url);
         return view;
     }
 
-
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        switch (id) {
+            case android.R.id.home:
+                getActivity().onBackPressed();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 }

@@ -23,13 +23,13 @@ import static com.leedga.seagate.leedga.REF.FIRST_CHOICE;
 import static com.leedga.seagate.leedga.REF.FLAGGED;
 import static com.leedga.seagate.leedga.REF.FOURTH_CHOICE;
 import static com.leedga.seagate.leedga.REF.ID;
-import static com.leedga.seagate.leedga.REF.MULTI_CHOICE_LEED_TABLE;
-import static com.leedga.seagate.leedga.REF.MULT_CHOICE_TABLE_TYPE;
 import static com.leedga.seagate.leedga.REF.NOTES_ON_ANSWER;
 import static com.leedga.seagate.leedga.REF.QUESTION_KEY;
 import static com.leedga.seagate.leedga.REF.SECOND_CHOICE;
 import static com.leedga.seagate.leedga.REF.SIXITH_CHOICE;
+import static com.leedga.seagate.leedga.REF.TABLE_NAME;
 import static com.leedga.seagate.leedga.REF.THIRD_CHOICE;
+import static com.leedga.seagate.leedga.REF.TYPE;
 import static com.leedga.seagate.leedga.REF.typesNames;
 
 /**
@@ -203,7 +203,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 String qw="( "+query.toString()+")";
 
 
-                Cursor cursor = db.query(MULTI_CHOICE_LEED_TABLE, null, REF.CATEGORY + " = '" + CATEGORY_NAMES[i] + "' AND " + REF.KEY + " IN " + qw, null, null, null, "random()");
+                Cursor cursor = db.query(TABLE_NAME, null, REF.CATEGORY + " = '" + CATEGORY_NAMES[i] + "' AND " + REF.KEY + " IN " + qw, null, null, null, "random()");
                 Question q=null;
                 int count=0;
                 while (cursor.moveToNext()){
@@ -226,7 +226,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
                         int flagString = cursor.getInt(cursor.getColumnIndex(FLAGGED));
                         int id = cursor.getInt(cursor.getColumnIndex(ID));
-                        int type = cursor.getInt(cursor.getColumnIndex(MULT_CHOICE_TABLE_TYPE));
+                        int type = cursor.getInt(cursor.getColumnIndex(TYPE));
                         boolean flag;
                         flag = flagString != 0;
                         q = new Question(question, ch1, ch2, ch3, ch4, ch5, ch6, answer, note,
@@ -234,8 +234,10 @@ public class DBHelper extends SQLiteOpenHelper {
                         questions.add(q);
                     }
                 }
+                cursor.close();
             }
         }
+
 
         return questions;
     }
@@ -248,23 +250,46 @@ public class DBHelper extends SQLiteOpenHelper {
         } else {
             contentValues.put(FLAGGED, 0);
         }
-        db.update(MULTI_CHOICE_LEED_TABLE, contentValues, ID + " = '" + id + "'", null);
+        db.update(TABLE_NAME, contentValues, ID + " = '" + id + "'", null);
+    }
+
+    public void editQuestion(ContentValues contentValues, int id) {
+        db.update(TABLE_NAME, contentValues, ID + " = '" + id + "'", null);
+    }
+
+
+    public void addQuestion(ContentValues contentValues) {
+        db.insert(TABLE_NAME, null, contentValues);
     }
 
     public void deleteAllFlags() {
-        Cursor cursor = db.query(MULTI_CHOICE_LEED_TABLE, null, FLAGGED + " = 1", null, null, null, null);
+        Cursor cursor = db.query(TABLE_NAME, null, FLAGGED + " = 1", null, null, null, null);
         ContentValues contentValues = new ContentValues();
         contentValues.put(FLAGGED, 0);
         while (cursor.moveToNext()) {
             int id = cursor.getInt(cursor.getColumnIndex(ID));
-            db.update(MULTI_CHOICE_LEED_TABLE, contentValues, ID + " = '" + id + "'", null);
+            db.update(TABLE_NAME, contentValues, ID + " = '" + id + "'", null);
         }
+        cursor.close();
     }
 
-    public ArrayList<Question> getFlaggedQuestions() {
-        Cursor cursor = db.query(MULTI_CHOICE_LEED_TABLE, null, FLAGGED + " = 1", null, null, null, null);
+    public int getFlaggedCount() {
+        Cursor cursor = db.query(TABLE_NAME, null, FLAGGED + " = 1", null, null, null, null);
+        cursor.moveToFirst();
+        int i = cursor.getCount();
+        cursor.close();
+        return i;
+    }
+
+    public ArrayList<Question> getFlaggedQuestions(int questionsCount) {
+        Cursor cursor = db.query(TABLE_NAME, null, FLAGGED + " = 1", null, null, null, null);
         ArrayList<Question> questions = new ArrayList<>();
+        int count = 0;
         while (cursor.moveToNext()) {
+            if (count > questionsCount) {
+                cursor.close();
+                break;
+            }
             String question = cursor.getString(cursor.getColumnIndex(QUESTION_KEY));
             String ch1 = cursor.getString(cursor.getColumnIndex(FIRST_CHOICE));
             String ch2 = cursor.getString(cursor.getColumnIndex(SECOND_CHOICE));
@@ -279,14 +304,15 @@ public class DBHelper extends SQLiteOpenHelper {
 
             int flagString = cursor.getInt(cursor.getColumnIndex(FLAGGED));
             int id = cursor.getInt(cursor.getColumnIndex(ID));
-            int type = cursor.getInt(cursor.getColumnIndex(MULT_CHOICE_TABLE_TYPE));
+            int type = cursor.getInt(cursor.getColumnIndex(TYPE));
             boolean flag;
             flag = flagString != 0;
             Question q = new Question(question, ch1, ch2, ch3, ch4, ch5, ch6, answer, note,
                     categoty, type, id, key, flag);
             questions.add(q);
+            count++;
         }
-
+        cursor.close();
         return questions;
     }
 
@@ -296,6 +322,7 @@ public class DBHelper extends SQLiteOpenHelper {
         String countQuery="SELECT * FROM "+tableName;
         Cursor cursor=db.rawQuery(countQuery,null);
         int count =cursor.getCount();
+        cursor.close();
         return count;
     }
 
@@ -303,8 +330,8 @@ public class DBHelper extends SQLiteOpenHelper {
         int i = 0;
         Question q = null;
         Random random = new Random();
-        int randomId = random.nextInt(getRowsCount(MULTI_CHOICE_LEED_TABLE));
-        Cursor cursor = db.query(MULTI_CHOICE_LEED_TABLE, null, ID + " = " + randomId, null, null, null,
+        int randomId = random.nextInt(getRowsCount(TABLE_NAME));
+        Cursor cursor = db.query(TABLE_NAME, null, ID + " = " + randomId, null, null, null,
                 null);
         while (cursor.moveToNext()) {
 
@@ -322,7 +349,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
             int flagString = cursor.getInt(cursor.getColumnIndex(FLAGGED));
             int id = cursor.getInt(cursor.getColumnIndex(ID));
-            int type = cursor.getInt(cursor.getColumnIndex(MULT_CHOICE_TABLE_TYPE));
+            int type = cursor.getInt(cursor.getColumnIndex(TYPE));
             boolean flag;
             flag = flagString != 0;
             q = new Question(question, ch1, ch2, ch3, ch4, ch5, ch6, answer, note,
@@ -330,6 +357,7 @@ public class DBHelper extends SQLiteOpenHelper {
             i++;
         }
 
+        cursor.close();
         return q;
     }
 

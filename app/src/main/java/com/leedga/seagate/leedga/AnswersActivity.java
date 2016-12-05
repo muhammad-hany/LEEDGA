@@ -7,13 +7,15 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import com.google.gson.Gson;
 
-public class AnswersActivity extends BaseActivity {
+public class AnswersActivity extends AppCompatActivity {
 
     public static final String QUESTION_BODY="question_body";
     protected SectionsPagerAdapter mSectionsPagerAdapter;
@@ -26,8 +28,10 @@ public class AnswersActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_answers);
-        defineNavigationMenu();
-
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle("Answers");
         categoryName=getIntent().getStringExtra(ResultActivity.CATEGORY_KEY);
 
 
@@ -54,9 +58,10 @@ public class AnswersActivity extends BaseActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        switch (id) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -76,7 +81,7 @@ public class AnswersActivity extends BaseActivity {
         test = fetchTest(testId);
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager(), test);
         mViewPager.setAdapter(mSectionsPagerAdapter);
-        mViewPager.setOffscreenPageLimit(4);
+        mViewPager.setOffscreenPageLimit(1);
         mViewPager.setCurrentItem(position);
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);

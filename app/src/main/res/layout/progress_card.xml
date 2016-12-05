@@ -1,57 +1,191 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+                                    xmlns:app="http://schemas.android.com/apk/res-auto"
                                     xmlns:custom="http://schemas.android.com/apk/res-auto"
                                     xmlns:tools="http://schemas.android.com/tools"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
-                                    android:clickable="true"
-                                    android:focusable="true"
-                                    android:foreground="?android:attr/selectableItemBackground">
+                                    android:layout_marginBottom="5dp"
+                                    android:layout_marginTop="5dp"
+                                    custom:cardBackgroundColor="#93ffffff"
+                                    custom:cardCornerRadius="10dp"
+                                    custom:cardElevation="0dp">
 
     <android.support.constraint.ConstraintLayout
+
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content">
 
-        <com.github.lzyzsd.circleprogress.ArcProgress
-            android:id="@+id/arc_progress"
-            android:layout_width="200dp"
-            android:layout_height="200dp"
-            android:layout_marginBottom="16dp"
-            android:layout_marginEnd="32dp"
-            android:layout_marginLeft="32dp"
-            android:layout_marginRight="32dp"
-            android:layout_marginStart="32dp"
-            android:layout_marginTop="16dp"
-            custom:arc_bottom_text="MEMORY"
-            custom:arc_bottom_text_size="15sp"
-            custom:arc_finished_color="@color/colorPrimary"
-            custom:arc_progress="0"
-            custom:arc_stroke_width="15dp"
-            custom:arc_suffix_text_padding="10dp"
-            custom:arc_suffix_text_size="30sp"
-            custom:arc_text_color="@color/colorPrimary"
-            custom:arc_text_size="0sp"
-            custom:arc_unfinished_color="@color/unfinished_progress"
-            custom:layout_constraintBottom_toBottomOf="parent"
-            custom:layout_constraintLeft_toLeftOf="parent"
-            custom:layout_constraintRight_toRightOf="parent"
-            custom:layout_constraintTop_toTopOf="parent"/>
-
-        <TextView
-            android:id="@+id/value"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+        <com.github.lzyzsd.circleprogress.DonutProgress
+            android:id="@+id/progressba"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:layout_marginBottom="4dp"
             android:layout_marginEnd="16dp"
             android:layout_marginLeft="16dp"
             android:layout_marginRight="16dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
-            android:text="0"
+            android:rotation="-90"
+            app:donut_finished_color="@color/colorPrimary"
+            app:donut_progress="30"
+            app:donut_text_size="0sp"
+            app:donut_unfinished_color="@android:color/white"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            custom:layout_constraintBottom_toBottomOf="parent"
+            custom:layout_constraintTop_toTopOf="parent"
+            custom:layout_constraintVertical_bias="0.51"/>
+
+        <TextView
+
+            android:id="@+id/mainText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="30"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large"
             android:textColor="@color/colorPrimary"
-            android:textSize="70sp"
-            custom:layout_constraintBottom_toBottomOf="@+id/arc_progress"
+            android:textSize="40sp"
+            app:layout_constraintBottom_toBottomOf="@+id/progressba"
+            app:layout_constraintLeft_toLeftOf="@+id/progressba"
+            app:layout_constraintRight_toRightOf="@+id/progressba"
+            app:layout_constraintTop_toTopOf="@+id/progressba"
+            />
+
+        <TextView
+            android:id="@+id/prec"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="4dp"
+            android:layout_marginStart="4dp"
+            android:text="%"
+            android:textColor="@color/textColor"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="@+id/mainText"
+            app:layout_constraintLeft_toRightOf="@+id/mainText"
+            app:layout_constraintTop_toTopOf="@+id/mainText"
+            app:layout_constraintVertical_bias="0.0"/>
+
+        <LinearLayout
+            android:id="@+id/linearLayout4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="@+id/progressba"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toLeftOf="@+id/progressba"
+            app:layout_constraintTop_toTopOf="@+id/progressba">
+
+            <TextView
+                android:id="@+id/bigNum1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
+                android:gravity="center"
+                android:text="30"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                android:textColor="@color/colorPrimaryDark"
+                android:textSize="18sp"/>
+
+            <TextView
+                android:id="@+id/smallText1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="Correct"
+                android:textColor="@color/textColor"
+                android:textSize="10sp"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="@+id/progressba"
+            app:layout_constraintLeft_toRightOf="@+id/progressba"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/progressba"
+            >
+
+            <TextView
+                android:id="@+id/bigNum2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginBottom="5dp"
+                android:gravity="center"
+                android:text="100"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                android:textColor="@color/colorPrimaryDark"
+                android:textSize="18sp"/>
+
+            <TextView
+                android:id="@+id/smallText2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:text="Total Questions"
+                android:textColor="@color/textColor"
+                android:textSize="10sp"/>
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:text="TextView"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+            android:textColor="@color/colorPrimaryDark"
+            custom:layout_constraintBottom_toTopOf="@+id/progressba"
             custom:layout_constraintLeft_toLeftOf="parent"
             custom:layout_constraintRight_toRightOf="parent"
             custom:layout_constraintTop_toTopOf="parent"/>
+
+        <LinearLayout
+            android:id="@+id/showAll"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?android:attr/selectableItemBackground"
+            android:orientation="horizontal"
+            android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/progressba"
+            app:layout_constraintVertical_bias="0.0"
+            >
+
+            <TextView
+                android:id="@+id/details"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_weight="3"
+                android:gravity="center"
+                android:paddingLeft="50dp"
+                android:text="Show All Questions"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                android:textColor="@color/colorPrimaryDark"/>
+
+            <ImageView
+                android:id="@+id/imageView3"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:adjustViewBounds="true"
+                custom:srcCompat="@drawable/ic_next_green"/>
+        </LinearLayout>
+
     </android.support.constraint.ConstraintLayout>
 </android.support.v7.widget.CardView>

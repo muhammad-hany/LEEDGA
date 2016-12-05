@@ -3,17 +3,22 @@ package com.leedga.seagate.leedga;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
+import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 
-import static com.leedga.seagate.leedga.MainActivity.DEFAULT_TEST_KEY;
-import static com.leedga.seagate.leedga.MainActivity.DEFAULT_TEST_PREF_KEY;
+import static com.leedga.seagate.leedga.REF.DEFAULT_TEST_KEY;
+import static com.leedga.seagate.leedga.REF.DEFAULT_TEST_PREF_KEY;
 import static com.leedga.seagate.leedga.TestTypeFragment.ANSWER_AFTER_ALL;
 import static com.leedga.seagate.leedga.TestTypeFragment.ANSWER_AFTER_EVERY;
 import static com.leedga.seagate.leedga.TestTypeFragment.ANSWER_WHEN_WRONG;
@@ -21,7 +26,7 @@ import static com.leedga.seagate.leedga.TestTypeFragment.MULTI_CHOICE;
 import static com.leedga.seagate.leedga.TestTypeFragment.SINGLE_CHOICE;
 import static com.leedga.seagate.leedga.TestTypeFragment.TRUE_FALSE;
 
-public class TestSettingActivity extends BaseActivity implements FragmentListener {
+public class TestSettingActivity extends AppCompatActivity implements FragmentListener {
 
     private RadioGroup radioGroup;
     private Switch trueFalse;
@@ -32,12 +37,19 @@ public class TestSettingActivity extends BaseActivity implements FragmentListene
     private Switch s1, s2, s3, s4, s5, s6, s7, s8, s9;
     private Test test;
     private SharedPreferences defaultTestPref;
+    private int activeTypeNumber, activeChapters;
+    private Switch knowledgeDomain, flaggedOnly;
+    private SharedPreferences generalSetting;
+    private DBHelper helper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_test_type);
-        defineNavigationMenu();
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle("Test Setting");
         gettingDefaultTest();
         definingViews();
         displayValues();
@@ -56,7 +68,7 @@ public class TestSettingActivity extends BaseActivity implements FragmentListene
     private void displayValues() {
         displayAnswerSettingValues();
         displayQuestionTypeValues();
-        displayQuestionsNumber();
+        displayQuestionsSetting();
         displayQuestionsDomains();
 
     }
@@ -75,15 +87,22 @@ public class TestSettingActivity extends BaseActivity implements FragmentListene
 
     }
 
-    private void displayQuestionsNumber() {
+    private void displayQuestionsSetting() {
         int numberOfQuestion = test.getNumberOfQuestions();
         int i = 0;
-        for (int num : myValues) {
-            if (num == numberOfQuestion) {
-                seekBar.setProgress(i);
+        if (!test.isOnlyFlagged()) {
+            for (int num : myValues) {
+                if (num == numberOfQuestion) {
+                    seekBar.setProgress(i);
+                }
+                i++;
             }
-            i++;
+        } else {
+            seekBar.setProgress(numberOfQuestion - 5);
         }
+
+        knowledgeDomain.setChecked(generalSetting.getBoolean(REF.KNOWLEDGE_DOMAIN, false));
+        flaggedOnly.setChecked(test.isOnlyFlagged());
     }
 
     private void displayQuestionTypeValues() {
@@ -115,6 +134,17 @@ public class TestSettingActivity extends BaseActivity implements FragmentListene
         }
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        switch (id) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     private void displayAnswerSettingValues() {
         RadioButton radioButton = null;
         switch (test.getAnswerShow()) {
@@ -141,10 +171,21 @@ public class TestSettingActivity extends BaseActivity implements FragmentListene
         s7 = (Switch) findViewById(R.id.switch7);
         s8 = (Switch) findViewById(R.id.switch8);
         s9 = (Switch) findViewById(R.id.switch9);
+        boolean[] chapters = test.getChapters();
+        activeChapters = 0;
+        for (boolean isChecked : chapters) {
+            activeChapters = isChecked ? activeChapters + 1 : activeChapters - 1;
+        }
         CompoundButton.OnCheckedChangeListener listener = new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 updateSwitchesStatusTest();
+                activeChapters = isChecked ? activeChapters + 1 : activeChapters - 1;
+                if (activeChapters == 1) {
+                    disableLastSwitch();
+                } else {
+                    enableLastSwitch();
+                }
             }
         };
         s1.setOnCheckedChangeListener(listener);
@@ -158,6 +199,27 @@ public class TestSettingActivity extends BaseActivity implements FragmentListene
         s9.setOnCheckedChangeListener(listener);
     }
 
+    private void enableLastSwitch() {
+        Switch[] switches = {s1, s2, s3, s4, s5, s6, s7, s8, s9};
+        for (Switch s : switches) {
+            if (!s.isEnabled()) {
+                s.setEnabled(true);
+            }
+        }
+    }
+
+    private void disableLastSwitch() {
+        Switch[] switches = {s1, s2, s3, s4, s5, s6, s7, s8, s9};
+        for (Switch s : switches) {
+            if (s.isChecked()) {
+                s.setEnabled(false);
+                Toast.makeText(this, "you must choose at least one domains ", Toast
+                        .LENGTH_LONG).show();
+            }
+        }
+    }
+
+
     private void updateSwitchesStatusTest() {
         Switch[] switches = {s1, s2, s3, s4, s5, s6, s7, s8, s9};
         boolean[] chapters = new boolean[9];
@@ -167,17 +229,34 @@ public class TestSettingActivity extends BaseActivity implements FragmentListene
         test.setChapters(chapters);
     }
 
-    private void definingNumberOfQuestions() {
+    private void definingQuestionsSetting() {
         final TextView seekBarTxt = (TextView) findViewById(R.id.seekBarTxt);
         seekBar = (SeekBar) findViewById(R.id.seekBar);
         seekBar.setProgress(0);
-        seekBar.setMax(18);
-        seekBarTxt.setText(String.valueOf(myValues[seekBar.getProgress()]) + " Questions");
+
+        if (test.isOnlyFlagged() && helper.getFlaggedCount() >= 5) {
+            // flagged question only
+            int flaggedCount = helper.getFlaggedCount();
+            seekBar.setMax(flaggedCount - 5);
+            seekBarTxt.setText(String.valueOf(seekBar.getProgress() + 5) + " Flagged Questions");
+
+        } else {
+            //no flagged question only
+            seekBar.setMax(18);
+            seekBarTxt.setText(String.valueOf(myValues[seekBar.getProgress()]) + " Questions");
+        }
+
+
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                seekBarTxt.setText(String.valueOf(myValues[progress]) + " Questions");
-                test.setNumberOfQuestions(myValues[progress]);
+                if (test.isOnlyFlagged() && helper.getFlaggedCount() >= 5) {
+                    seekBarTxt.setText(String.valueOf(progress + 5) + " Flagged Questions");
+                    test.setNumberOfQuestions(progress + 5);
+                } else {
+                    seekBarTxt.setText(String.valueOf(myValues[progress]) + " Questions");
+                    test.setNumberOfQuestions(myValues[progress]);
+                }
 
             }
 
@@ -191,13 +270,68 @@ public class TestSettingActivity extends BaseActivity implements FragmentListene
 
             }
         });
+
+        knowledgeDomain = (Switch) findViewById(R.id.knowledge);
+        knowledgeDomain.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                SharedPreferences.Editor editor = generalSetting.edit();
+                editor.putBoolean(REF.KNOWLEDGE_DOMAIN, b);
+                editor.apply();
+            }
+        });
+
+        flaggedOnly = (Switch) findViewById(R.id.flagQuestion);
+        flaggedOnly.setChecked(test.isOnlyFlagged());
+        View v = findViewById(R.id.dd);
+        if (helper.getFlaggedCount() < 5) {
+            flaggedOnly.setEnabled(false);
+            v.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Toast.makeText(TestSettingActivity.this, "There is no enough flagged questions to perform test", Toast.LENGTH_LONG).show();
+                }
+            });
+        } else {
+            v.setVisibility(View.GONE);
+        }
+        flaggedOnly.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                test.setOnlyFlagged(b);
+                if (b) {
+                    seekBar.setMax(helper.getFlaggedCount() - 5);
+                    seekBarTxt.setText(String.valueOf(seekBar.getProgress() + 5) + " Flagged Questions");
+                    changeDomainState(false);
+                } else {
+                    seekBar.setMax(18);
+                    seekBarTxt.setText(String.valueOf(myValues[seekBar.getProgress()]) + " " +
+                            "Questions");
+                    changeDomainState(true);
+                }
+            }
+        });
     }
 
+
+    private void changeDomainState(boolean state) {
+        Switch[] switches = {s1, s2, s3, s4, s5, s6, s7, s8, s9};
+        for (Switch s : switches) {
+            s.setEnabled(state);
+        }
+    }
+
+
+
     private void definingQuestionType() {
+        activeTypeNumber = 0;
         trueFalse = (Switch) findViewById(R.id.true_false);
         oneChoice = (Switch) findViewById(R.id.one_choice);
         multiChoice = (Switch) findViewById(R.id.multi_choice);
         final boolean[] questionTypes = test.getQuestionTypes();
+        for (boolean state : questionTypes) {
+            activeTypeNumber = state ? activeTypeNumber + 1 : activeTypeNumber - 1;
+        }
         CompoundButton.OnCheckedChangeListener listener = new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -213,11 +347,39 @@ public class TestSettingActivity extends BaseActivity implements FragmentListene
                         break;
                 }
                 test.setQuestionTypes(questionTypes);
+                activeTypeNumber = isChecked ? activeTypeNumber + 1 : activeTypeNumber - 1;
+                if (activeTypeNumber == 1) {
+                    findWhichActiveToDisable();
+                } else {
+                    enableAll();
+                }
             }
         };
         trueFalse.setOnCheckedChangeListener(listener);
         oneChoice.setOnCheckedChangeListener(listener);
         multiChoice.setOnCheckedChangeListener(listener);
+    }
+
+    private void enableAll() {
+        if (!trueFalse.isEnabled()) {
+            trueFalse.setEnabled(true);
+        } else if (!oneChoice.isEnabled()) {
+            oneChoice.setEnabled(true);
+        } else if (!multiChoice.isEnabled()) {
+            multiChoice.setEnabled(true);
+        }
+    }
+
+    private void findWhichActiveToDisable() {
+        if (trueFalse.isChecked()) {
+            trueFalse.setEnabled(false);
+        } else if (oneChoice.isChecked()) {
+            oneChoice.setEnabled(false);
+        } else if (multiChoice.isChecked()) {
+            multiChoice.setEnabled(false);
+        }
+
+        Toast.makeText(this, "you must choose one of question type at least", Toast.LENGTH_LONG).show();
     }
 
     private void definingAnswerSetting() {
@@ -243,7 +405,7 @@ public class TestSettingActivity extends BaseActivity implements FragmentListene
     private void definingViews() {
         definingAnswerSetting();
         definingQuestionType();
-        definingNumberOfQuestions();
+        definingQuestionsSetting();
         definingQuestionCategories();
     }
 
@@ -268,6 +430,8 @@ public class TestSettingActivity extends BaseActivity implements FragmentListene
         String decode = defaultTestPref.getString(DEFAULT_TEST_KEY, null);
         Gson gson = new Gson();
         test = gson.fromJson(decode, Test.class);
+        generalSetting = getSharedPreferences(REF.GENERAL_SETTING_PREF, MODE_PRIVATE);
+        helper = new DBHelper(this, REF.DATABASE_NAME);
     }
 
     @Override

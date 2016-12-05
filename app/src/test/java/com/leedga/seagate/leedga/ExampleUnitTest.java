@@ -1,4 +1,4 @@
-package com.leedga.seagate.leedga;
+package com.seagate.test.leedga;
 
 import org.junit.Test;
 

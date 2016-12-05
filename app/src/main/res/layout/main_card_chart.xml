@@ -53,7 +53,7 @@
             android:layout_marginLeft="4dp"
             android:layout_marginStart="4dp"
             android:text="%"
-            android:textColor="@color/colorPrimary"
+            android:textColor="@color/textColor"
             android:textSize="16sp"
             app:layout_constraintBottom_toBottomOf="@+id/mainText"
             app:layout_constraintLeft_toRightOf="@+id/mainText"
@@ -87,7 +87,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:text="Correct"
-                android:textColor="@color/colorPrimaryDark"
+                android:textColor="@color/textColor"
                 android:textSize="10sp"/>
         </LinearLayout>
         <LinearLayout
@@ -119,11 +119,12 @@
                 android:layout_gravity="center"
                 android:gravity="center"
                 android:text="Total Questions"
-                android:textColor="@color/colorPrimaryDark"
+                android:textColor="@color/textColor"
                 android:textSize="10sp"/>
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/detailsC"
             android:layout_width="0dp"
             android:layout_height="45dp"
             android:layout_marginTop="8dp"

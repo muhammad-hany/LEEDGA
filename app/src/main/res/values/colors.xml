@@ -13,6 +13,8 @@
     <color name="textColor">#116047</color>
     <color name="correct">#7733c23a</color>
     <color name="incorrect">#8bf23636</color>
+    <color name="flag">#66ffe500</color>
+    <color name="lightGray">#a6969696</color>
 
     <color name="fistCard">#93ff4b66</color>
     <color name="secondCard">#00A9AC</color>

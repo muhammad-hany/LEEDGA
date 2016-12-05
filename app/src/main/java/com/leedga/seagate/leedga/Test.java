@@ -8,20 +8,20 @@ import java.util.Date;
  * Created by Muhammad Workstation on 14/09/2016.
  */
 public class Test implements Serializable {
-    boolean []  chapters,questionTypes;
+    private boolean[] chapters, questionTypes;
+    private int[] numberPerCategory;
+    private ArrayList<Question> answeredQuestions;
+    private ArrayList<Question> questions;
+    private ArrayList<String> userAnswers;
+    private ArrayList<Boolean> userResult;
+    private int numberOfQuestions, answerShow;
+    private Date savingDate;
+    private boolean saved;
+    private String testPercentage, ratio, testId;
+    private ArrayList<Boolean> nextState;
+    private boolean onlyFlagged;
 
-    int [] numberPerCategory;
-    ArrayList<Question> answeredQuestions;
-    ArrayList<Question> questions;
-    ArrayList<String> userAnswers;
-    ArrayList<Boolean> userResult;
-    int numberOfQuestions, answerShow;
-    Date savingDate;
-    boolean saved;
-    String testPercentage, ratio, testId;
-    ArrayList<Boolean> nextState;
-
-    public Test(ArrayList<Question> questions, boolean[] chapters, int[] numberPerCategory, boolean[] questionTypes, int numberOfQuestions, ArrayList<String> userAnswers, ArrayList<Boolean> userResult, Date savingDate, boolean saved, String testPercentage, String ratio, String testId, int answerShow, ArrayList<Boolean> nextState) {
+    public Test(ArrayList<Question> questions, boolean[] chapters, int[] numberPerCategory, boolean[] questionTypes, int numberOfQuestions, ArrayList<String> userAnswers, ArrayList<Boolean> userResult, Date savingDate, boolean saved, String testPercentage, String ratio, String testId, int answerShow, ArrayList<Boolean> nextState, boolean onlyFlagged) {
         this.chapters=chapters;
         this.questions=questions;
         this.questionTypes=questionTypes;
@@ -36,12 +36,20 @@ public class Test implements Serializable {
         this.testId = testId;
         this.answerShow = answerShow;
         this.nextState = nextState;
-
-
+        this.onlyFlagged = onlyFlagged;
     }
 
     public Test() {
 
+    }
+
+
+    public boolean isOnlyFlagged() {
+        return onlyFlagged;
+    }
+
+    public void setOnlyFlagged(boolean onlyFlagged) {
+        this.onlyFlagged = onlyFlagged;
     }
 
     public void addToNextSate(boolean state, int index) {

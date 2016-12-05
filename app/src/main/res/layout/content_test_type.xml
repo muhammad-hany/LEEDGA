@@ -184,6 +184,7 @@
                             android:padding="10dp"
                             android:text="One Choice"
                             />
+
                     </LinearLayout>
                 </android.support.constraint.ConstraintLayout>
 
@@ -212,7 +213,6 @@
                     android:layout_height="match_parent">
 
                     <SeekBar
-
                         android:id="@+id/seekBar"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -225,10 +225,10 @@
                         app:layout_constraintHorizontal_bias="0.51"
                         app:layout_constraintLeft_toLeftOf="parent"
                         app:layout_constraintRight_toRightOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/textView"/>
+                        app:layout_constraintTop_toBottomOf="@+id/switchContainer"/>
+
 
                     <TextView
-
                         android:id="@+id/seekBarTxt"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -253,7 +253,7 @@
                         android:background="@color/fourthColor"
                         android:gravity="center"
                         android:padding="10dp"
-                        android:text="Number of Questions"
+                        android:text="Questions Setting"
                         android:textAppearance="@style/TextAppearance.AppCompat.Large"
                         android:textColor="@android:color/white"
                         android:textSize="18sp"
@@ -261,6 +261,68 @@
                         app:layout_constraintLeft_toLeftOf="parent"
                         app:layout_constraintRight_toRightOf="parent"
                         app:layout_constraintTop_toTopOf="parent"/>
+
+                    <Switch
+                        android:id="@+id/knowledge"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginLeft="8dp"
+                        android:layout_marginRight="8dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="16dp"
+                        android:checked="true"
+                        android:padding="10dp"
+                        android:text="Show knowledge domain during test"
+                        app:layout_constraintHorizontal_bias="0.0"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintRight_toRightOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/textView"
+                        app:layout_constraintVertical_bias="0.72"/>
+
+                    <android.support.constraint.ConstraintLayout
+                        android:id="@+id/switchContainer"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:clickable="true"
+                        app:layout_constraintHorizontal_bias="0.0"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintRight_toRightOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/knowledge"
+                        >
+
+
+                        <Switch
+                            android:id="@+id/flagQuestion"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="16dp"
+                            android:layout_marginLeft="16dp"
+                            android:layout_marginRight="16dp"
+                            android:layout_marginStart="16dp"
+                            android:checked="true"
+                            android:text="Use only flagged questions"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintLeft_toLeftOf="parent"
+                            app:layout_constraintRight_toRightOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"/>
+
+                        <View
+
+                            android:id="@+id/dd"
+                            android:layout_width="0dp"
+                            android:layout_height="0dp"
+                            android:background="@android:color/transparent"
+                            android:clickable="true"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintLeft_toLeftOf="parent"
+                            app:layout_constraintRight_toRightOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            />
+                    </android.support.constraint.ConstraintLayout>
+
+
                 </android.support.constraint.ConstraintLayout>
             </android.support.v7.widget.CardView>
 

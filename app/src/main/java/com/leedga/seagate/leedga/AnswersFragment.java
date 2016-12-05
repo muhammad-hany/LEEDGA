@@ -2,9 +2,11 @@ package com.leedga.seagate.leedga;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +16,8 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -181,7 +185,7 @@ public class AnswersFragment extends Fragment implements listCallback {
         callback= (listCallback) activity;
     }*/
 
-    class AnswerListAdapter extends ArrayAdapter<String> {
+    class AnswerListAdapter extends ArrayAdapter<String> implements View.OnClickListener {
         List<String> questions;
         ArrayList<Boolean> results;
         int ftagmentNum;
@@ -192,13 +196,14 @@ public class AnswersFragment extends Fragment implements listCallback {
             this.questions = questions;
             this.results = results;
             this.ftagmentNum = fragmentNum;
+
         }
 
         @NonNull
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            ViewHolder viewHolder = null;
-            Log.i("FRAGMENT", "AnswerListAdapter getView called");
+        public View getView(final int position, View convertView, ViewGroup parent) {
+            int resultPosition = 0;
+            ViewHolder viewHolder;
             if (convertView == null) {
                 LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(LAYOUT_INFLATER_SERVICE);
                 convertView = inflater.inflate(R.layout.answer_row, null);
@@ -206,6 +211,22 @@ public class AnswersFragment extends Fragment implements listCallback {
                 viewHolder.image = (ImageView) convertView.findViewById(R.id.imageView);
                 viewHolder.textView = (TextView) convertView.findViewById(R.id.textView15);
                 viewHolder.flagImage = (ImageView) convertView.findViewById(R.id.flag);
+                viewHolder.cardView = (CardView) convertView.findViewById(R.id.card);
+                if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.LOLLIPOP) {
+                    viewHolder.cardView.setRadius(0);
+                }
+                viewHolder.flagImage.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        /*ImageView imageView = (ImageView) view;
+                        imageView.setImageResource(R.drawable.ic_flag_gold_heav);
+                        imageView.setBackgroundResource(R.color.flag);*/
+                        Integer pos = (Integer) view.getTag();
+                        updateTestInPref(pos);
+                        notifyDataSetChanged();
+                        ((AnswersActivity) getActivity()).mSectionsPagerAdapter.notifyDataSetChanged();
+                    }
+                });
                 convertView.setTag(viewHolder);
 
             } else {
@@ -213,43 +234,109 @@ public class AnswersFragment extends Fragment implements listCallback {
             }
 
             viewHolder.textView.setText(questions.get(position));
-            int resultPosition = 0;
+
+
             for (Question question : test.getAnsweredQuestions()) {
                 if (question.getQuestionBody().equals(questions.get(position))) {
                     resultPosition = test.getAnsweredQuestions().indexOf(question);
                 }
 
             }
+            viewHolder.flagImage.setTag(resultPosition);
             if (ftagmentNum == 0 || ftagmentNum == 3) {
                 if (results.get(resultPosition)) {
                     viewHolder.image.setImageResource(R.drawable.ic_correct);
+                    viewHolder.image.setBackgroundResource(R.color.correct);
                 } else {
                     viewHolder.image.setImageResource(R.drawable.ic_incorrect);
+                    viewHolder.image.setBackgroundResource(R.color.incorrect);
                 }
 
             } else if (ftagmentNum == 1) {
                 viewHolder.image.setImageResource(R.drawable.ic_correct);
+                viewHolder.image.setBackgroundResource(R.color.correct);
             } else if (ftagmentNum == 2) {
                 viewHolder.image.setImageResource(R.drawable.ic_incorrect);
+                viewHolder.image.setBackgroundResource(R.color.incorrect);
             }
 
             if (test.getAnsweredQuestions().get(resultPosition).isFlagged()) {
-                viewHolder.flagImage.setVisibility(View.VISIBLE);
+                viewHolder.flagImage.setImageResource(R.drawable.ic_flag_gold_heav);
+                viewHolder.flagImage.setBackgroundResource(R.color.flag);
+
             } else {
-                viewHolder.flagImage.setVisibility(View.INVISIBLE);
+                viewHolder.flagImage.setImageResource(R.drawable.ic_flag_gray);
+                viewHolder.flagImage.setBackgroundResource(android.R.color.transparent);
+
             }
 
             return convertView;
         }
 
 
+        @Override
+        public void onClick(View view) {
+            switch (view.getId()) {
+                case R.id.flag:
+                    /*if (test.getQuestions().get(resultPosition).isFlagged()) {
+                        viewHolder.flagImage.setImageResource(R.drawable.ic_flag_gray);
+                        viewHolder.flagImage.setBackgroundResource(android.R.color.transparent);
+                    } else {
+                        viewHolder.flagImage.setImageResource(R.drawable.ic_flag_gold_heav);
+                        viewHolder.flagImage.setBackgroundResource(R.color.flag);
+                    }
+                    updateTestInPref();*/
+
+            }
+        }
+
+        private void updateTestInPref(int resultPosition) {
+            boolean state = !test.getQuestions().get(resultPosition).isFlagged();
+            Question answerShowQuestion = test.getQuestions().get(resultPosition);
+            Question q = test.getAnsweredQuestions().get(resultPosition);
+            answerShowQuestion.setFlagged(state);
+            test.getAnsweredQuestions().get(resultPosition).setFlagged(state);
+            SharedPreferences preferences = getContext().getSharedPreferences(ResultActivity.TESTS_PREFS, Context.MODE_PRIVATE);
+            preferences.edit().putString(test.getTestId(), new Gson().toJson(test)).apply();
+            DBHelper helper = new DBHelper(getContext(), REF.DATABASE_NAME);
+            helper.updateFlag(answerShowQuestion.getId(), state);
+
+        }
     }
 
     class ViewHolder {
         ImageView image;
+        boolean flagChecked;
         TextView textView;
         ImageView flagImage;
+        CardView cardView;
     }
+
+
+
+    /*class AnswerRecyclerAdapter extends RecyclerView.Adapter<AnswerRecyclerAdapter.ViewHolder>{
+
+        @Override
+        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            return null;
+        }
+
+        @Override
+        public void onBindViewHolder(ViewHolder holder, int position) {
+
+        }
+
+        @Override
+        public int getItemCount() {
+            return 0;
+        }
+
+        public class ViewHolder extends RecyclerView.ViewHolder {
+            public ViewHolder(View itemView) {
+                super(itemView);
+            }
+        }
+    }*/
 
 
 }

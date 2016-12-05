@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:background="@drawable/tree2"
     android:fitsSystemWindows="true"
-    tools:context="com.leedga.seagate.leedga.MainActivity">
+    tools:context="MainActivity">
 
 
     <android.support.design.widget.AppBarLayout

@@ -447,7 +447,6 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
-            android:layout_below="@+id/progressText"
             android:layout_marginTop="14dp"
             android:padding="10dp"
             android:text="question body"

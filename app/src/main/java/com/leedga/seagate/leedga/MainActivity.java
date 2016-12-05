@@ -2,19 +2,43 @@ package com.leedga.seagate.leedga;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentSender;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.os.RemoteException;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 
+import com.android.vending.billing.IInAppBillingService;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
+import com.vungle.publisher.VunglePub;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -22,15 +46,19 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Map;
 
-import static com.leedga.seagate.leedga.REF.REFERENCES_KEY;
-import static com.leedga.seagate.leedga.REF.TERMS_KEY;
+import util.IabBroadcastReceiver;
+
+import static com.leedga.seagate.leedga.REF.DEFAULT_TEST_KEY;
+import static com.leedga.seagate.leedga.REF.DEFAULT_TEST_PREF_KEY;
+import static com.leedga.seagate.leedga.REF.FIREBASE_COMMIT_NUMBER_PREF_KEY;
 import static com.leedga.seagate.leedga.TestActivity.UNFINISHED_TEST;
 import static com.leedga.seagate.leedga.TestCategoriesFragment.TEST_BUNDLE;
 
-public class MainActivity extends BaseActivity implements MainRecyclerAdaptor.OnMyItemClick {
+public class MainActivity extends AppCompatActivity implements MainRecyclerAdaptor.OnMyItemClick, IabBroadcastReceiver.IabBroadcastListener {
 
-    public static final String DEFAULT_TEST_KEY = "default_test";
-    public static final String DEFAULT_TEST_PREF_KEY = "default_test_pref";
+
+    public static boolean mPremiumAcount;
+    private final com.vungle.publisher.VunglePub vunglePub = VunglePub.getInstance();
     AlertDialog.Builder builder;
     private Test test;
     private SharedPreferences unFinishedTestPref;
@@ -38,32 +66,46 @@ public class MainActivity extends BaseActivity implements MainRecyclerAdaptor.On
     private SharedPreferences defaultTestPref;
     private PendingIntent pendingIntent;
     private AlarmManager alarmManager;
-
+    private MainRecyclerAdaptor adaptor;
+    private BroadcastReceiver mBroadcastReceiver;
+    private DatabaseReference mDatabase;
+    private ContentValues contentValues;
+    private SharedPreferences sharedPreferences;
+    private IInAppBillingService mService;
+    private ServiceConnection mServiceConnection;
+    private Menu mainMenu;
+    private CardView upgradeDetailsCard;
+    private Button upgradeDetailsButton;
+    private AlertDialog alertDialog;
+    private ProgressDialog updateCheckDialog;
+    private AlertDialog updateStatusDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        defineNavigationMenu();
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
         setDefaultTestPreferences();
+        definingViews();
         setDefaultPrefrences();
+        vunglePub.init(this, REF.VUNGLE_APP_ID);
+
+        testFireBase();
+        setUpBillingSystem();
 
 
-        /*getSupportActionBar().setDisplayShowTitleEnabled(false);*/
 
         ArrayList<Test> tests = getLastTests();
         recyclerView = (RecyclerView) findViewById(R.id.main_recycler);
-        MainRecyclerAdaptor adaptor = new MainRecyclerAdaptor(this, this, tests);
-
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-        GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 2);
+        adaptor = new MainRecyclerAdaptor(this, this, tests);
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 3);
         gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
             @Override
             public int getSpanSize(int position) {
                 switch (position) {
                     case 0:
-                        return 2;
+                        return 3;
                     default:
                         return 1;
                 }
@@ -77,18 +119,191 @@ public class MainActivity extends BaseActivity implements MainRecyclerAdaptor.On
 
     }
 
+    private void definingViews() {
+        upgradeDetailsCard = (CardView) findViewById(R.id.upgradeDetailsCard);
+        upgradeDetailsCard.setVisibility(View.GONE);
+        upgradeDetailsButton = (Button) findViewById(R.id.upgradeDeatils);
+        final AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
+        alertBuilder.setTitle("Upgrade Details");
+        alertBuilder.setMessage("Unlock additional XX questions\nUnlock the question of the day\nNo ads");
+        alertBuilder.setPositiveButton("Upgrade", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+                upgradeAccount();
+            }
+        });
+        alertDialog = alertBuilder.create();
+        upgradeDetailsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                alertDialog.show();
+            }
+        });
+
+        updateCheckDialog = new ProgressDialog(this);
+        updateCheckDialog.setTitle("Please wait");
+        updateCheckDialog.setIndeterminate(true);
+        updateCheckDialog.setCancelable(false);
+        updateCheckDialog.setMessage("Checking for question updates");
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Question update");
+        builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+            }
+        });
+
+        updateStatusDialog = builder.create();
+
+
+    }
+
+    private void setUpBillingSystem() {
+
+
+        mServiceConnection = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+                mService = IInAppBillingService.Stub.asInterface(iBinder);
+                //checking is this premium account ?
+                try {
+                    Bundle ownedItems = mService.getPurchases(3, getPackageName(), "inapp", null);
+                    int response = ownedItems.getInt("RESPONSE_CODE");
+
+                    if (response == 0) {
+                        int visibility;
+                        ArrayList<String> ownedSkus = ownedItems.getStringArrayList("INAPP_PURCHASE_ITEM_LIST");
+                        for (String itemId : ownedSkus) {
+                            mPremiumAcount = itemId.equals(REF.SKU_PREMIUM);
+                        }
+                        visibility = mPremiumAcount ? View.GONE : View.VISIBLE;
+                        upgradeDetailsCard.setVisibility(visibility);
+                    }
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName componentName) {
+                mService = null;
+            }
+        };
+
+        Intent serviceIntent = new Intent("com.android.vending.billing.InAppBillingService.BIND");
+        serviceIntent.setPackage("com.android.vending");
+        bindService(serviceIntent, mServiceConnection, BIND_AUTO_CREATE);
+
+
+    }
+
+    private void changeUpgradeMenuItemState(boolean mPremiumAcount) {
+        mainMenu.findItem(R.id.upgrarde).setVisible(mPremiumAcount);
+    }
+
+    private void testFireBase() {
+        updateCheckDialog.show();
+        PackageInfo packageInfo = null;
+        try {
+            packageInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+        final DBHelper dbHelper = new DBHelper(this, REF.DATABASE_NAME);
+        Question q = dbHelper.getRandomQuestion();
+
+        sharedPreferences = getSharedPreferences(REF.GENERAL_SETTING_PREF, MODE_PRIVATE);
+        final int lastCommitNumber = sharedPreferences.getInt(FIREBASE_COMMIT_NUMBER_PREF_KEY, 0);
+        mDatabase.child("Questions").child(/*"v" + packageInfo.versionCode*/"Q1").setValue(q);
+        mDatabase.child("versions").child("v" + packageInfo.versionCode).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                contentValues = new ContentValues();
+                for (DataSnapshot questionSnap : dataSnapshot.getChildren()) {
+                    updateDatabase(questionSnap, lastCommitNumber, dbHelper);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                updateCheckDialog.dismiss();
+            }
+        });
+
+    }
+
+    private void updateDatabase(DataSnapshot questionSnap, int lastCommitNumber, DBHelper dbHelper) {
+        contentValues.clear();
+        Integer i = questionSnap.child(REF.COMMIT_NUMBER_KEY).getValue(Integer.class);
+        if (i != null) {
+            if (i > lastCommitNumber) {
+                contentValues.put(REF.QUESTION_KEY, questionSnap.child(REF.QUESTION_KEY).getValue(String.class));
+                contentValues.put(REF.FIRST_CHOICE, questionSnap.child(REF.FIRST_CHOICE).getValue(String.class));
+                contentValues.put(REF.SECOND_CHOICE, questionSnap.child(REF.SECOND_CHOICE).getValue(String.class));
+                contentValues.put(REF.THIRD_CHOICE, questionSnap.child(REF.THIRD_CHOICE).getValue(String.class));
+                contentValues.put(REF.FOURTH_CHOICE, questionSnap.child(REF.FOURTH_CHOICE).getValue(String.class));
+                if (questionSnap.hasChild(REF.FIFTH_CHOICE)) {
+                    contentValues.put(REF.FIFTH_CHOICE, questionSnap.child(REF.FIFTH_CHOICE).getValue(String.class));
+                }
+                if (questionSnap.hasChild(REF.SIXITH_CHOICE)) {
+                    contentValues.put(REF.SIXITH_CHOICE, questionSnap.child(REF.SIXITH_CHOICE).getValue(String.class));
+                }
+                contentValues.put(REF.ANSWER, questionSnap.child(REF.ANSWER).getValue(String.class));
+                contentValues.put(REF.NOTES_ON_ANSWER, questionSnap.child(REF.NOTES_ON_ANSWER).getValue(String
+                        .class));
+                contentValues.put(REF.CATEGORY, questionSnap.child(REF.CATEGORY).getValue(String
+                        .class));
+                contentValues.put(REF.KEY, questionSnap.child(REF.KEY).getValue(String
+                        .class));
+                contentValues.put(REF.FLAGGED, 0);
+                contentValues.put(REF.TYPE, questionSnap.child(REF.TYPE).getValue(Integer
+                        .class));
+                if (questionSnap.child("action").getValue(String.class).equals("add")) {
+
+                    dbHelper.addQuestion(contentValues);
+                } else if (questionSnap.child("action").getValue(String.class).equals
+                        ("edit")) {
+                    if (questionSnap.hasChild(REF.ID)) {
+                        int l = questionSnap.child(REF.ID).getValue(Integer.class);
+                        dbHelper.editQuestion(contentValues, l);
+                    }
+                }
+
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putInt(REF.FIREBASE_COMMIT_NUMBER_PREF_KEY, i);
+                editor.apply();
+                updateCheckDialog.dismiss();
+                updateStatusDialog.setMessage("Question database has been updated");
+                updateStatusDialog.show();
+
+            } else {
+                updateCheckDialog.dismiss();
+                updateStatusDialog.setMessage("No updates found");
+                updateStatusDialog.show();
+            }
+        } else {
+            updateCheckDialog.dismiss();
+        }
+    }
+
+
 
     private void setDefaultPrefrences() {
         SharedPreferences prefs = getSharedPreferences(REF.GENERAL_SETTING_PREF, MODE_PRIVATE);
         if (!prefs.contains(REF.DAY_QUESTION_PREF)) {
             SharedPreferences.Editor editor = prefs.edit();
             editor.putBoolean(REF.DAY_QUESTION_PREF, true);
+            editor.putBoolean(REF.KNOWLEDGE_DOMAIN, true);
+            editor.putInt(REF.FIREBASE_COMMIT_NUMBER_PREF_KEY, 0);
             Calendar calendar = Calendar.getInstance();
-            calendar.set(Calendar.HOUR_OF_DAY, 22);
-            calendar.set(Calendar.MINUTE, 9);
+            calendar.set(Calendar.HOUR_OF_DAY, 8);
+            calendar.set(Calendar.MINUTE, 0);
             editor.apply();
             Intent intent = new Intent(this, NotificationService.class);
-            intent.putExtra(REF.TRIGGER_MILLS_KEY, calendar.getTimeInMillis());
             pendingIntent = PendingIntent.getBroadcast(this, REF.PENDING_INTENT_ID, intent, PendingIntent.FLAG_UPDATE_CURRENT);
             alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
             alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
@@ -106,7 +321,7 @@ public class MainActivity extends BaseActivity implements MainRecyclerAdaptor.On
         defaultTestPref = getSharedPreferences(DEFAULT_TEST_PREF_KEY, MODE_PRIVATE);
         if (!defaultTestPref.contains(DEFAULT_TEST_KEY)) {
             SharedPreferences.Editor editor = defaultTestPref.edit();
-            Test test = createNewTest();
+            Test test = createDefaultTest();
             Gson gson = new Gson();
             String json = gson.toJson(test);
             editor.putString(DEFAULT_TEST_KEY, json);
@@ -114,10 +329,11 @@ public class MainActivity extends BaseActivity implements MainRecyclerAdaptor.On
         }
     }
 
-    private Test createNewTest() {
+    private Test createDefaultTest() {
         Test test = new Test();
         test.setQuestionTypes(new boolean[]{true, true, true});
         test.setNumberOfQuestions(10);
+        test.setOnlyFlagged(false);
         test.setAnswerShow(TestTypeFragment.ANSWER_AFTER_ALL);
         test.setChapters(new boolean[]{true, true, true, true, true, true, true, true, true});
         return test;
@@ -149,7 +365,12 @@ public class MainActivity extends BaseActivity implements MainRecyclerAdaptor.On
         String decode = defaultTestPref.getString(DEFAULT_TEST_KEY, null);
         Gson gson = new Gson();
         Test test = gson.fromJson(decode, Test.class);
-        ArrayList<Question> questions = new DBHelper(this, REF.DATABASE_NAME).getAll(test.getChapters(), test.getcountPerCategory(), test.getQuestionTypes());
+        ArrayList<Question> questions;
+        if (test.isOnlyFlagged()) {
+            questions = new DBHelper(this, REF.DATABASE_NAME).getFlaggedQuestions(test.getNumberOfQuestions());
+        } else {
+            questions = new DBHelper(this, REF.DATABASE_NAME).getAll(test.getChapters(), test.getcountPerCategory(), test.getQuestionTypes());
+        }
         Collections.shuffle(questions);
         test.setQuestions(questions);
         i.putExtra(REF.TEST_FRAGMENT_TYPE, REF.FULL_QUESTIONS);
@@ -160,7 +381,7 @@ public class MainActivity extends BaseActivity implements MainRecyclerAdaptor.On
     private void buildDialog() {
         builder = new AlertDialog.Builder(MainActivity.this);
         builder.setMessage("Do you want to continue Your last Test ?");
-        builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton("Resume", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 Intent i = new Intent(MainActivity.this, TestActivity.class);
@@ -185,6 +406,10 @@ public class MainActivity extends BaseActivity implements MainRecyclerAdaptor.On
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
+        mainMenu = menu;
+
+        /*menu.getItem(R.id.upgrarde).setVisible(!mPremiumAcount);*/
+
         return true;
     }
 
@@ -193,20 +418,125 @@ public class MainActivity extends BaseActivity implements MainRecyclerAdaptor.On
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        switch (id) {
+            case R.id.rating:
+                return true;
+            case R.id.upgrarde:
+
+                //make the purchase
+
+                upgradeAccount();
+
+                /*try {
+                    mIaHelper.launchPurchaseFlow(MainActivity.this, REF.SKU_PREMIUM, REF.RC_PREMIUM_PURCHASE, new IabHelper.OnIabPurchaseFinishedListener() {
+                        @Override
+                        public void onIabPurchaseFinished(IabResult result, Purchase info) {
+
+                        }
+                    }, "");
+                } catch (IabHelper.IabAsyncInProgressException e) {
+                    e.printStackTrace();
+                }*/
+
+                return true;
+            case android.R.id.home:
+                onBackPressed();
+                return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
 
+
+    private void upgradeAccount() {
+        Bundle buyIntentBundle = null;
+        try {
+            buyIntentBundle = mService.getBuyIntent(3, getPackageName(), REF.SKU_PREMIUM, "inapp", "");
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+
+        if (buyIntentBundle.getInt("RESPONSE_CODE") == 0) {
+            PendingIntent pendingIntent = buyIntentBundle.getParcelable("BUY_INTENT");
+            try {
+                startIntentSenderForResult(pendingIntent.getIntentSender(), REF.RC_UPGRADE_PURCHASE, new Intent(), Integer.valueOf(0), Integer.valueOf(0), Integer.valueOf(0));
+            } catch (IntentSender.SendIntentException e) {
+                e.printStackTrace();
+            }
+        }
+
+
+
+        /*ArrayList<String> skuList = new ArrayList<>();
+        skuList.add(REF.SKU_PREMIUM);
+        Bundle querySkus = new Bundle();
+        querySkus.putStringArrayList("ITEM_ID_LIST", skuList);
+        Bundle skuDetails = null;
+        try {
+            skuDetails = mService.getSkuDetails(3, getPackageName(), "inapp", querySkus);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+        if (skuDetails.getInt("RESPONSE_CODE") == 0) {
+            ArrayList<String> responseList = skuDetails.getStringArrayList("DETAILS_LIST");
+            for (String response : responseList) {
+                try {
+                    JSONObject object = new JSONObject(response);
+                    String sku = object.getString("productId");
+                    if (sku.equals(REF.SKU_PREMIUM))
+                        mPremiumAcount = object.getString("price");
+                    try {
+
+
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    } catch (IntentSender.SendIntentException e) {
+                        e.printStackTrace();
+                    }
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+
+        }*/
+
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == 5) {
-            SharedPreferences preferences = getSharedPreferences(UNFINISHED_TEST, MODE_PRIVATE);
-            SharedPreferences.Editor editor = preferences.edit();
-            editor.clear().apply();
+
+
+        switch (requestCode) {
+            case 5:
+                SharedPreferences preferences = getSharedPreferences(UNFINISHED_TEST, MODE_PRIVATE);
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.clear().apply();
+                break;
+            case REF.RC_UPGRADE_PURCHASE:
+                int responseCode = data.getIntExtra("RESPONSE_CODE", 0);
+                String purchaseData = data.getStringExtra("INAPP_PURCHASE_DATA");
+                String dataSignature = data.getStringExtra("INAPP_DATA_SIGNATURE");
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                builder.setTitle("Upgrade account");
+
+                String msg;
+                if (resultCode == RESULT_OK) {
+                    try {
+                        JSONObject jsonObject = new JSONObject(purchaseData);
+                        String sku = jsonObject.getString("productId");
+                        msg = "You have bought the " + sku + " successfully";
+                        upgradeDetailsCard.setVisibility(View.GONE);
+                        mPremiumAcount = true;
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        msg = "Failed to upgrade your account";
+                    }
+                    builder.setMessage(msg);
+                    builder.create().show();
+                }
         }
     }
 
@@ -223,17 +553,36 @@ public class MainActivity extends BaseActivity implements MainRecyclerAdaptor.On
                 break;
             case 3:
                 i = new Intent(MainActivity.this, HistoryActivity.class);
+                i.putExtra(REF.DAY_QUESTION_PREF, false);
                 startActivity(i);
                 break;
             case 4:
                 //question of the day
-                i = new Intent(this, TestActivity.class);
-                i.putExtra(REF.TEST_FRAGMENT_TYPE, REF.SINGLE_QUESTION);
-                startActivity(i);
+                // determine last time make question of question of day
+                SharedPreferences preferences = getSharedPreferences(REF.GENERAL_SETTING_PREF, MODE_PRIVATE);
+
+                long lastTime = preferences.getLong(REF.DAY_QUESTION_DATE_PREF_KEY, 0);
+                float diff = (float) (System.currentTimeMillis() - lastTime) / (float) AlarmManager.INTERVAL_DAY;
+
+                if (diff > 1) {
+                    // make the question of day
+                    i = new Intent(this, TestActivity.class);
+                    i.putExtra(REF.TEST_FRAGMENT_TYPE, REF.SINGLE_QUESTION);
+                    startActivity(i);
+                } else {
+                    // show history of question of day
+                    i = new Intent(MainActivity.this, HistoryActivity.class);
+                    i.putExtra(REF.DAY_QUESTION_PREF, true);
+                    startActivity(i);
+                    break;
+
+                }
+
                 break;
             case 5:
                 //lessons
                 Intent intent = new Intent(MainActivity.this, LessonsActivity.class);
+                intent.putExtra(REF.LESSON_ACTIVITY_KEY, REF.LESSONS);
                 startActivity(intent);
                 break;
             case 6:
@@ -243,22 +592,37 @@ public class MainActivity extends BaseActivity implements MainRecyclerAdaptor.On
                 break;
             case 7:
                 // key terms and definitions
+                i = new Intent(this, LessonsActivity.class);
+                i.putExtra(REF.LESSON_ACTIVITY_KEY, REF.KEY_TERMS);
+                startActivity(i);
 
-                android.support.v4.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                /*android.support.v4.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
                 transaction.replace(R.id.main, LessonShowFragment.newInstance(0, TERMS_KEY));
                 transaction.addToBackStack(null);
-                transaction.commit();
+                transaction.commit();*/
                 break;
             case 8:
                 // references
-                android.support.v4.app.FragmentTransaction transaction2 = getSupportFragmentManager().beginTransaction();
+
+                i = new Intent(this, LessonsActivity.class);
+                i.putExtra(REF.LESSON_ACTIVITY_KEY, REF.REFERENCE);
+                startActivity(i);
+
+                /*android.support.v4.app.FragmentTransaction transaction2 = getSupportFragmentManager().beginTransaction();
                 transaction2.replace(R.id.main, LessonShowFragment.newInstance(0, REFERENCES_KEY));
                 transaction2.addToBackStack(null);
-                transaction2.commit();
+                transaction2.commit();*/
                 break;
             case 9:
 
         }
+    }
+
+    @Override
+    public void onDetailsClick() {
+        Intent i = new Intent(MainActivity.this, HistoryActivity.class);
+        startActivity(i);
+
     }
 
     public ArrayList<Test> getLastTests() {
@@ -288,5 +652,33 @@ public class MainActivity extends BaseActivity implements MainRecyclerAdaptor.On
         return testPref;
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        adaptor.setTests(getLastTests());
+        adaptor.notifyDataSetChanged();
+        vunglePub.onResume();
 
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        vunglePub.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        if (mService != null) {
+            unbindService(mServiceConnection);
+        }
+    }
+
+
+    @Override
+    public void receivedBroadcast() {
+
+    }
 }

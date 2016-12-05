@@ -1,21 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v7.widget.CardView android:id="@+id/result_card"
+                                    xmlns:android="http://schemas.android.com/apk/res/android"
                                     xmlns:app="http://schemas.android.com/apk/res-auto"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
-                                    android:layout_margin="3dp"
+                                    android:layout_marginBottom="2dp"
+                                    android:layout_marginTop="2dp"
                                     android:clickable="true"
                                     android:focusable="true"
                                     android:foreground="?android:attr/selectableItemBackground"
-    >
+                                    app:cardBackgroundColor="#8effffff"
+                                    app:cardCornerRadius="10dp"
+                                    app:cardElevation="0dp">
 
 
     <android.support.constraint.ConstraintLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/cardBackground">
+        android:layout_height="wrap_content">
 
         <TextView
             android:id="@+id/categoryName"
@@ -23,9 +24,10 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="8dp"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
+            android:paddingTop="8dp"
             android:text="Category Name"
             android:textAppearance="@style/TextAppearance.AppCompat.Large"
+            android:textColor="@color/textColor"
             android:textSize="18sp"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintLeft_toRightOf="@+id/colorResult"
@@ -44,6 +46,8 @@
             android:layout_marginTop="8dp"
             android:text="2/9 Correct"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:textColor="@color/colorPrimaryDark"
+            android:textSize="15sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toRightOf="@+id/colorResult"
             app:layout_constraintRight_toRightOf="parent"
@@ -51,26 +55,24 @@
 
         <RelativeLayout
             android:id="@+id/colorResult"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:layout_marginLeft="4dp"
-            android:layout_marginStart="4dp"
+            android:layout_width="50dp"
+            android:layout_height="0dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
-            <com.github.lzyzsd.circleprogress.DonutProgress
-                android:id="@+id/item_donut"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:rotation="-90"
-                app:donut_finished_color="@color/colorPrimary"
-                app:donut_finished_stroke_width="3dp"
-                app:donut_text_color="@android:color/white"
-                app:donut_text_size="0sp"
-                app:donut_unfinished_stroke_width="3dp"
+            <!-- <com.github.lzyzsd.circleprogress.DonutProgress
+                 android:id="@+id/item_donut"
+                 android:layout_width="match_parent"
+                 android:layout_height="match_parent"
+                 android:rotation="-90"
+                 app:donut_finished_color="@color/colorPrimary"
+                 app:donut_finished_stroke_width="3dp"
+                 app:donut_text_color="@android:color/white"
+                 app:donut_text_size="0sp"
+                 app:donut_unfinished_stroke_width="3dp"
 
-                />
+                 />-->
 
             <TextView
                 android:id="@+id/prec"
@@ -80,7 +82,7 @@
                 android:layout_centerVertical="true"
                 android:text="20%"
                 android:textColor="@color/white"
-                android:textSize="20sp"
+                android:textSize="16sp"
                 android:visibility="visible"/>
         </RelativeLayout>
     </android.support.constraint.ConstraintLayout>

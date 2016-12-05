@@ -1,14 +1,19 @@
 package com.leedga.seagate.leedga;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -16,19 +21,21 @@ import android.widget.Toast;
 
 import com.akexorcist.roundcornerprogressbar.RoundCornerProgressBar;
 import com.google.gson.Gson;
+import com.vungle.publisher.VunglePub;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.UUID;
 
-import static com.leedga.seagate.leedga.MainActivity.DEFAULT_TEST_KEY;
-import static com.leedga.seagate.leedga.MainActivity.DEFAULT_TEST_PREF_KEY;
+import static com.leedga.seagate.leedga.REF.DEFAULT_TEST_KEY;
+import static com.leedga.seagate.leedga.REF.DEFAULT_TEST_PREF_KEY;
 import static com.leedga.seagate.leedga.ResultActivity.TESTS_PREFS;
 
-public class TestActivity extends BaseActivity implements ViewPager.OnPageChangeListener, View.OnClickListener {
+public class TestActivity extends AppCompatActivity implements ViewPager.OnPageChangeListener, View.OnClickListener {
 
     public static final String UNFINISHED = "UNFINISHED";
     public static final String UNFINISHED_TEST = "unfinished_test";
+    private final com.vungle.publisher.VunglePub vunglePub = VunglePub.getInstance();
     public boolean isAppWentToBg = false;
     public boolean isWindowFocused = false;
     public boolean isMenuOpened = false;
@@ -47,18 +54,23 @@ public class TestActivity extends BaseActivity implements ViewPager.OnPageChange
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_test);
-        defineNavigationMenu();
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         defineButtons();
+
 
         fragmentType = getIntent().getStringExtra(REF.TEST_FRAGMENT_TYPE);
         pager = (TestViewPager) findViewById(R.id.pager);
         test = (Test) getIntent().getSerializableExtra(TestCategoriesFragment.TEST_BUNDLE);
         if (fragmentType.equals(REF.FULL_QUESTIONS)) {
+            getSupportActionBar().setTitle("Test");
             pagerAdapter = new PagerAdapter(getSupportFragmentManager(), test, PagerAdapter.TEST);
             pager.setAdapter(pagerAdapter);
             pager.setOffscreenPageLimit(test.getNumberOfQuestions());
             pager.addOnPageChangeListener(this);
-
+            progress.setProgress(((float) (1) / (float) test.getNumberOfQuestions()) * 100);
+            progressText.setText(1 + "/" + test.getNumberOfQuestions());
             if (test.getTestId() != null) {
 
                 //for unfinished Test
@@ -70,14 +82,19 @@ public class TestActivity extends BaseActivity implements ViewPager.OnPageChange
                 progressText.setText(position + 1 + "/" + test.getNumberOfQuestions());
             }
         } else {
+            //question of the day
+            getSupportActionBar().setTitle("Question of day");
             pager.setVisibility(View.GONE);
+            progress.setVisibility(View.GONE);
+            back.setVisibility(View.GONE);
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             DBHelper helper = new DBHelper(this, REF.DATABASE_NAME);
             ArrayList<Question> questions = new ArrayList<>();
             questions.add(helper.getRandomQuestion());
             Test singleQuestionTest = gettingDefaultTest();
             singleQuestionTest.setQuestions(questions);
-            transaction.add(R.id.main, TestFragment.init(singleQuestionTest, 0));
+            Fragment fragment = TestFragment.init(singleQuestionTest, 0);
+            transaction.add(R.id.linear, fragment);
             transaction.commit();
         }
 
@@ -108,7 +125,9 @@ public class TestActivity extends BaseActivity implements ViewPager.OnPageChange
 
     private void buildAlertDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        String positiveText, message, title = null;
+        builder.setMessage("Do you want to end the test without submitting the result ?");
+
+        /*String positiveText, message, title = null;
         if (pager.getCurrentItem() == 0) {
             message = "Are you sure ?";
             positiveText = "Yes";
@@ -142,9 +161,40 @@ public class TestActivity extends BaseActivity implements ViewPager.OnPageChange
                 dialog.dismiss();
                 onBackPressed();
             }
-        });
+        });*/
 
         dialog = builder.create();
+        dialog.setButton(DialogInterface.BUTTON_NEUTRAL, "End", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                onBackPressed();
+                SharedPreferences preferences = getSharedPreferences(REF.UNCOMPLETED_PREF, Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.remove(REF.UNCOMPLETED_TEST);
+                editor.apply();
+                // Todo delete unfinished test
+            }
+        });
+        dialog.setButton(DialogInterface.BUTTON_POSITIVE, "Submit", new DialogInterface.OnClickListener
+                () {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                if (pager.getCurrentItem() > 0) {
+                    TestFragment fragment = (TestFragment) pagerAdapter.instantiateItem(pager, pager.getCurrentItem());
+                    Test test = fragment.getTest();
+                    savingTestInMemory(test, false);
+                }
+                dialog.dismiss();
+                onBackPressed();
+            }
+        });
+
+        dialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+            }
+        });
     }
 
     private void savingTestInMemory(Test test, boolean isItFinishedTest) {
@@ -195,7 +245,12 @@ public class TestActivity extends BaseActivity implements ViewPager.OnPageChange
 
     @Override
     public void onClick(View v) {
-        TestFragment fragment = (TestFragment) pagerAdapter.instantiateItem(pager, pager.getCurrentItem());
+        TestFragment fragment;
+        if (!fragmentType.equals(REF.FULL_QUESTIONS)) {
+            fragment = (TestFragment) getSupportFragmentManager().findFragmentById(R.id.linear);
+        } else {
+            fragment = (TestFragment) pagerAdapter.instantiateItem(pager, pager.getCurrentItem());
+        }
         isExplainOn = fragment.isExplainOn;
         switch (v.getId()) {
             case R.id.nextt:
@@ -316,6 +371,14 @@ public class TestActivity extends BaseActivity implements ViewPager.OnPageChange
                 savingTestInMemory(unFinishedTest, false);
             }
         }
+
+        vunglePub.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        vunglePub.onResume();
     }
 
     @Override
@@ -384,7 +447,7 @@ public class TestActivity extends BaseActivity implements ViewPager.OnPageChange
         }
         if (fragment.nextNext && fragment.nextSubmit) {
             setNextNext(fragment);
-            if (fragment.question.getNote() != null) {
+            if (fragment.question.getNote() != null && test.getAnswerShow() != TestTypeFragment.ANSWER_AFTER_ALL) {
                 showExplainBtn(true);
             } else {
                 showExplainBtn(false);
@@ -446,5 +509,15 @@ public class TestActivity extends BaseActivity implements ViewPager.OnPageChange
     @Override
     public void onPageScrollStateChanged(int state) {
 
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        switch (id) {
+            case android.R.id.home:
+                onBackPressed();
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

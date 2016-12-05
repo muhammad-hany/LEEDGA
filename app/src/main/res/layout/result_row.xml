@@ -44,13 +44,11 @@
         android:id="@+id/colorResult"
         android:layout_width="60dp"
         android:layout_height="60dp"
-        android:layout_marginLeft="4dp"
-        android:layout_marginStart="4dp"
         app:layout_constraintBottom_toBottomOf="@+id/correct"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="@+id/categoryName">
 
-        <com.github.lzyzsd.circleprogress.DonutProgress
+        <!--<com.github.lzyzsd.circleprogress.DonutProgress
             android:id="@+id/item_donut"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -61,7 +59,7 @@
             app:donut_text_size="0sp"
             app:donut_unfinished_stroke_width="3dp"
 
-            />
+            />-->
 
         <TextView
             android:id="@+id/prec"

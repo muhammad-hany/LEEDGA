@@ -8,18 +8,19 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.github.lzyzsd.circleprogress.DonutProgress;
 import com.google.gson.Gson;
 
 import java.text.DateFormat;
@@ -28,37 +29,81 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
-public class HistoryActivity extends BaseActivity {
+import static com.leedga.seagate.leedga.AnswersActivity.QUESTION_BODY;
+
+public class HistoryActivity extends AppCompatActivity {
     static final String TEST_ID_KEY = "test_id";
-    TextView exams, overAllRatio, overAllPercentage, examTxt;
+    TextView examTxt;
     ArrayList<String> stringPref;
     List<Test> testPref;
-    ListView listView;
+    ArrayList<String> testDates;
+    RecyclerView recyclerView;
+    HistoryRecyclerAdaptor recyclerAdaptor;
+    ArrayList<Integer> numberofAnsweredQList;
+    private int comulativePrec;
+    private String overAllPrec;
+    private boolean isDayQuestion;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_history);
-        defineNavigationMenu();
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        isDayQuestion = getIntent().getBooleanExtra(REF.DAY_QUESTION_PREF, false);
+        String txt = isDayQuestion ? "Question of the Day" : "Test History";
+        getSupportActionBar().setTitle(txt);
         initViews();
         gettingTestFromPref();
         settingValues();
 
         HistoryListAdapter adapter = new HistoryListAdapter(this, testPref);
         adapter.notifyDataSetChanged();
-        listView.setAdapter(adapter);
+
+
+        recyclerView = (RecyclerView) findViewById(R.id.historyList);
+        recyclerAdaptor = new HistoryRecyclerAdaptor(this, comulativePrec, new HistoryRecyclerAdaptor.OnMyItemClick() {
+            @Override
+            public void onItemClick(int position) {
+                if (isDayQuestion) {
+                    Intent intent = new Intent(HistoryActivity.this, AnswerViewActivity.class);
+                    intent.putExtra(TestCategoriesFragment.TEST_BUNDLE, testPref.get(position));
+                    intent.putExtra(QUESTION_BODY, testPref.get(position).getQuestions().get(0)
+                            .getQuestionBody());
+                    startActivity(intent);
+                } else {
+                    Bundle bundle = new Bundle();
+                    bundle.putSerializable(TestCategoriesFragment.TEST_BUNDLE, testPref.get(position));
+                    Intent intent = new Intent(HistoryActivity.this, ResultActivity.class);
+                    intent.putExtra(TestCategoriesFragment.TEST_BUNDLE, bundle);
+                    intent.putExtra(TEST_ID_KEY, testPref.get(position).getTestId());
+                    startActivity(intent);
+                }
+
+            }
+
+            @Override
+            public void onShowAllClick() {
+
+            }
+        }, overAllPrec, testPref, isDayQuestion);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setAdapter(recyclerAdaptor);
+
 
 
     }
 
     private void settingValues() {
-        if (testPref.size() == 1 || testPref.size() == 0) {
+        /*if (testPref.size() == 1 || testPref.size() == 0) {
             examTxt.setText("Exam");
-        }
-        exams.setText(String.valueOf(testPref.size()));
-        int comulativePrec = 0;
+        }*/
+        comulativePrec = 0;
         int comulativeRightQuestionsCount = 0;
         int comulativeQuestionCount = 0;
         for (Test test : testPref) {
@@ -67,36 +112,37 @@ public class HistoryActivity extends BaseActivity {
         }
         comulativePrec = (int) ((((double) comulativeRightQuestionsCount /
                 (double) comulativeQuestionCount)) * 100);
-        overAllPercentage.setText(String.valueOf(comulativePrec) + "%");
-        overAllRatio.setText(String.valueOf(comulativeRightQuestionsCount) + "/" + comulativeQuestionCount);
+        overAllPrec = String.valueOf(comulativeRightQuestionsCount) + "/" + comulativeQuestionCount;
     }
 
     private void initViews() {
-        exams = (TextView) findViewById(R.id.exams);
-        examTxt = (TextView) findViewById(R.id.examText);
-        overAllRatio = (TextView) findViewById(R.id.precentage);
-        overAllPercentage = (TextView) findViewById(R.id.overallPrecntage);
 
-        listView = (ListView) findViewById(R.id.list);
+        /*examTxt = (TextView) findViewById(R.id.examText);*/
+        /*listView = (ListView) findViewById(R.id.list);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Bundle bundle = new Bundle();
-                bundle.putSerializable(TestCategoriesFragment.TEST_BUNDLE, testPref.get(position));
-                Intent intent = new Intent(HistoryActivity.this, ResultActivity.class);
-                intent.putExtra(TestCategoriesFragment.TEST_BUNDLE, bundle);
-                intent.putExtra(TEST_ID_KEY, testPref.get(position).getTestId());
-                startActivity(intent);
+
             }
-        });
+        });*/
         stringPref = new ArrayList<>();
         testPref = new ArrayList<>();
+        testDates = new ArrayList<>();
+        numberofAnsweredQList = new ArrayList<>();
 
     }
 
 
     public void gettingTestFromPref() {
-        SharedPreferences prefs = getSharedPreferences(ResultActivity.TESTS_PREFS, MODE_PRIVATE);
+        SharedPreferences prefs;
+        if (isDayQuestion) {
+            // question of day history tests
+            prefs = getSharedPreferences(REF.DAY_QUESTION_HISTORY_PREF, MODE_PRIVATE);
+        } else {
+            // history test
+            prefs = getSharedPreferences(ResultActivity.TESTS_PREFS, MODE_PRIVATE);
+        }
+
         Map<String, ?> tests = prefs.getAll();
         for (Map.Entry<String, ?> test : tests.entrySet()) {
             stringPref.add(test.getValue().toString());
@@ -115,6 +161,11 @@ public class HistoryActivity extends BaseActivity {
                 return rhs.getSavingDate().compareTo(lhs.getSavingDate());
             }
         });
+        for (Test test : testPref) {
+            String date = new SimpleDateFormat(REF.DETAILED_DATE_FORMAT, Locale.US).format(test.getSavingDate());
+            testDates.add(date);
+            numberofAnsweredQList.add(test.getNumberOfAnsweredQuestions());
+        }
     }
 
     private int calculateScore(Test test) {
@@ -170,6 +221,9 @@ public class HistoryActivity extends BaseActivity {
             dialog.show();
 
             return true;
+        } else if (id == android.R.id.home) {
+            onBackPressed();
+            return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -198,7 +252,6 @@ public class HistoryActivity extends BaseActivity {
                 holder.ratio = (TextView) convertView.findViewById(R.id.correct);
                 holder.colorResult = (RelativeLayout) convertView.findViewById(R.id.colorResult);
                 holder.insidePrec = (TextView) convertView.findViewById(R.id.prec);
-                holder.donutProgress = (DonutProgress) convertView.findViewById(R.id.item_donut);
                 convertView.setTag(holder);
             } else {
                 holder = (ViewHolder) convertView.getTag();
@@ -210,9 +263,7 @@ public class HistoryActivity extends BaseActivity {
             /*GradientDrawable drawable= (GradientDrawable) holder.colorResult.getBackground();
              drawable.setColor(getColorByScore(Integer.parseInt(
                     (tests.getTestPercentage()))));*/
-            holder.donutProgress.setProgress(Integer.parseInt(test.getTestPercentage()));
-            holder.donutProgress.setInnerBackgroundColor((getColorByScore(Integer.parseInt(
-                    (test.getTestPercentage())))));
+
             return convertView;
 
 
@@ -242,7 +293,6 @@ public class HistoryActivity extends BaseActivity {
             TextView date;
             TextView ratio, insidePrec;
             RelativeLayout colorResult;
-            DonutProgress donutProgress;
         }
     }
 

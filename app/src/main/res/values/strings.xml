@@ -30,5 +30,9 @@
     </array>
     <string name="title_activity_lessons">LessonsActivity</string>
     <string name="title_activity_setting">SettingActivity</string>
+    <string name="rate_us">Rate us</string>
+
+    <string name="banner_ad_unit_id">ca-app-pub-5193020935401556/4267742221</string>
+    <string name="upgrade_to_full_version">Upgrade to full version</string>
 
 </resources>

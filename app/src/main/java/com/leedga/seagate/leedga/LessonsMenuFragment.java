@@ -37,8 +37,9 @@ public class LessonsMenuFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        ((LessonsActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         View view = inflater.inflate(R.layout.fragment_lessons_menu, container, false);
-        ((LessonsActivity) getActivity()).getSupportActionBar().setTitle(R.string.app_name);
+        ((LessonsActivity) getActivity()).getSupportActionBar().setTitle("Lessons");
         RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.lessons_recyc);
         LessonsRecyclerAdapter adapter = new LessonsRecyclerAdapter(getContext(), new LessonsRecyclerAdapter.LessonsItemClick() {
             @Override
@@ -51,7 +52,7 @@ public class LessonsMenuFragment extends Fragment {
         });
         adapter.setHasStableIds(true);
         recyclerView.setAdapter(adapter);
-        GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), 2);
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(getContext(), 3);
         recyclerView.setLayoutManager(gridLayoutManager);
         return view;
     }

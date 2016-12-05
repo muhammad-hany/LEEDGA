@@ -1,20 +1,24 @@
 package com.leedga.seagate.leedga;
 
+import android.app.AlarmManager;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Typeface;
-import android.graphics.drawable.Drawable;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.github.lzyzsd.circleprogress.DonutProgress;
+import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 
 /**
  * Created by Muhammad Workstation on 07/10/2016.
@@ -23,26 +27,28 @@ import java.util.ArrayList;
 public class MainRecyclerAdaptor extends RecyclerView.Adapter<MainRecyclerAdaptor.ViewHolder> {
 
 
-    static ArrayList<Test> tests;
+    ArrayList<Test> tests;
     private int[] cardsIds;
     private Context context;
     private OnMyItemClick listener;
     private int[] imagesIds;
-    private ArrayList<Drawable> drawables;
 
     public MainRecyclerAdaptor(Context context, OnMyItemClick listener, ArrayList<Test> tests) {
         cardsIds = new int[]{R.layout.main_card_chart, R.layout.main_card};
 
         this.context = context;
-        MainRecyclerAdaptor.tests = tests;
+        this.tests = tests;
         this.listener = listener;
         gettingDrawables();
 
     }
 
+    public void setTests(ArrayList<Test> tests) {
+        this.tests = tests;
+    }
+
     private void gettingDrawables() {
-        imagesIds = new int[]{R.drawable.checklist_, R.drawable.testsetting_, R.drawable.testhistory_, R.drawable.dayquestion_, R.drawable.studying_, R.drawable.settings_, R.drawable.terms_, R.drawable.law_, R.drawable.rating_, R.drawable.calendar_};
-        drawables = new ArrayList<>();
+        imagesIds = new int[]{R.drawable.test, R.drawable.testsetting_, R.drawable.testhistory_, R.drawable.dayquestion_, R.drawable.studying_, R.drawable.settings_, R.drawable.terms_, R.drawable.law_, R.drawable.calendar_};
     }
 
     @Override
@@ -82,6 +88,12 @@ public class MainRecyclerAdaptor extends RecyclerView.Adapter<MainRecyclerAdapto
         }
         switch (position) {
             case 0:
+                MainChartHolder holder = (MainChartHolder) viewHolder;
+                holder.donutProgress.setProgress(getMainPercentage());
+                holder.donutProgress.animate();
+                holder.bigNum2.setText(String.valueOf(tests.size()));
+                holder.mainText.setText(String.valueOf(getMainPercentage()));
+                holder.bigNum1.setText(String.valueOf(getTotalCorrectQuestions() + "/" + String.valueOf(getTotalAnsweredQuestions())));
                 break;
             case 1:
                 ((MainMenuHolder) viewHolder).textView.setText("Test");
@@ -91,7 +103,6 @@ public class MainRecyclerAdaptor extends RecyclerView.Adapter<MainRecyclerAdapto
                 break;
             case 3:
                 ((MainMenuHolder) viewHolder).textView.setText("Test History");
-
                 break;
             case 4:
                 ((MainMenuHolder) viewHolder).textView.setText("Question of The Day");
@@ -109,25 +120,60 @@ public class MainRecyclerAdaptor extends RecyclerView.Adapter<MainRecyclerAdapto
                 ((MainMenuHolder) viewHolder).textView.setText("Reference Materials");
                 break;
             case 9:
-                ((MainMenuHolder) viewHolder).textView.setText("Rate us");
-                break;
-            case 10:
-                ((MainMenuHolder) viewHolder).textView.setText("3 days until Exam");
+
+                ((MainMenuHolder) viewHolder).textView.setText(getTimeDifference());
                 break;
 
 
         }
     }
 
-    private View getCard(int position) {
+    private String getTimeDifference() {
+        SharedPreferences pref = context.getSharedPreferences(REF.GENERAL_SETTING_PREF, Context
+                .MODE_PRIVATE);
+        Gson gson = new Gson();
+        String date = pref.getString(REF.SCHEDULE_EXAM_DATE_PREF, null);
+        if (date == null) {
+            return "not set yet";
+        }
+        Calendar calendar = gson.fromJson(date, Calendar.class);
+        float diff = (float) (calendar.getTimeInMillis() - Calendar.getInstance().getTimeInMillis()) / (float) AlarmManager.INTERVAL_DAY;
 
-
-        return null;
+        return String.valueOf((int) diff) + " days\nuntil exam";
     }
+
+    private int getMainPercentage() {
+        int comulativeScore = 0;
+        for (Test test : tests) {
+            comulativeScore = comulativeScore + Integer.parseInt(test.getTestPercentage());
+        }
+        return (int) ((float) comulativeScore / (float) tests.size());
+    }
+
+    private int getTotalCorrectQuestions() {
+        int scoreCount = 0;
+        for (Test test : tests) {
+            for (int i = 0; i < test.getUserResult().size(); i++) {
+                if (test.getUserResult().get(i)) {
+                    scoreCount++;
+                }
+            }
+        }
+        return scoreCount;
+    }
+
+    private int getTotalAnsweredQuestions() {
+        int counter = 0;
+        for (Test test : tests) {
+            counter = counter + test.getNumberOfAnsweredQuestions();
+        }
+        return counter;
+    }
+
 
     @Override
     public int getItemCount() {
-        return 11;
+        return 10;
     }
 
     @Override
@@ -155,6 +201,8 @@ public class MainRecyclerAdaptor extends RecyclerView.Adapter<MainRecyclerAdapto
 
     public interface OnMyItemClick {
         void onItemClick(int position);
+
+        void onDetailsClick();
     }
 
 
@@ -194,6 +242,16 @@ public class MainRecyclerAdaptor extends RecyclerView.Adapter<MainRecyclerAdapto
             mainText.setTypeface(big);
 
             donutProgress = (DonutProgress) view.findViewById(R.id.donutProgress);
+
+            smallText2.setText("Exams");
+            smallText1.setText("Successful\nQuestions");
+            LinearLayout layout = (LinearLayout) view.findViewById(R.id.detailsC);
+            layout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    listener.onDetailsClick();
+                }
+            });
         }
 
 
@@ -213,6 +271,9 @@ public class MainRecyclerAdaptor extends RecyclerView.Adapter<MainRecyclerAdapto
             icon = (ImageView) itemView.findViewById(R.id.imageView);
             textView = (TextView) itemView.findViewById(R.id.textView15);
             cardView = (CardView) itemView.findViewById(R.id.card);
+            if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.LOLLIPOP) {
+                cardView.setRadius(0);
+            }
         }
 
 

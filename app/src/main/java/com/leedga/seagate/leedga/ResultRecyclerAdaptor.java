@@ -1,7 +1,9 @@
 package com.leedga.seagate.leedga;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,10 +11,10 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.Transformation;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.github.lzyzsd.circleprogress.ArcProgress;
 import com.github.lzyzsd.circleprogress.DonutProgress;
 import com.github.mikephil.charting.charts.RadarChart;
 
@@ -29,21 +31,27 @@ public class ResultRecyclerAdaptor extends RecyclerView.Adapter<ResultRecyclerAd
     ArrayList<Boolean> userResult;
     int[] numberOfCorrectQuestionPerCategory;
     ArrayList<Question> questions;
-    String ratio;
+    int score, totalNumberQuestions;
     private int position;
     private int[] correctPerCat;
     private int progressPrec;
     private OnMyItemClick listener;
+    private Context context;
+    private String testDate;
 
-    public ResultRecyclerAdaptor(ArrayList<String> categoryNames, ArrayList<Integer> numberofQuestionsPerCategory, ArrayList<Boolean> userResult, ArrayList<Question> questions, int progressPrec, String ratio, OnMyItemClick listener) {
+    public ResultRecyclerAdaptor(Context context, ArrayList<String> categoryNames, ArrayList<Integer> numberofQuestionsPerCategory, ArrayList<Boolean> userResult, ArrayList<Question> questions, int progressPrec, int score, int totalNumberQuestions, OnMyItemClick listener, String testDate) {
         this.categoryNames = categoryNames;
         this.numberofQuestionsPerCategory = numberofQuestionsPerCategory;
         this.userResult = userResult;
         this.questions = questions;
         numberOfCorrectQuestionPerCategory = new int[categoryNames.size()];
         this.progressPrec = progressPrec;
-        this.ratio = ratio;
+        this.score = score;
+        this.totalNumberQuestions = totalNumberQuestions;
         this.listener = listener;
+        this.context = context;
+        this.testDate = testDate;
+
     }
 
     @Override
@@ -52,10 +60,10 @@ public class ResultRecyclerAdaptor extends RecyclerView.Adapter<ResultRecyclerAd
         if (viewType == 0) {
             v = LayoutInflater.from(parent.getContext()).inflate(R.layout.progress_card, parent, false);
             return new ProgressBarViewHolder(v);
-        } else if (viewType == 1) {
+        } /*else if (viewType == 1) {
             v = LayoutInflater.from(parent.getContext()).inflate(R.layout.chart_card, parent, false);
             return new ChartViewHolder(v);
-        } else {
+        }*/ else {
             v = LayoutInflater.from(parent.getContext()).inflate(R.layout.result_card, parent, false);
             return new ResultViewHolder(v);
         }
@@ -67,25 +75,27 @@ public class ResultRecyclerAdaptor extends RecyclerView.Adapter<ResultRecyclerAd
         if (viewHolder.getItemViewType() == 0) {
             ProgressBarViewHolder progHolder = (ProgressBarViewHolder) viewHolder;
             progHolder.arcProgress.setProgress(progressPrec);
-            progHolder.arcProgress.setBottomText(ratio);
+            progHolder.allQ.setText(String.valueOf(totalNumberQuestions));
+            progHolder.corrctQ.setText(String.valueOf(score));
+            /*progHolder.arcProgress.setBottomText(ratio);*/
 
-
-        } else if (viewHolder.getItemViewType() == 1) {
 
         } else {
             ResultViewHolder holder = (ResultViewHolder) viewHolder;
-            this.position = position - 2;
+            this.position = position - 1;
             holder.bind(this.position, listener);
             holder.categoryName.setText(categoryNames.get(this.position));
             correctPerCat = calculateResultPerCategory();
-            holder.result.setText(String.valueOf(correctPerCat[this.position]) + "/" + String.valueOf(numberofQuestionsPerCategory.get(this.position)) + " Correct Answers");
+            int x = correctPerCat[this.position];
+            int y = numberofQuestionsPerCategory.get(this.position);
+            holder.result.setText(String.valueOf(x) + "/" + String.valueOf(y) + " Correct Answers");
 
 
-            double x = ((double) correctPerCat[this.position] / (double) numberofQuestionsPerCategory.get(this.position)) * 100;
-            holder.progress.setProgress((int) x);
-            holder.progress.setInnerBackgroundColor(getColorForScore(gettingScore()));
-            holder.precPerCateg.setText(String.valueOf((int) x) + "%");
-
+            double v = ((double) correctPerCat[this.position] / (double) numberofQuestionsPerCategory.get(this.position)) * 100;
+            /*holder.progress.setProgress((int) x);
+            holder.progress.setInnerBackgroundColor(getColorForScore(gettingScore()));*/
+            holder.precPerCateg.setText(String.valueOf((int) v) + "%");
+            holder.colorResult.setBackgroundColor(getColorForScore(gettingScore()));
 
         }
     }
@@ -99,7 +109,7 @@ public class ResultRecyclerAdaptor extends RecyclerView.Adapter<ResultRecyclerAd
 
     @Override
     public int getItemCount() {
-        return categoryNames.size() + 2;
+        return numberofQuestionsPerCategory.size() + 1;
     }
 
     @Override
@@ -110,19 +120,19 @@ public class ResultRecyclerAdaptor extends RecyclerView.Adapter<ResultRecyclerAd
     private int getColorForScore(int score) {
 
         if (score >= 0 && score < 20) {
-            return Color.rgb(237, 27, 36);
+            return Color.argb(140, 237, 27, 36);
         } else if (score >= 20 && score < 40) {
-            return Color.rgb(243, 112, 32);
+            return Color.argb(140, 243, 112, 32);
         } else if (score >= 40 && score < 55) {
-            return Color.rgb(252, 185, 19);
+            return Color.argb(140, 252, 185, 19);
         } else if (score >= 55 && score < 70) {
-            return Color.rgb(254, 242, 0);
+            return Color.argb(140, 254, 242, 0);
         } else if (score >= 70 && score < 80) {
-            return Color.rgb(92, 215, 49);
+            return Color.argb(140, 92, 215, 49);
         } else if (score >= 80 && score < 90) {
-            return Color.rgb(80, 184, 73);
+            return Color.argb(140, 80, 184, 73);
         } else if (score >= 90 && score <= 100) {
-            return Color.rgb(0, 166, 82);
+            return Color.argb(140, 0, 166, 82);
         }
         return 0;
     }
@@ -152,6 +162,8 @@ public class ResultRecyclerAdaptor extends RecyclerView.Adapter<ResultRecyclerAd
 
     public interface OnMyItemClick {
         void onItemClick(int position);
+
+        void onShowAllClick();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
@@ -219,6 +231,7 @@ public class ResultRecyclerAdaptor extends RecyclerView.Adapter<ResultRecyclerAd
         TextView precPerCateg;
         View container;
         DonutProgress progress;
+        CardView cardView;
 
         public ResultViewHolder(View convertView) {
             super(convertView);
@@ -226,8 +239,13 @@ public class ResultRecyclerAdaptor extends RecyclerView.Adapter<ResultRecyclerAd
             result = (TextView) convertView.findViewById(R.id.correct);
             colorResult = (RelativeLayout) convertView.findViewById(R.id.colorResult);
             precPerCateg = (TextView) convertView.findViewById(R.id.prec);
-            progress = (DonutProgress) convertView.findViewById(R.id.item_donut);
+            /*progress = (DonutProgress) convertView.findViewById(R.id.item_donut);*/
+            cardView = (CardView) convertView.findViewById(R.id.result_card);
             container = convertView;
+
+            if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.LOLLIPOP) {
+                cardView.setRadius(0);
+            }
 
         }
 
@@ -242,33 +260,54 @@ public class ResultRecyclerAdaptor extends RecyclerView.Adapter<ResultRecyclerAd
     }
 
     public class ProgressBarViewHolder extends ViewHolder {
-        ArcProgress arcProgress;
-        TextView value;
+        DonutProgress arcProgress;
+        TextView value, corrctQ, allQ;
         ProgressAnimator animator;
+        LinearLayout showAll;
 
         public ProgressBarViewHolder(View itemView) {
             super(itemView);
 
-            arcProgress = (ArcProgress) itemView.findViewById(R.id.arc_progress);
-            value = (TextView) itemView.findViewById(R.id.value);
-            Typeface typeface = Typeface.createFromAsset(itemView.getContext().getAssets(), "fonts/adcc.ttf");
-            value.setTypeface(typeface);
+            arcProgress = (DonutProgress) itemView.findViewById(R.id.progressba);
+            value = (TextView) itemView.findViewById(R.id.mainText);
+            Typeface big = Typeface.createFromAsset(context.getAssets(), "fonts/big.otf");
+            Typeface small = Typeface.createFromAsset(context.getAssets(), "fonts/arvo.ttf");
+            value.setTypeface(big);
+
+            corrctQ = (TextView) itemView.findViewById(R.id.bigNum1);
+            corrctQ.setTypeface(big);
+            allQ = (TextView) itemView.findViewById(R.id.bigNum2);
+            allQ.setTypeface(big);
+            TextView details = (TextView) itemView.findViewById(R.id.details);
+            details.setTypeface(small);
+            ((TextView) itemView.findViewById(R.id.smallText1)).setTypeface(small);
+            ((TextView) itemView.findViewById(R.id.smallText2)).setTypeface(small);
             animator = new ProgressAnimator(arcProgress, value, progressPrec);
             animator.setDuration(1000);
             animator.setInterpolator(new LinearInterpolator());
             arcProgress.setAnimation(animator);
             value.setAnimation(animator);
+            showAll = (LinearLayout) itemView.findViewById(R.id.showAll);
+            showAll.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    listener.onShowAllClick();
+                }
+            });
+            TextView dateText = (TextView) itemView.findViewById(R.id.date);
+            dateText.setText(testDate);
+            dateText.setTypeface(small);
 
 
         }
     }
 
     public class ProgressAnimator extends Animation {
-        ArcProgress progress;
+        DonutProgress progress;
         TextView textView;
         float to;
 
-        public ProgressAnimator(ArcProgress progress, TextView textView, float to) {
+        public ProgressAnimator(DonutProgress progress, TextView textView, float to) {
             this.progress = progress;
             this.textView = textView;
             this.to = to;
@@ -279,8 +318,6 @@ public class ResultRecyclerAdaptor extends RecyclerView.Adapter<ResultRecyclerAd
             super.applyTransformation(interpolatedTime, t);
             float value = interpolatedTime * to;
             progress.setProgress((int) value);
-            progress.setFinishedStrokeColor(getColorForScore((int) value));
-            textView.setTextColor(getColorForScore((int) value));
             textView.setText(String.valueOf((int) value));
 
         }

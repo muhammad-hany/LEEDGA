@@ -5,13 +5,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/tree2"
     android:fitsSystemWindows="true"
-    tools:context="com.leedga.seagate.leedga.HistoryActivity">
+    tools:context="com.seagate.test.leedga.HistoryActivity">
 
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="160dp"
+        android:layout_height="wrap_content"
         android:theme="@style/AppTheme.AppBarOverlay">
 
         <android.support.v7.widget.Toolbar
@@ -19,101 +20,13 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
+            android:title="@string/app_name"
             app:layout_collapseMode="pin"
             app:popupTheme="@style/AppTheme.PopupOverlay">
 
-            <TextView
-                android:id="@+id/header"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_alignParentTop="true"
-                android:gravity="center"
-                android:text="History Results"
-                android:textColor="#fff"
-                android:textSize="25sp"/>
         </android.support.v7.widget.Toolbar>
 
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <TextView
-                android:id="@+id/overallPrecntage"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:layout_centerVertical="true"
-                android:text="30%"
-                android:textAppearance="@style/TextAppearance.AppCompat.Large"
-                android:textColor="@android:color/white"
-                android:textSize="45sp"/>
-
-            <TextView
-                android:id="@+id/precentage"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true"
-                android:layout_marginLeft="20dp"
-                android:layout_marginStart="20dp"
-                android:text="30/50"
-                android:textColor="#fff"
-                android:textSize="25sp"/>
-
-            <TextView
-                android:id="@+id/textView15"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/overallPrecntage"
-                android:layout_centerHorizontal="true"
-                android:text="Overall Evaluation"
-                android:textAppearance="@style/TextAppearance.AppCompat.Small"
-                android:textColor="#fff"/>
-
-            <TextView
-                android:id="@+id/textView5"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignBaseline="@+id/examText"
-                android:layout_alignBottom="@+id/examText"
-                android:layout_alignLeft="@+id/precentage"
-                android:layout_alignStart="@+id/precentage"
-                android:layout_marginLeft="8dp"
-                android:layout_marginStart="8dp"
-                android:breakStrategy="balanced"
-                android:gravity="fill"
-                android:text="Successful\n Questions"
-                android:textColor="#fff"
-                android:textSize="10sp"/>
-
-            <TextView
-                android:id="@+id/exams"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignBottom="@+id/precentage"
-                android:layout_alignEnd="@+id/examText"
-                android:layout_alignRight="@+id/examText"
-                android:layout_marginEnd="12dp"
-                android:layout_marginRight="12dp"
-                android:text="5"
-                android:textColor="#fff"
-                android:textSize="30sp"/>
-
-            <TextView
-                android:id="@+id/examText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentRight="true"
-                android:layout_below="@+id/exams"
-                android:layout_marginEnd="19dp"
-                android:layout_marginRight="19dp"
-                android:text="Exams"
-                android:textColor="#fff"/>
-
-        </RelativeLayout>
 
 
     </android.support.design.widget.AppBarLayout>
