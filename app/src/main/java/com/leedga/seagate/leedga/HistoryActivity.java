@@ -55,7 +55,7 @@ public class HistoryActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         isDayQuestion = getIntent().getBooleanExtra(REF.DAY_QUESTION_PREF, false);
-        String txt = isDayQuestion ? "Question of the Day" : "Test History";
+        String txt = isDayQuestion ? "Question of the Day" : "Tests History";
         getSupportActionBar().setTitle(txt);
         initViews();
         gettingTestFromPref();
@@ -198,7 +198,7 @@ public class HistoryActivity extends AppCompatActivity {
         if (id == R.id.resetHistory) {
             AlertDialog dialog;
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setMessage("Are you sure  you want to delete Tests History?");
+            builder.setMessage("Are you sure  you want to clear Tests History?");
             builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {

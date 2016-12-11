@@ -59,6 +59,8 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
 
 
         generalSetting = getSharedPreferences(REF.GENERAL_SETTING_PREF, MODE_PRIVATE);
+
+
         String json = generalSetting.getString(REF.SCHEDULE_EXAM_DATE_PREF, null);
         Gson gson = new Gson();
         examDateCalendar = gson.fromJson(json, Calendar.class);
@@ -266,8 +268,7 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
                 helper.deleteAllFlags();
                 clearFlagFromHistory();
                 clearFlagsFromDefualtTest();
-                Toast.makeText(SettingActivity.this, "Questions flags has been cleared", Toast
-                        .LENGTH_LONG).show();
+                Toast.makeText(SettingActivity.this, "Questions flags have been cleared", Toast.LENGTH_LONG).show();
 
             }
         });
@@ -334,7 +335,7 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
                 SharedPreferences prefs = getSharedPreferences(ResultActivity.TESTS_PREFS, MODE_PRIVATE);
                 prefs.edit().clear().apply();
                 dialog.dismiss();
-                Toast.makeText(SettingActivity.this, "Test history has been cleared", Toast
+                Toast.makeText(SettingActivity.this, "Tests history has been cleared", Toast
                         .LENGTH_LONG).show();
             }
         });

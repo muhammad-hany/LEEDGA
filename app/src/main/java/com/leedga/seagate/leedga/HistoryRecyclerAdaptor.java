@@ -268,7 +268,7 @@ public class HistoryRecyclerAdaptor extends RecyclerView.Adapter<HistoryRecycler
             showAll = (LinearLayout) itemView.findViewById(R.id.showAll);
             showAll.setVisibility(View.GONE);
             TextView dateText = (TextView) itemView.findViewById(R.id.date);
-            String txt = isItDayQuestion ? "Question of the day history" : "History Exams";
+            String txt = isItDayQuestion ? "Question of the day history" : "Tests History";
             dateText.setText(txt);
             dateText.setTypeface(small);
 

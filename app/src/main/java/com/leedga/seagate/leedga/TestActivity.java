@@ -17,7 +17,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.akexorcist.roundcornerprogressbar.RoundCornerProgressBar;
 import com.google.gson.Gson;
@@ -182,7 +181,7 @@ public class TestActivity extends AppCompatActivity implements ViewPager.OnPageC
                 if (pager.getCurrentItem() > 0) {
                     TestFragment fragment = (TestFragment) pagerAdapter.instantiateItem(pager, pager.getCurrentItem());
                     Test test = fragment.getTest();
-                    savingTestInMemory(test, false);
+                    savingTestInMemory(test, true);
                 }
                 dialog.dismiss();
                 onBackPressed();
@@ -364,7 +363,7 @@ public class TestActivity extends AppCompatActivity implements ViewPager.OnPageC
         if (fragmentType.equals(REF.FULL_QUESTIONS)) {
             if (!isWindowFocused && !isBackPressed) {
                 isAppWentToBg = true;
-                Toast.makeText(this, "Background", Toast.LENGTH_LONG).show();
+                /*Toast.makeText(this, "Background", Toast.LENGTH_LONG).show();*/
                 //saving tests item
                 Test unFinishedTest = ((TestFragment) pagerAdapter.instantiateItem(pager, pager
                         .getCurrentItem())).getTest();

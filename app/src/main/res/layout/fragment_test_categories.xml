@@ -129,7 +129,7 @@
             android:background="@color/thirdColor"
             android:gravity="center"
             android:padding="10dp"
-            android:text="Questions Domains"
+            android:text="Knowledge domains"
             android:textAppearance="@style/TextAppearance.AppCompat.Large"
             android:textColor="@android:color/white"
             android:textSize="18sp"

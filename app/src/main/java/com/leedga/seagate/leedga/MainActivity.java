@@ -14,6 +14,7 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -70,7 +71,7 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerAdapt
     private BroadcastReceiver mBroadcastReceiver;
     private DatabaseReference mDatabase;
     private ContentValues contentValues;
-    private SharedPreferences sharedPreferences;
+    private SharedPreferences generalSettingPreferences;
     private IInAppBillingService mService;
     private ServiceConnection mServiceConnection;
     private Menu mainMenu;
@@ -86,12 +87,15 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerAdapt
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle("LEED Green Associate V4");
+        generalSettingPreferences = getSharedPreferences(REF.GENERAL_SETTING_PREF, MODE_PRIVATE);
         setDefaultTestPreferences();
         definingViews();
         setDefaultPrefrences();
         vunglePub.init(this, REF.VUNGLE_APP_ID);
+        checkForQuestionUpdate();
 
-        testFireBase();
+
         setUpBillingSystem();
 
 
@@ -119,13 +123,32 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerAdapt
 
     }
 
+    private void checkForQuestionUpdate() {
+        long twoWeeksInterval = AlarmManager.INTERVAL_DAY * 14;
+        SharedPreferences.Editor editor = generalSettingPreferences.edit();
+        if (!generalSettingPreferences.contains(REF.LAST_CHECK_FOR_UPDATE_KEY)) {
+            testFireBase();
+            editor.putLong(REF.LAST_CHECK_FOR_UPDATE_KEY, System.currentTimeMillis());
+            editor.apply();
+        } else {
+            long lastUpdate = generalSettingPreferences.getLong(REF.LAST_CHECK_FOR_UPDATE_KEY, 0);
+            if (System.currentTimeMillis() > lastUpdate + twoWeeksInterval) {
+                //need check For update
+                testFireBase();
+                editor.putLong(REF.LAST_CHECK_FOR_UPDATE_KEY, System.currentTimeMillis());
+                editor.apply();
+            }
+        }
+
+    }
+
     private void definingViews() {
         upgradeDetailsCard = (CardView) findViewById(R.id.upgradeDetailsCard);
         upgradeDetailsCard.setVisibility(View.GONE);
         upgradeDetailsButton = (Button) findViewById(R.id.upgradeDeatils);
         final AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
         alertBuilder.setTitle("Upgrade Details");
-        alertBuilder.setMessage("Unlock additional XX questions\nUnlock the question of the day\nNo ads");
+        alertBuilder.setMessage("Unlock additional 500 questions\nUnlock the question of the day\nNo ads");
         alertBuilder.setPositiveButton("Upgrade", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
@@ -180,6 +203,8 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerAdapt
                             mPremiumAcount = itemId.equals(REF.SKU_PREMIUM);
                         }
                         visibility = mPremiumAcount ? View.GONE : View.VISIBLE;
+                        SharedPreferences.Editor editor = generalSettingPreferences.edit();
+                        editor.putBoolean(REF.PREMIUM_USER_KEY, true);
                         upgradeDetailsCard.setVisibility(visibility);
                     }
                 } catch (RemoteException e) {
@@ -216,13 +241,13 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerAdapt
         final DBHelper dbHelper = new DBHelper(this, REF.DATABASE_NAME);
         Question q = dbHelper.getRandomQuestion();
 
-        sharedPreferences = getSharedPreferences(REF.GENERAL_SETTING_PREF, MODE_PRIVATE);
-        final int lastCommitNumber = sharedPreferences.getInt(FIREBASE_COMMIT_NUMBER_PREF_KEY, 0);
+        final int lastCommitNumber = generalSettingPreferences.getInt(FIREBASE_COMMIT_NUMBER_PREF_KEY, 0);
         mDatabase.child("Questions").child(/*"v" + packageInfo.versionCode*/"Q1").setValue(q);
         mDatabase.child("versions").child("v" + packageInfo.versionCode).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 contentValues = new ContentValues();
+
                 for (DataSnapshot questionSnap : dataSnapshot.getChildren()) {
                     updateDatabase(questionSnap, lastCommitNumber, dbHelper);
                 }
@@ -273,7 +298,7 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerAdapt
                     }
                 }
 
-                SharedPreferences.Editor editor = sharedPreferences.edit();
+                SharedPreferences.Editor editor = generalSettingPreferences.edit();
                 editor.putInt(REF.FIREBASE_COMMIT_NUMBER_PREF_KEY, i);
                 editor.apply();
                 updateCheckDialog.dismiss();
@@ -299,6 +324,8 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerAdapt
             editor.putBoolean(REF.DAY_QUESTION_PREF, true);
             editor.putBoolean(REF.KNOWLEDGE_DOMAIN, true);
             editor.putInt(REF.FIREBASE_COMMIT_NUMBER_PREF_KEY, 0);
+            editor.putLong(REF.FIRST_LOG_IN_KEY, System.currentTimeMillis());
+            editor.putBoolean(REF.PREMIUM_USER_KEY, false);
             Calendar calendar = Calendar.getInstance();
             calendar.set(Calendar.HOUR_OF_DAY, 8);
             calendar.set(Calendar.MINUTE, 0);
@@ -369,7 +396,11 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerAdapt
         if (test.isOnlyFlagged()) {
             questions = new DBHelper(this, REF.DATABASE_NAME).getFlaggedQuestions(test.getNumberOfQuestions());
         } else {
-            questions = new DBHelper(this, REF.DATABASE_NAME).getAll(test.getChapters(), test.getcountPerCategory(), test.getQuestionTypes());
+            if (generalSettingPreferences.getBoolean(REF.PREMIUM_USER_KEY, false)) {
+                questions = new DBHelper(this, REF.DATABASE_NAME).getAll(test.getChapters(), test.getcountPerCategory(), test.getQuestionTypes());
+            } else {
+                questions = new DBHelper(this, REF.DATABASE_NAME).getFree(test.getChapters(), test.getcountPerCategory(), test.getQuestionTypes());
+            }
         }
         Collections.shuffle(questions);
         test.setQuestions(questions);
@@ -419,32 +450,31 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerAdapt
 
         //noinspection SimplifiableIfStatement
         switch (id) {
+
             case R.id.rating:
+                openAppPage();
                 return true;
+
             case R.id.upgrarde:
-
                 //make the purchase
-
                 upgradeAccount();
-
-                /*try {
-                    mIaHelper.launchPurchaseFlow(MainActivity.this, REF.SKU_PREMIUM, REF.RC_PREMIUM_PURCHASE, new IabHelper.OnIabPurchaseFinishedListener() {
-                        @Override
-                        public void onIabPurchaseFinished(IabResult result, Purchase info) {
-
-                        }
-                    }, "");
-                } catch (IabHelper.IabAsyncInProgressException e) {
-                    e.printStackTrace();
-                }*/
-
                 return true;
+
             case android.R.id.home:
                 onBackPressed();
                 return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void openAppPage() {
+        final String appPackageName = getPackageName(); // getPackageName() from Context or Activity object
+        try {
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
+        } catch (android.content.ActivityNotFoundException anfe) {
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
+        }
     }
 
 
@@ -559,24 +589,58 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerAdapt
             case 4:
                 //question of the day
                 // determine last time make question of question of day
-                SharedPreferences preferences = getSharedPreferences(REF.GENERAL_SETTING_PREF, MODE_PRIVATE);
-
-                long lastTime = preferences.getLong(REF.DAY_QUESTION_DATE_PREF_KEY, 0);
-                float diff = (float) (System.currentTimeMillis() - lastTime) / (float) AlarmManager.INTERVAL_DAY;
-
-                if (diff > 1) {
-                    // make the question of day
-                    i = new Intent(this, TestActivity.class);
-                    i.putExtra(REF.TEST_FRAGMENT_TYPE, REF.SINGLE_QUESTION);
-                    startActivity(i);
+                boolean isItPremiumUser = generalSettingPreferences.getBoolean(REF.PREMIUM_USER_KEY, false);
+                if (isItPremiumUser) {
+                    makeQuestionOfDayAction();
                 } else {
-                    // show history of question of day
-                    i = new Intent(MainActivity.this, HistoryActivity.class);
-                    i.putExtra(REF.DAY_QUESTION_PREF, true);
-                    startActivity(i);
-                    break;
+                    long trialTime = AlarmManager.INTERVAL_DAY * 5;
+                    long firstLogIn = generalSettingPreferences.getLong(REF.FIRST_LOG_IN_KEY, 0);
+                    if (System.currentTimeMillis() > firstLogIn + trialTime) {
+                        //exceed trial time
+                        AlertDialog.Builder alert = new AlertDialog.Builder(this);
+                        alert.setTitle("Caution");
+                        alert.setMessage("If you want to proceed to Question of the day you should upgrade to premium account");
+                        alert.setPositiveButton("Upgrade", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                dialogInterface.dismiss();
+                                upgradeAccount();
+                            }
+                        });
+                        alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                dialogInterface.dismiss();
+                            }
+                        });
+                        alert.create().show();
+                    } else {
+                        // still in trial time
+                        AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
+                        alertBuilder.setTitle("Caution");
+                        alertBuilder.setMessage("Question of will be available only for 5 days in the free version");
+                        alertBuilder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                dialogInterface.dismiss();
+                                makeQuestionOfDayAction();
+                            }
+                        });
+
+                        alertBuilder.setNegativeButton("Upgrade", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                upgradeAccount();
+                            }
+                        });
+
+                        alertBuilder.create().show();
+
+                    }
+
 
                 }
+
 
                 break;
             case 5:
@@ -614,6 +678,26 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerAdapt
                 transaction2.commit();*/
                 break;
             case 9:
+
+        }
+    }
+
+    private void makeQuestionOfDayAction() {
+        SharedPreferences preferences = getSharedPreferences(REF.GENERAL_SETTING_PREF, MODE_PRIVATE);
+
+        long lastTime = preferences.getLong(REF.DAY_QUESTION_DATE_PREF_KEY, 0);
+        float diff = (float) (System.currentTimeMillis() - lastTime) / (float) AlarmManager.INTERVAL_DAY;
+        Intent i;
+        if (diff > 1) {
+            // make the question of day
+            i = new Intent(this, TestActivity.class);
+            i.putExtra(REF.TEST_FRAGMENT_TYPE, REF.SINGLE_QUESTION);
+            startActivity(i);
+        } else {
+            // show history of question of day
+            i = new Intent(MainActivity.this, HistoryActivity.class);
+            i.putExtra(REF.DAY_QUESTION_PREF, true);
+            startActivity(i);
 
         }
     }

@@ -41,6 +41,7 @@ public class TestSettingActivity extends AppCompatActivity implements FragmentLi
     private Switch knowledgeDomain, flaggedOnly;
     private SharedPreferences generalSetting;
     private DBHelper helper;
+    private boolean premiumUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,7 +50,7 @@ public class TestSettingActivity extends AppCompatActivity implements FragmentLi
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setTitle("Test Setting");
+        getSupportActionBar().setTitle("Test Settings");
         gettingDefaultTest();
         definingViews();
         displayValues();
@@ -213,7 +214,7 @@ public class TestSettingActivity extends AppCompatActivity implements FragmentLi
         for (Switch s : switches) {
             if (s.isChecked()) {
                 s.setEnabled(false);
-                Toast.makeText(this, "you must choose at least one domains ", Toast
+                Toast.makeText(this, "You must choose at least one domain ", Toast
                         .LENGTH_LONG).show();
             }
         }
@@ -250,10 +251,23 @@ public class TestSettingActivity extends AppCompatActivity implements FragmentLi
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+
+
                 if (test.isOnlyFlagged() && helper.getFlaggedCount() >= 5) {
                     seekBarTxt.setText(String.valueOf(progress + 5) + " Flagged Questions");
                     test.setNumberOfQuestions(progress + 5);
                 } else {
+                    if (!premiumUser) {
+                        if (myValues[progress] > 30) {
+                            if (progress == 5) {
+                                Toast.makeText(TestSettingActivity.this, "You need to upgrade to use " +
+                                        "more questions in the test", Toast.LENGTH_SHORT).show();
+                            }
+                            progress = 4;
+                            seekBar.setProgress(4);
+
+                        }
+                    }
                     seekBarTxt.setText(String.valueOf(myValues[progress]) + " Questions");
                     test.setNumberOfQuestions(myValues[progress]);
                 }
@@ -379,7 +393,7 @@ public class TestSettingActivity extends AppCompatActivity implements FragmentLi
             multiChoice.setEnabled(false);
         }
 
-        Toast.makeText(this, "you must choose one of question type at least", Toast.LENGTH_LONG).show();
+        Toast.makeText(this, "You must choose at least one type", Toast.LENGTH_LONG).show();
     }
 
     private void definingAnswerSetting() {
@@ -431,6 +445,8 @@ public class TestSettingActivity extends AppCompatActivity implements FragmentLi
         Gson gson = new Gson();
         test = gson.fromJson(decode, Test.class);
         generalSetting = getSharedPreferences(REF.GENERAL_SETTING_PREF, MODE_PRIVATE);
+        premiumUser = generalSetting.getBoolean(REF.PREMIUM_USER_KEY, false);
+
         helper = new DBHelper(this, REF.DATABASE_NAME);
     }
 

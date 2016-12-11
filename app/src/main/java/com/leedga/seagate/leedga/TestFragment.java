@@ -63,6 +63,7 @@ public class TestFragment extends Fragment {
     boolean isItAnswerShow = false;
     boolean isExplainOn = false;
     private CardView mainCard;
+
     public TestFragment() {
         // Required empty public constructor
     }
@@ -405,6 +406,8 @@ public class TestFragment extends Fragment {
             if (isItAnswerShow) {
                 String answer = test.getUserAnswers().get(uniCount);
                 boolean result = test.getUserResult().get(uniCount);
+
+
                 switch (answer) {
                     case "1":
                         radio1.setChecked(true);
@@ -798,7 +801,7 @@ public class TestFragment extends Fragment {
         } else if (question.getKey().equals(MULTI_CHOICE_KEY)) {
             showMultiAnswersToUser(getUserAnswer(), question.getAnswer());
         } else {
-            showTrueFalseAnswerToUser(getResult(getUserAnswer()));
+            showTrueFalseAnswerToUser(getResult(getUserAnswer()), getUserAnswer());
         }
     }
 
@@ -815,7 +818,6 @@ public class TestFragment extends Fragment {
         mainCard.setVisibility(View.VISIBLE);
         answerCard.setVisibility(View.INVISIBLE);
     }
-
 
 
     public void next() {
@@ -914,9 +916,10 @@ public class TestFragment extends Fragment {
             }
         } else {
             if (test.getTestId() != null && test.getNumberOfAnsweredQuestions() > uniCount) {
-                showTrueFalseAnswerToUser(test.getUserResult().get(uniCount));
+                showTrueFalseAnswerToUser(test.getUserResult().get(uniCount), test.getUserAnswers
+                        ().get(uniCount));
             } else {
-                showTrueFalseAnswerToUser(getResult(getUserAnswer()));
+                showTrueFalseAnswerToUser(getResult(getUserAnswer()), getUserAnswer());
             }
         }
     }
@@ -942,19 +945,37 @@ public class TestFragment extends Fragment {
         }
     }
 
-    private void showTrueFalseAnswerToUser(boolean result) {
-        if (result) {
-            image1.setImageResource(R.drawable.ic_correct);
+    private void showTrueFalseAnswerToUser(boolean result, String answer) {
+        switch (answer) {
+            case "1":
+                if (result) {
+                    image1.setImageResource(R.drawable.ic_correct);
             /*image2.setImageResource(R.drawable.ic_incorrect);*/
 
-            r1.setBackgroundResource(R.color.correct);
+                    r1.setBackgroundResource(R.color.correct);
             /*r2.setBackgroundResource(R.color.incorrect);*/
-        } else {
+                } else {
             /*image1.setImageResource(R.drawable.ic_incorrect);*/
-            image2.setImageResource(R.drawable.ic_correct);
+                    image1.setImageResource(R.drawable.ic_incorrect);
 
             /*r1.setBackgroundResource(R.color.incorrect);*/
-            r2.setBackgroundResource(R.color.correct);
+                    r1.setBackgroundResource(R.color.incorrect);
+                }
+                break;
+            case "0":
+                if (result) {
+                    image2.setImageResource(R.drawable.ic_correct);
+            /*image2.setImageResource(R.drawable.ic_incorrect);*/
+
+                    r2.setBackgroundResource(R.color.correct);
+            /*r2.setBackgroundResource(R.color.incorrect);*/
+                } else {
+            /*image1.setImageResource(R.drawable.ic_incorrect);*/
+                    image2.setImageResource(R.drawable.ic_incorrect);
+
+            /*r1.setBackgroundResource(R.color.incorrect);*/
+                    r2.setBackgroundResource(R.color.incorrect);
+                }
         }
 
 
