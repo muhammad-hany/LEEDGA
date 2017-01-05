@@ -61,7 +61,7 @@ public class TestActivity extends AppCompatActivity implements ViewPager.OnPageC
         defineButtons();
         createQuestionLoadingDialog();
 
-        //
+
         questionLoadDialog.show();
         fragmentType = getIntent().getStringExtra(REF.TEST_FRAGMENT_TYPE);
         pager = (TestViewPager) findViewById(R.id.pager);
