@@ -33,8 +33,6 @@ import com.google.gson.Gson;
 import java.util.Calendar;
 import java.util.Map;
 
-import static com.leedga.seagate.leedga.MainActivity.mPremiumAcount;
-
 public class SettingActivity extends AppCompatActivity implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
 
     private LinearLayout examDate, clearHistory, clearFlags;
@@ -145,15 +143,16 @@ public class SettingActivity extends AppCompatActivity implements View.OnClickLi
         questionOfDayAlert = (Switch) findViewById(R.id.s1);
         questionOfDayAlert.setOnCheckedChangeListener(this);
 
+
         LinearLayout layout = (LinearLayout) findViewById(R.id.l5);
         View view = findViewById(R.id.lastLine);
-        int visibility = mPremiumAcount ? View.GONE : View.VISIBLE;
+        int visibility = generalSetting.getBoolean(REF.PREMIUM_USER_KEY, false) ? View.GONE : View.VISIBLE;
         layout.setVisibility(visibility);
         view.setVisibility(visibility);
 
         final AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
         alertBuilder.setTitle("Upgrade Details");
-        alertBuilder.setMessage("Unlock additional XX questions\nUnlock the question of the day\nNo ads");
+        alertBuilder.setMessage("Unlock additional 500 questions\nUnlock the question of the day\nNo ads");
         alertBuilder.setPositiveButton("Upgrade", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {

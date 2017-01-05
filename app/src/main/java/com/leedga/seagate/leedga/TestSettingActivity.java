@@ -336,7 +336,6 @@ public class TestSettingActivity extends AppCompatActivity implements FragmentLi
     }
 
 
-
     private void definingQuestionType() {
         activeTypeNumber = 0;
         trueFalse = (Switch) findViewById(R.id.true_false);
@@ -362,16 +361,48 @@ public class TestSettingActivity extends AppCompatActivity implements FragmentLi
                 }
                 test.setQuestionTypes(questionTypes);
                 activeTypeNumber = isChecked ? activeTypeNumber + 1 : activeTypeNumber - 1;
-                if (activeTypeNumber == 1) {
-                    findWhichActiveToDisable();
-                } else {
-                    enableAll();
+                if (premiumUser) {
+                    if (activeTypeNumber == 1) {
+                        findWhichActiveToDisable();
+                    } else {
+                        enableAll();
+                    }
                 }
             }
         };
         trueFalse.setOnCheckedChangeListener(listener);
         oneChoice.setOnCheckedChangeListener(listener);
         multiChoice.setOnCheckedChangeListener(listener);
+        View layout = findViewById(R.id.moc2);
+        View layout1 = findViewById(R.id.moc3);
+        if (premiumUser) {
+            trueFalse.setEnabled(true);
+            oneChoice.setEnabled(true);
+            multiChoice.setEnabled(true);
+            layout.setVisibility(View.GONE);
+            layout1.setVisibility(View.GONE);
+        } else {
+            trueFalse.setEnabled(false);
+            oneChoice.setEnabled(false);
+            multiChoice.setEnabled(false);
+            layout.setVisibility(View.VISIBLE);
+            layout1.setVisibility(View.VISIBLE);
+
+            View.OnClickListener mockListener = new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Toast.makeText(TestSettingActivity.this, "You need to upgrde to premium " +
+                            "account to unlock all question types", Toast.LENGTH_LONG).show();
+                }
+            };
+
+            layout.setOnClickListener(mockListener);
+
+
+            layout1.setOnClickListener(mockListener);
+
+
+        }
     }
 
     private void enableAll() {

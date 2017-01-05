@@ -52,6 +52,7 @@ import util.IabBroadcastReceiver;
 import static com.leedga.seagate.leedga.REF.DEFAULT_TEST_KEY;
 import static com.leedga.seagate.leedga.REF.DEFAULT_TEST_PREF_KEY;
 import static com.leedga.seagate.leedga.REF.FIREBASE_COMMIT_NUMBER_PREF_KEY;
+import static com.leedga.seagate.leedga.REF.PREMIUM_USER_KEY;
 import static com.leedga.seagate.leedga.TestActivity.UNFINISHED_TEST;
 import static com.leedga.seagate.leedga.TestCategoriesFragment.TEST_BUNDLE;
 
@@ -80,6 +81,7 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerAdapt
     private AlertDialog alertDialog;
     private ProgressDialog updateCheckDialog;
     private AlertDialog updateStatusDialog;
+    private ProgressDialog questionLoadDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,9 +91,10 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerAdapt
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("LEED Green Associate V4");
         generalSettingPreferences = getSharedPreferences(REF.GENERAL_SETTING_PREF, MODE_PRIVATE);
+        setDefaultPrefrences();
         setDefaultTestPreferences();
         definingViews();
-        setDefaultPrefrences();
+
         vunglePub.init(this, REF.VUNGLE_APP_ID);
         checkForQuestionUpdate();
 
@@ -119,6 +122,7 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerAdapt
         recyclerView.setLayoutManager(gridLayoutManager);
         /*adaptor.setHasStableIds(true);*/
         recyclerView.setAdapter(adaptor);
+        createQuestionLoadingDialog();
 
 
     }
@@ -144,7 +148,9 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerAdapt
 
     private void definingViews() {
         upgradeDetailsCard = (CardView) findViewById(R.id.upgradeDetailsCard);
-        upgradeDetailsCard.setVisibility(View.GONE);
+        int visability = generalSettingPreferences.getBoolean(PREMIUM_USER_KEY, false) ? View.GONE :
+                View.VISIBLE;
+        upgradeDetailsCard.setVisibility(visability);
         upgradeDetailsButton = (Button) findViewById(R.id.upgradeDeatils);
         final AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
         alertBuilder.setTitle("Upgrade Details");
@@ -202,9 +208,12 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerAdapt
                         for (String itemId : ownedSkus) {
                             mPremiumAcount = itemId.equals(REF.SKU_PREMIUM);
                         }
+
                         visibility = mPremiumAcount ? View.GONE : View.VISIBLE;
                         SharedPreferences.Editor editor = generalSettingPreferences.edit();
-                        editor.putBoolean(REF.PREMIUM_USER_KEY, true);
+                        editor.putBoolean(PREMIUM_USER_KEY, mPremiumAcount);
+                        editor.apply();
+                        updateDefaultTest(mPremiumAcount);
                         upgradeDetailsCard.setVisibility(visibility);
                     }
                 } catch (RemoteException e) {
@@ -225,9 +234,24 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerAdapt
 
     }
 
-    private void changeUpgradeMenuItemState(boolean mPremiumAcount) {
-        mainMenu.findItem(R.id.upgrarde).setVisible(mPremiumAcount);
+    private void updateDefaultTest(boolean mPremiumAcount) {
+        defaultTestPref = getSharedPreferences(DEFAULT_TEST_PREF_KEY, MODE_PRIVATE);
+        Gson gson = new Gson();
+        Test test = gson.fromJson(defaultTestPref.getString(DEFAULT_TEST_KEY, null), Test.class);
+        if (mPremiumAcount) {
+            test.setQuestionTypes(new boolean[]{true, true, true});
+        } else {
+            test.setQuestionTypes(new boolean[]{false, true, false});
+        }
+        SharedPreferences.Editor editor = defaultTestPref.edit();
+        String json = gson.toJson(test);
+        editor.putString(DEFAULT_TEST_KEY, json);
+        editor.apply();
     }
+
+    /*private void changeUpgradeMenuItemState(boolean mPremiumAcount) {
+        mainMenu.findItem(R.id.upgrarde).setVisible(mPremiumAcount);
+    }*/
 
     private void testFireBase() {
         updateCheckDialog.show();
@@ -240,16 +264,21 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerAdapt
         mDatabase = FirebaseDatabase.getInstance().getReference();
         final DBHelper dbHelper = new DBHelper(this, REF.DATABASE_NAME);
         Question q = dbHelper.getRandomQuestion();
-
+        final int versionCode = packageInfo.versionCode;
         final int lastCommitNumber = generalSettingPreferences.getInt(FIREBASE_COMMIT_NUMBER_PREF_KEY, 0);
-        mDatabase.child("Questions").child(/*"v" + packageInfo.versionCode*/"Q1").setValue(q);
-        mDatabase.child("versions").child("v" + packageInfo.versionCode).addValueEventListener(new ValueEventListener() {
+        mDatabase.child("versions").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                contentValues = new ContentValues();
+                if (dataSnapshot.hasChild("v" + versionCode)) {
+                    contentValues = new ContentValues();
 
-                for (DataSnapshot questionSnap : dataSnapshot.getChildren()) {
-                    updateDatabase(questionSnap, lastCommitNumber, dbHelper);
+                    for (DataSnapshot questionSnap : dataSnapshot.getChildren()) {
+                        updateDatabase(questionSnap, lastCommitNumber, dbHelper);
+                    }
+                } else {
+                    updateCheckDialog.dismiss();
+                    updateStatusDialog.setMessage("No updates found");
+                    updateStatusDialog.show();
                 }
             }
 
@@ -325,7 +354,7 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerAdapt
             editor.putBoolean(REF.KNOWLEDGE_DOMAIN, true);
             editor.putInt(REF.FIREBASE_COMMIT_NUMBER_PREF_KEY, 0);
             editor.putLong(REF.FIRST_LOG_IN_KEY, System.currentTimeMillis());
-            editor.putBoolean(REF.PREMIUM_USER_KEY, false);
+            editor.putBoolean(PREMIUM_USER_KEY, false);
             Calendar calendar = Calendar.getInstance();
             calendar.set(Calendar.HOUR_OF_DAY, 8);
             calendar.set(Calendar.MINUTE, 0);
@@ -358,7 +387,11 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerAdapt
 
     private Test createDefaultTest() {
         Test test = new Test();
-        test.setQuestionTypes(new boolean[]{true, true, true});
+        if (generalSettingPreferences.getBoolean(PREMIUM_USER_KEY, false)) {
+            test.setQuestionTypes(new boolean[]{true, true, true});
+        } else {
+            test.setQuestionTypes(new boolean[]{false, true, false});
+        }
         test.setNumberOfQuestions(10);
         test.setOnlyFlagged(false);
         test.setAnswerShow(TestTypeFragment.ANSWER_AFTER_ALL);
@@ -367,6 +400,7 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerAdapt
     }
 
     protected void checkThereIsUnfinishedTest() {
+        /*questionLoadDialog.show();*/
         SharedPreferences preferences = getSharedPreferences(REF.UNCOMPLETED_PREF, Context.MODE_PRIVATE);
         buildDialog();
 
@@ -383,6 +417,7 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerAdapt
     }
 
     private void startNewTest() {
+
         SharedPreferences preferences = getSharedPreferences(REF.UNCOMPLETED_PREF, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
         editor.clear();
@@ -396,7 +431,7 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerAdapt
         if (test.isOnlyFlagged()) {
             questions = new DBHelper(this, REF.DATABASE_NAME).getFlaggedQuestions(test.getNumberOfQuestions());
         } else {
-            if (generalSettingPreferences.getBoolean(REF.PREMIUM_USER_KEY, false)) {
+            if (generalSettingPreferences.getBoolean(PREMIUM_USER_KEY, false)) {
                 questions = new DBHelper(this, REF.DATABASE_NAME).getAll(test.getChapters(), test.getcountPerCategory(), test.getQuestionTypes());
             } else {
                 questions = new DBHelper(this, REF.DATABASE_NAME).getFree(test.getChapters(), test.getcountPerCategory(), test.getQuestionTypes());
@@ -407,6 +442,12 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerAdapt
         i.putExtra(REF.TEST_FRAGMENT_TYPE, REF.FULL_QUESTIONS);
         i.putExtra(TEST_BUNDLE, test);
         startActivityForResult(i, 1);
+    }
+
+    private void createQuestionLoadingDialog() {
+        questionLoadDialog = new ProgressDialog(this);
+        questionLoadDialog.setTitle("Please wait");
+        questionLoadDialog.setMessage("Loading Questions");
     }
 
     private void buildDialog() {
@@ -455,10 +496,10 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerAdapt
                 openAppPage();
                 return true;
 
-            case R.id.upgrarde:
+            /*case R.id.upgrarde:
                 //make the purchase
                 upgradeAccount();
-                return true;
+                return true;*/
 
             case android.R.id.home:
                 onBackPressed();
@@ -557,8 +598,13 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerAdapt
                     try {
                         JSONObject jsonObject = new JSONObject(purchaseData);
                         String sku = jsonObject.getString("productId");
-                        msg = "You have bought the " + sku + " successfully";
+                        msg = "You upgraded your account successfully";
                         upgradeDetailsCard.setVisibility(View.GONE);
+
+                        SharedPreferences.Editor editor2 = generalSettingPreferences.edit();
+                        editor2.putBoolean(PREMIUM_USER_KEY, true);
+                        editor2.apply();
+
                         mPremiumAcount = true;
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -589,7 +635,7 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerAdapt
             case 4:
                 //question of the day
                 // determine last time make question of question of day
-                boolean isItPremiumUser = generalSettingPreferences.getBoolean(REF.PREMIUM_USER_KEY, false);
+                boolean isItPremiumUser = generalSettingPreferences.getBoolean(PREMIUM_USER_KEY, false);
                 if (isItPremiumUser) {
                     makeQuestionOfDayAction();
                 } else {
@@ -742,6 +788,11 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerAdapt
         adaptor.setTests(getLastTests());
         adaptor.notifyDataSetChanged();
         vunglePub.onResume();
+        if (questionLoadDialog != null) {
+            questionLoadDialog.dismiss();
+        }
+
+
 
     }
 

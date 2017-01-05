@@ -1,5 +1,6 @@
 package com.leedga.seagate.leedga;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -48,6 +49,7 @@ public class TestActivity extends AppCompatActivity implements ViewPager.OnPageC
     private LinearLayout next, back, explain;
     private RoundCornerProgressBar progress;
     private TextView progressText;
+    private ProgressDialog questionLoadDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,8 +59,9 @@ public class TestActivity extends AppCompatActivity implements ViewPager.OnPageC
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         defineButtons();
+        createQuestionLoadingDialog();
 
-
+        questionLoadDialog.show();
         fragmentType = getIntent().getStringExtra(REF.TEST_FRAGMENT_TYPE);
         pager = (TestViewPager) findViewById(R.id.pager);
         test = (Test) getIntent().getSerializableExtra(TestCategoriesFragment.TEST_BUNDLE);
@@ -96,8 +99,15 @@ public class TestActivity extends AppCompatActivity implements ViewPager.OnPageC
             transaction.add(R.id.linear, fragment);
             transaction.commit();
         }
+        questionLoadDialog.dismiss();
 
 
+    }
+
+    private void createQuestionLoadingDialog() {
+        questionLoadDialog = new ProgressDialog(this);
+        questionLoadDialog.setTitle("Please wait");
+        questionLoadDialog.setMessage("Loading Questions");
     }
 
     private void defineButtons() {

@@ -159,7 +159,8 @@ public class ResultActivity extends AppCompatActivity {
             }
         });*/
         // settingRadarChart();
-        if (!MainActivity.mPremiumAcount) {
+        SharedPreferences generalSetting = getSharedPreferences(REF.GENERAL_SETTING_PREF, MODE_PRIVATE);
+        if (!generalSetting.getBoolean(REF.PREMIUM_USER_KEY, false)) {
             vunglePub.playAd();
         }
 
