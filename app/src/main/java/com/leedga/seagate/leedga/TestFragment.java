@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -63,6 +64,8 @@ public class TestFragment extends Fragment {
     boolean isItAnswerShow = false;
     boolean isExplainOn = false;
     private CardView mainCard;
+    private int cc;
+    private boolean[] userSelection;
 
     public TestFragment() {
         // Required empty public constructor
@@ -82,18 +85,65 @@ public class TestFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+        cc = getArguments().getInt(QUESTIONS_POSTITION_KEY);
+        Log.i("SAVE FRAGMENT", "onCreate state called of fragment " + cc);
+        if (savedInstanceState != null) {
+            Log.i("SAVE FRAGMENT", "this fragment has has instance state" + cc);
+        }
 
 
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.i("SAVE FRAGMENT", "onDestroy state called of fragment " + cc);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.i("SAVE FRAGMENT", "onResume state called of fragment " + cc);
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        Log.i("SAVE FRAGMENT", "save instance state called of fragment " + cc);
+        /*userSelection=new boolean[question.getAswersCount()];
+        if (question.getKey().equals(REF.SINGLE_CHOICE_KEY) || question.getKey().equals(REF.TRUE_FALSE_KEY)){
+            RadioButton [] radioButtons=new RadioButton[]{radio1,radio2,radio3,radio4};
+            int i=0;
+            for (RadioButton radioButton:radioButtons){
+                userSelection[i]=radioButton.isChecked();
+                i++;
+            }
+        }else if (question.getKey().equals(REF.MULTI_CHOICE_KEY)){
+            int i=0;
+            for (CheckBox checkBox:checkBoxes){
+                userSelection[i]=checkBox.isChecked();
+                i++;
+            }
+        }
+
+        outState.putBooleanArray(REF.FRAGMENT_USER_SELECTION_KEY,userSelection);*/
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Bundle bundle = getArguments();
         test = (Test) bundle.getSerializable(TEST_BUNDLE_KEY);
         isItAnswerShow = test.isSaved();
+
         uniCount = bundle.getInt(QUESTIONS_POSTITION_KEY);
         position = bundle.getInt(QUESTIONS_POSTITION_KEY);
+
         View view = inflater.inflate(R.layout.fragment_test, container, false);
         CardView cardView = (CardView) view.findViewById(R.id.card);
         if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.LOLLIPOP) {
@@ -101,6 +151,40 @@ public class TestFragment extends Fragment {
         }
         initViews(view);
         previewNextQuestion(uniCount, view);
+        if (savedInstanceState != null && uniCount < test.getNumberOfAnsweredQuestions()) {
+            disableAllViewClicks();
+            nextNext = true;
+
+
+            if (test.getAnswerShow() == TestTypeFragment.ANSWER_WHEN_WRONG) {
+                if (!test.getUserResult().get(uniCount)) {
+                    showingDetailedAnswer();
+                }
+            } else if (test.getAnswerShow() == TestTypeFragment.ANSWER_AFTER_EVERY) {
+                showingDetailedAnswer();
+            }
+
+
+
+            /*userSelection=savedInstanceState.getBooleanArray(REF.FRAGMENT_USER_SELECTION_KEY);
+            if (test.getQuestions().get(uniCount).getKey().equals(REF
+                    .SINGLE_CHOICE_KEY) ||test.getQuestions().get(uniCount).getKey().equals(REF
+                    .TRUE_FALSE_KEY)){
+                int i=0;
+                RadioButton [] radioButtons=new RadioButton[]{radio1,radio2,radio3,radio4};
+                for (RadioButton radioButton:radioButtons){
+                    if (userSelection[i]) radioButton.setChecked(true);
+                    i++;
+                }
+            }else if (test.getQuestions().get(uniCount).getKey().equals(REF
+                    .MULTI_CHOICE_KEY)){
+                int i=0;
+                for (CheckBox checkBox:checkBoxes){
+                    if (userSelection[i]) checkBox.setChecked(true);
+                    i++;
+                }
+            }*/
+        }
         return view;
     }
 
@@ -168,8 +252,8 @@ public class TestFragment extends Fragment {
             r4.setVisibility(View.VISIBLE);
             r5.setVisibility(View.GONE);
             r6.setVisibility(View.GONE);
-            line6.setVisibility(View.INVISIBLE);
-            line5.setVisibility(View.INVISIBLE);
+            line6.setVisibility(View.GONE);
+            line5.setVisibility(View.GONE);
             radio1.setVisibility(View.VISIBLE);
             radio2.setVisibility(View.VISIBLE);
             radio3.setVisibility(View.VISIBLE);
@@ -493,7 +577,7 @@ public class TestFragment extends Fragment {
             /*next.setEnabled(true);*/
             enableNext();
             /*back.setEnabled(true);*/
-            showingDetailedAnswer();
+
             image1.setVisibility(View.INVISIBLE);
             image2.setVisibility(View.INVISIBLE);
             image3.setVisibility(View.INVISIBLE);
@@ -518,6 +602,7 @@ public class TestFragment extends Fragment {
                     image4.setVisibility(View.VISIBLE);
                     image5.setVisibility(View.VISIBLE);
                     image6.setVisibility(View.VISIBLE);
+                    showingDetailedAnswer();
                 }
             } else {
                 answerText.setVisibility(View.VISIBLE);
@@ -533,6 +618,7 @@ public class TestFragment extends Fragment {
                 image4.setVisibility(View.VISIBLE);
                 image5.setVisibility(View.VISIBLE);
                 image6.setVisibility(View.VISIBLE);
+                showingDetailedAnswer();
             }
             if (question.getKey().equals(SINGLE_CHOICE_KEY)) {
                 String userAnswer = test.getUserAnswers().get(uniCount);
@@ -655,11 +741,7 @@ public class TestFragment extends Fragment {
     }
 
 
-    @Override
-    public void onResume() {
-        super.onResume();
 
-    }
 
     private void settingUpCheckListener(final int minimumAnswer) {
 
@@ -831,6 +913,7 @@ public class TestFragment extends Fragment {
 
         } else {
             if (test.getAnswerShow() == TestTypeFragment.ANSWER_AFTER_ALL) {
+                submitTest();
                 updateTest();
             } else if (test.getAnswerShow() == TestTypeFragment.ANSWER_AFTER_EVERY) {
                 disableAllViewClicks();
@@ -843,6 +926,7 @@ public class TestFragment extends Fragment {
                     updateTest();
                 } else if (nextCounter == 1) {
                     showingDetailedAnswer();
+                    submitTest();
 
                 }
             } else {
@@ -856,11 +940,13 @@ public class TestFragment extends Fragment {
                     nextCounter++;
                     if (nextCounter > 1) {
                         //moving to next tests
+                        submitTest();
                         updateTest();
                     } else if (nextCounter == 1) {
                         showingDetailedAnswer();
                     }
                 } else {
+                    submitTest();
                     updateTest();
                 }
             }
@@ -903,19 +989,19 @@ public class TestFragment extends Fragment {
 
 
         if (question.getKey().equals(SINGLE_CHOICE_KEY)) {
-            if (test.getTestId() != null && test.getNumberOfAnsweredQuestions() > uniCount) {
+            if (/*test.getTestId() != null &&*/ test.getNumberOfAnsweredQuestions() > uniCount) {
                 showSingleAnswersToUser(test.getUserAnswers().get(uniCount), test.getUserResult().get(uniCount), question.getAnswer());
             } else {
                 showSingleAnswersToUser(getUserAnswer(), getResult(getUserAnswer()), question.getAnswer());
             }
         } else if (question.getKey().equals(MULTI_CHOICE_KEY)) {
-            if (test.getTestId() != null && test.getNumberOfAnsweredQuestions() > uniCount) {
+            if (/*test.getTestId() != null &&*/ test.getNumberOfAnsweredQuestions() > uniCount) {
                 showMultiAnswersToUser(test.getUserAnswers().get(uniCount), question.getAnswer());
             } else {
                 showMultiAnswersToUser(getUserAnswer(), question.getAnswer());
             }
         } else {
-            if (test.getTestId() != null && test.getNumberOfAnsweredQuestions() > uniCount) {
+            if (/*test.getTestId() != null &&*/ test.getNumberOfAnsweredQuestions() > uniCount) {
                 showTrueFalseAnswerToUser(test.getUserResult().get(uniCount), test.getUserAnswers
                         ().get(uniCount));
             } else {
@@ -924,13 +1010,23 @@ public class TestFragment extends Fragment {
         }
     }
 
-
-    private void updateTest() {
+    private void submitTest() {
         fragmentPosition = ((TestActivity) getActivity()).getCurrentFragmentPosition();
         String answer = getUserAnswer();
         test.setUserAnswerElement(answer, fragmentPosition);
         test.setUserResultElement(getResult(answer), fragmentPosition);
         test.addToAnsweredQuestions(question, uniCount);
+        test.addToNextSate(true, uniCount);
+        nextNext = true;
+    }
+
+
+    private void updateTest() {
+        fragmentPosition = ((TestActivity) getActivity()).getCurrentFragmentPosition();
+        /*String answer = getUserAnswer();
+        test.setUserAnswerElement(answer, fragmentPosition);
+        test.setUserResultElement(getResult(answer), fragmentPosition);
+        test.addToAnsweredQuestions(question, uniCount);*/
         ((TestActivity) getActivity()).setCurrentItem(fragmentPosition + 1);
         test.addToNextSate(true, uniCount);
         nextNext = true;

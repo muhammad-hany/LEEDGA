@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.CompoundButton;
@@ -17,6 +18,10 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
+import static com.leedga.seagate.leedga.REF.CATEGORY_NAMES;
 import static com.leedga.seagate.leedga.REF.DEFAULT_TEST_KEY;
 import static com.leedga.seagate.leedga.REF.DEFAULT_TEST_PREF_KEY;
 import static com.leedga.seagate.leedga.TestTypeFragment.ANSWER_AFTER_ALL;
@@ -25,6 +30,7 @@ import static com.leedga.seagate.leedga.TestTypeFragment.ANSWER_WHEN_WRONG;
 import static com.leedga.seagate.leedga.TestTypeFragment.MULTI_CHOICE;
 import static com.leedga.seagate.leedga.TestTypeFragment.SINGLE_CHOICE;
 import static com.leedga.seagate.leedga.TestTypeFragment.TRUE_FALSE;
+import static java.util.Arrays.asList;
 
 public class TestSettingActivity extends AppCompatActivity implements FragmentListener {
 
@@ -33,7 +39,7 @@ public class TestSettingActivity extends AppCompatActivity implements FragmentLi
     private Switch oneChoice;
     private Switch multiChoice;
     private SeekBar seekBar;
-    private int[] myValues = {10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100};
+    private Integer[] myValues = {10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100};
     private Switch s1, s2, s3, s4, s5, s6, s7, s8, s9;
     private Test test;
     private SharedPreferences defaultTestPref;
@@ -42,6 +48,7 @@ public class TestSettingActivity extends AppCompatActivity implements FragmentLi
     private SharedPreferences generalSetting;
     private DBHelper helper;
     private boolean premiumUser;
+    private int roundedMaxPossible;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +60,9 @@ public class TestSettingActivity extends AppCompatActivity implements FragmentLi
         getSupportActionBar().setTitle("Test Settings");
         gettingDefaultTest();
         definingViews();
+        updateMinQuestions();
         displayValues();
+
 
 
         /*FragmentManager manager=getSupportFragmentManager();
@@ -187,6 +196,8 @@ public class TestSettingActivity extends AppCompatActivity implements FragmentLi
                 } else {
                     enableLastSwitch();
                 }
+
+                updateMinQuestions();
             }
         };
         s1.setOnCheckedChangeListener(listener);
@@ -257,7 +268,27 @@ public class TestSettingActivity extends AppCompatActivity implements FragmentLi
                     seekBarTxt.setText(String.valueOf(progress + 5) + " Flagged Questions");
                     test.setNumberOfQuestions(progress + 5);
                 } else {
-                    if (!premiumUser) {
+
+                    if (progress > asList(myValues).indexOf(roundedMaxPossible)) {
+                        if (progress == asList(myValues).indexOf(roundedMaxPossible) + 1) {
+                            Toast.makeText(TestSettingActivity.this, "This is the max number of " +
+                                    "questions that fits your selection criteria", Toast
+                                    .LENGTH_SHORT).show();
+                        }
+                        progress = asList(myValues).indexOf(roundedMaxPossible);
+                        seekBar.setProgress(progress);
+                    }
+
+                    if (!premiumUser && progress > asList(myValues).indexOf(30)) {
+                        if (progress == asList(myValues).indexOf(30) + 1) {
+                            Toast.makeText(TestSettingActivity.this, "You need to upgrade to use more questions in the test", Toast.LENGTH_SHORT).show();
+                        }
+                        progress = Arrays.asList(myValues).indexOf(30);
+                        seekBar.setProgress(progress);
+
+                    }
+
+                    /*if (!premiumUser) {
                         if (myValues[progress] > 30) {
                             if (progress == 5) {
                                 Toast.makeText(TestSettingActivity.this, "You need to upgrade to use " +
@@ -267,9 +298,16 @@ public class TestSettingActivity extends AppCompatActivity implements FragmentLi
                             seekBar.setProgress(4);
 
                         }
+                    }else {
+                        if (progress>= Arrays.asList(myValues).indexOf(roundedMaxPossible)){
+                            progress=Arrays.asList(myValues).indexOf(roundedMaxPossible);
+                            seekBar.setProgress(progress);
+                        }
+                    }*/
+                    if (progress >= 0) {
+                        seekBarTxt.setText(String.valueOf(myValues[progress]) + " Questions");
+                        test.setNumberOfQuestions(myValues[progress]);
                     }
-                    seekBarTxt.setText(String.valueOf(myValues[progress]) + " Questions");
-                    test.setNumberOfQuestions(myValues[progress]);
                 }
 
             }
@@ -368,6 +406,7 @@ public class TestSettingActivity extends AppCompatActivity implements FragmentLi
                         enableAll();
                     }
                 }
+                updateMinQuestions();
             }
         };
         trueFalse.setOnCheckedChangeListener(listener);
@@ -432,6 +471,7 @@ public class TestSettingActivity extends AppCompatActivity implements FragmentLi
         radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
+
                 switch (checkedId) {
                     case R.id.radio1:
                         test.setAnswerShow(ANSWER_AFTER_EVERY);
@@ -479,6 +519,40 @@ public class TestSettingActivity extends AppCompatActivity implements FragmentLi
         premiumUser = generalSetting.getBoolean(REF.PREMIUM_USER_KEY, false);
 
         helper = new DBHelper(this, REF.DATABASE_NAME);
+
+    }
+
+    private void updateMinQuestions() {
+        boolean[] categories = test.getChapters();
+        boolean[] keys = test.getQuestionTypes();
+        ArrayList<String> keysList = new ArrayList<>();
+        ArrayList<String> categoriesList = new ArrayList<>();
+        int i = 0;
+        for (boolean state : categories) {
+            if (state) {
+                categoriesList.add(CATEGORY_NAMES[i]);
+            }
+            i++;
+        }
+        int j = 0;
+        for (boolean state : keys) {
+            if (state) {
+                keysList.add(REF.QUESTIONS_TYPES[j]);
+            }
+            j++;
+        }
+
+        int maxPossible = helper.getNumberOfPossibleQuestions(keysList, categoriesList);
+        maxPossible = maxPossible < 100 ? maxPossible : 100;
+
+        roundedMaxPossible = maxPossible / 5 * 5;
+        if (seekBar.getProgress() > asList(myValues).indexOf(roundedMaxPossible)) {
+            seekBar.setProgress(asList(myValues).indexOf(roundedMaxPossible));
+        }
+
+        Log.i("POSSIBLE QUESTION", "Possible questions number is " + helper
+                .getNumberOfPossibleQuestions(keysList,
+                        categoriesList) + " ");
     }
 
     @Override

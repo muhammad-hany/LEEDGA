@@ -39,7 +39,7 @@ public class ReportActivity extends AppCompatActivity {
             user = name.getText().toString();
         }
         i.putExtra(Intent.EXTRA_SUBJECT, user + " has reported question in LEED GA");
-        i.putExtra(Intent.EXTRA_EMAIL, new String[]{"osama@khayata.com"});
+        i.putExtra(Intent.EXTRA_EMAIL, new String[]{"app@khayata.com"});
         i.putExtra(Intent.EXTRA_TEXT, makeEmailBody());
         startActivity(Intent.createChooser(i, "Send Email...."));
     }

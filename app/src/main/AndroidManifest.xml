@@ -19,6 +19,7 @@
         <activity
             android:name="com.leedga.seagate.leedga.MainActivity"
             android:label="@string/app_name"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -29,6 +30,7 @@
             android:name="com.leedga.seagate.leedga.TestActivity"
             android:label="@string/title_activity_test"
             android:parentActivityName="com.leedga.seagate.leedga.MainActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -38,6 +40,7 @@
             android:name="com.leedga.seagate.leedga.ResultActivity"
             android:label="@string/title_activity_result"
             android:parentActivityName="com.leedga.seagate.leedga.MainActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -47,6 +50,7 @@
             android:name="com.leedga.seagate.leedga.TestSettingActivity"
             android:label="@string/title_activity_test_type"
             android:parentActivityName="com.leedga.seagate.leedga.MainActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -56,6 +60,7 @@
             android:name="com.leedga.seagate.leedga.HistoryActivity"
             android:label="@string/title_activity_history"
             android:parentActivityName="com.leedga.seagate.leedga.MainActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -65,6 +70,7 @@
             android:name="com.leedga.seagate.leedga.AnswersActivity"
             android:label="@string/title_activity_answers"
             android:parentActivityName="com.leedga.seagate.leedga.ResultActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -73,22 +79,26 @@
         <activity
             android:name="com.leedga.seagate.leedga.AnswerViewActivity"
             android:label="@string/title_activity_answer_view_acivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
             android:name="com.leedga.seagate.leedga.ReportActivity"
             android:label="@string/title_activity_report"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
             android:name="com.leedga.seagate.leedga.LessonsActivity"
             android:label="@string/title_activity_lessons"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity
             android:name="com.leedga.seagate.leedga.SettingActivity"
             android:label="@string/title_activity_setting"
             android:parentActivityName="com.leedga.seagate.leedga.MainActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

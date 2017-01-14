@@ -73,6 +73,8 @@ class REF {
     static final String LAST_CHECK_FOR_UPDATE_KEY="last_check_for_update_key";
     static final String FIRST_LOG_IN_KEY="first_login_key";
     static final String PREMIUM_USER_KEY="premium_user_key";
+    static final String FRAGMENT_USER_SELECTION_KEY = "fragment_user_selection_key";
+    static final String[] QUESTIONS_TYPES = {TRUE_FALSE_KEY, SINGLE_CHOICE_KEY, MULTI_CHOICE_KEY};
     static String[] chapterNames = {"Becoming a LEED Green Associate", "The Test Process", "LEED v4 Core Concepts and Themes", "Overview of USGBC and LEED", "Location and Transportation", "Sustainable Sites", "Water Efficiency", "Energy and Atmosphere", "Materials and Resources", "Indoor Environmental Quality", "Innovation and Regional Priority", "Regional Priority"};
     static String[] links = {"http://www.usgbc.org/resources/leed-v4-green-associate-candidate-handbook", "http://www.usgbc.org/resources/leed-core-concepts-guide", "http://www.usgbc.org/resources/leed-green-associate-exam-preparation-guide-leed-v4-edition", "http://www.usgbc.org/sites/all/assets/section/files/v4-guide-excerpts/Excerpt_v4_BDC.pdf", "http://www.usgbc.org/sites/default/files/LEED%20v4%20Impact%20Category%20and%20Point%20Allocation%20Process_Overview_0.pdf", "http://www.usgbc.org/resources/leed-v4-user-guide", "http://www.usgbc.org/cert-guide/commercial", "http://www.usgbc.org/cert-guide/fees", "http://www.usgbc.org/articles/rating-system-selection-guidance", "http://www.usgbc.org/leed-interpretations", "http://www.usgbc.org/resources/leed-v4-building-design-and-construction-checklist"};
     static String[] references = {"LEED V4 Green Associate Candidate Handbook ",

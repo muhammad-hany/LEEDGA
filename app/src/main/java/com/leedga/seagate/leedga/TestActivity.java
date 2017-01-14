@@ -61,6 +61,8 @@ public class TestActivity extends AppCompatActivity implements ViewPager.OnPageC
         defineButtons();
         createQuestionLoadingDialog();
 
+        //todo عند اختيار خيار وفي وضع اظهار الاجابة و الرجوع الى السؤال السابق و عند الرحوع الى السؤال الحالي و ضفط تسجيل لاتظهر الاجابة و ينتقل الي السؤال الاخر فورا
+
         questionLoadDialog.show();
         fragmentType = getIntent().getStringExtra(REF.TEST_FRAGMENT_TYPE);
         pager = (TestViewPager) findViewById(R.id.pager);
@@ -69,7 +71,7 @@ public class TestActivity extends AppCompatActivity implements ViewPager.OnPageC
             getSupportActionBar().setTitle("Test");
             pagerAdapter = new PagerAdapter(getSupportFragmentManager(), test, PagerAdapter.TEST);
             pager.setAdapter(pagerAdapter);
-            pager.setOffscreenPageLimit(test.getNumberOfQuestions());
+            pager.setOffscreenPageLimit(1/*test.getNumberOfQuestions()*/);
             pager.addOnPageChangeListener(this);
             progress.setProgress(((float) (1) / (float) test.getNumberOfQuestions()) * 100);
             progressText.setText(1 + "/" + test.getNumberOfQuestions());
@@ -98,6 +100,9 @@ public class TestActivity extends AppCompatActivity implements ViewPager.OnPageC
             Fragment fragment = TestFragment.init(singleQuestionTest, 0);
             transaction.add(R.id.linear, fragment);
             transaction.commit();
+        }
+        if (pager.getCurrentItem() == 0) {
+            setEnableBack(false);
         }
         questionLoadDialog.dismiss();
 
@@ -171,11 +176,14 @@ public class TestActivity extends AppCompatActivity implements ViewPager.OnPageC
                 onBackPressed();
             }
         });*/
-
+        final SharedPreferences prefs = getSharedPreferences(REF.GENERAL_SETTING_PREF, MODE_PRIVATE);
         dialog = builder.create();
         dialog.setButton(DialogInterface.BUTTON_NEUTRAL, "End", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
+                if (!prefs.getBoolean(REF.PREMIUM_USER_KEY, false)) {
+                    vunglePub.playAd();
+                }
                 onBackPressed();
                 SharedPreferences preferences = getSharedPreferences(REF.UNCOMPLETED_PREF, Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = preferences.edit();
@@ -188,6 +196,9 @@ public class TestActivity extends AppCompatActivity implements ViewPager.OnPageC
                 () {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
+                if (!prefs.getBoolean(REF.PREMIUM_USER_KEY, false)) {
+                    vunglePub.playAd();
+                }
                 if (pager.getCurrentItem() > 0) {
                     TestFragment fragment = (TestFragment) pagerAdapter.instantiateItem(pager, pager.getCurrentItem());
                     Test test = fragment.getTest();
@@ -302,6 +313,15 @@ public class TestActivity extends AppCompatActivity implements ViewPager.OnPageC
             ((TextView) explain.findViewById(R.id.explainText)).setText("Hide Explanation");
         } else {
             ((TextView) explain.findViewById(R.id.explainText)).setText("Show Explanation");
+        }
+    }
+
+    public void setEnableBack(boolean state) {
+        back.setClickable(state);
+        if (state) {
+            back.setBackgroundResource(R.drawable.select_style_color);
+        } else {
+            back.setBackgroundResource(R.drawable.disabled_next);
         }
     }
 
@@ -449,6 +469,11 @@ public class TestActivity extends AppCompatActivity implements ViewPager.OnPageC
     @Override
     public void onPageSelected(int position) {
         TestFragment fragment = (TestFragment) pagerAdapter.instantiateItem(pager, pager.getCurrentItem());
+        if (position == 0) {
+            setEnableBack(false);
+        } else {
+            setEnableBack(true);
+        }
         isExplainOn = fragment.isExplainOn;
         Test test = fragment.getTest();
         if (test == null) {

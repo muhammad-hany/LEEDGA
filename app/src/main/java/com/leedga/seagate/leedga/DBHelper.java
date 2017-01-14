@@ -2,6 +2,7 @@ package com.leedga.seagate.leedga;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
@@ -42,7 +43,6 @@ public class DBHelper extends SQLiteOpenHelper {
     public int GetCursor;
     private Context myContext;
     private SQLiteDatabase db;
-
 
 
     public DBHelper(Context context, String db_name) {
@@ -113,7 +113,7 @@ public class DBHelper extends SQLiteOpenHelper {
         String myPath = DB_PATH + DB_NAME;
         db = SQLiteDatabase.openDatabase(myPath, null,
                 SQLiteDatabase.OPEN_READWRITE);
-        Log.i("SQLITE","sdsd");
+        Log.i("SQLITE", "sdsd");
 
     }
 
@@ -154,7 +154,6 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
 
-
     public Cursor execCursorQuery(String sql) {
         Cursor cursor = null;
         try {
@@ -178,40 +177,63 @@ public class DBHelper extends SQLiteOpenHelper {
         }
     }
 
+    public int getNumberOfPossibleQuestions(ArrayList<String> keys, ArrayList<String>
+            categories) {
+        SharedPreferences preferences = myContext.getSharedPreferences(REF.GENERAL_SETTING_PREF, Context.MODE_PRIVATE);
+        int possibleCount = 0;
+        Cursor cursor;
+        for (String key : keys) {
+            for (String category : categories) {
+                if (preferences.getBoolean(REF.PREMIUM_USER_KEY, false)) {
+                    cursor = db.query(REF.TABLE_NAME, new String[]{REF.KEY, REF.CATEGORY}, REF
+                            .KEY + " = '" + key + "' AND " + REF.CATEGORY + " = '" + category + "'", null, null, null, null);
+                } else {
+                    cursor = db.query(REF.TABLE_NAME, new String[]{REF.KEY, REF.CATEGORY}, REF
+                            .KEY + " = '" + key + "' AND " + REF.CATEGORY + " = '" + category + "' AND " + REF.ID + " < 226", null, null, null, null);
+                }
+                while (cursor.moveToNext()) {
+                    possibleCount++;
+                }
+                cursor.close();
+            }
+        }
+
+        return possibleCount;
+    }
 
 
-    protected ArrayList<Question> getAll(boolean[] chaptersTrueFalse,int [] numberPerCategory ,boolean [] questionsTypes){
+    protected ArrayList<Question> getAll(boolean[] chaptersTrueFalse, int[] numberPerCategory, boolean[] questionsTypes) {
 
-        ArrayList<Question> questions=new ArrayList<>();
+        ArrayList<Question> questions = new ArrayList<>();
 
-        for (int i=0;i<9;i++){
+        for (int i = 0; i < 9; i++) {
             if (chaptersTrueFalse[i]) {
-                StringBuilder query=new StringBuilder();
+                StringBuilder query = new StringBuilder();
                 if (questionsTypes[TestTypeFragment.SINGLE_CHOICE] &&
                         questionsTypes[TestTypeFragment.MULTI_CHOICE] &&
-                        questionsTypes[TestTypeFragment.TRUE_FALSE]){
+                        questionsTypes[TestTypeFragment.TRUE_FALSE]) {
 
                 }
-                for (int j=0; j<typesNames.length;j++){
-                    if (questionsTypes[j]){
-                        query.append("'"+typesNames[j]+"'");
+                for (int j = 0; j < typesNames.length; j++) {
+                    if (questionsTypes[j]) {
+                        query.append("'" + typesNames[j] + "'");
                         query.append(" , ");
 
                     }
                 }
-                query.delete(query.length()-3,query.length()-1);
-                String qw="( "+query.toString()+")";
+                query.delete(query.length() - 3, query.length() - 1);
+                String qw = "( " + query.toString() + ")";
 
 
                 Cursor cursor = db.query(TABLE_NAME, null, REF.CATEGORY + " = '" + CATEGORY_NAMES[i] + "' AND " + REF.KEY + " IN " + qw, null, null, null, "random()");
-                Question q=null;
-                int count=0;
-                while (cursor.moveToNext()){
+                Question q = null;
+                int count = 0;
+                while (cursor.moveToNext()) {
                     count++;
-                    if (count>numberPerCategory[i]){
+                    if (count > numberPerCategory[i]) {
                         cursor.close();
                         break;
-                    }else {
+                    } else {
                         String question = cursor.getString(cursor.getColumnIndex(QUESTION_KEY));
                         String ch1 = cursor.getString(cursor.getColumnIndex(FIRST_CHOICE));
                         String ch2 = cursor.getString(cursor.getColumnIndex(SECOND_CHOICE));
@@ -381,11 +403,10 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
 
-
     private int getRowsCount(String tableName) {
-        String countQuery="SELECT * FROM "+tableName;
-        Cursor cursor=db.rawQuery(countQuery,null);
-        int count =cursor.getCount();
+        String countQuery = "SELECT * FROM " + tableName;
+        Cursor cursor = db.rawQuery(countQuery, null);
+        int count = cursor.getCount();
         cursor.close();
         return count;
     }
