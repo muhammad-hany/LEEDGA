@@ -119,6 +119,7 @@ public class TestSettingActivity extends AppCompatActivity implements FragmentLi
         boolean[] questionTypes = test.getQuestionTypes();
 
         int n = 0;
+        int activeCount = 0;
         for (boolean i : questionTypes) {
             if (n == TRUE_FALSE) {
                 if (i) {
@@ -141,7 +142,13 @@ public class TestSettingActivity extends AppCompatActivity implements FragmentLi
                 }
             }
             n++;
+            if (i) activeCount++;
         }
+
+        if (activeCount == 1) findWhichActiveToDisable();
+
+
+
     }
 
     @Override
@@ -381,7 +388,7 @@ public class TestSettingActivity extends AppCompatActivity implements FragmentLi
         multiChoice = (Switch) findViewById(R.id.multi_choice);
         final boolean[] questionTypes = test.getQuestionTypes();
         for (boolean state : questionTypes) {
-            activeTypeNumber = state ? activeTypeNumber + 1 : activeTypeNumber - 1;
+            activeTypeNumber = state ? activeTypeNumber + 1 : activeTypeNumber;
         }
         CompoundButton.OnCheckedChangeListener listener = new CompoundButton.OnCheckedChangeListener() {
             @Override

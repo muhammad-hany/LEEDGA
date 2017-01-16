@@ -201,6 +201,59 @@ public class DBHelper extends SQLiteOpenHelper {
         return possibleCount;
     }
 
+    protected ArrayList<Question> getSingleType(boolean[] chapters, String questionType, int
+            questionsNumber) {
+        ArrayList<Question> questions = new ArrayList<>();
+        StringBuilder query = new StringBuilder();
+        int j = 0;
+        for (boolean chapter : chapters) {
+            if (chapter) {
+                query.append("'" + CATEGORY_NAMES[j] + "' , ");
+            }
+            j++;
+        }
+
+        query.delete(query.length() - 3, query.length() - 1);
+        String qw = "( " + query.toString() + ")";
+
+
+        Cursor cursor = db.query(TABLE_NAME, null, REF.CATEGORY + " IN " + qw + " AND " + REF.KEY + " = '" + questionType + "'", null, null, null, "random()");
+
+        int count = 0;
+        while (cursor.moveToNext()) {
+            count++;
+            if (count > questionsNumber) {
+                cursor.close();
+                break;
+            } else {
+                String question = cursor.getString(cursor.getColumnIndex(QUESTION_KEY));
+                String ch1 = cursor.getString(cursor.getColumnIndex(FIRST_CHOICE));
+                String ch2 = cursor.getString(cursor.getColumnIndex(SECOND_CHOICE));
+                String ch3 = cursor.getString(cursor.getColumnIndex(THIRD_CHOICE));
+                String ch4 = cursor.getString(cursor.getColumnIndex(FOURTH_CHOICE));
+                String ch5 = cursor.getString(cursor.getColumnIndex(FIFTH_CHOICE));
+                String ch6 = cursor.getString(cursor.getColumnIndex(SIXITH_CHOICE));
+                String answer = cursor.getString(cursor.getColumnIndex(ANSWER));
+                String note = cursor.getString(cursor.getColumnIndex(NOTES_ON_ANSWER));
+                String categoty = cursor.getString(cursor.getColumnIndex(REF.CATEGORY));
+                String key = cursor.getString(cursor.getColumnIndex(REF.KEY));
+
+                int flagString = cursor.getInt(cursor.getColumnIndex(FLAGGED));
+                int id = cursor.getInt(cursor.getColumnIndex(ID));
+                int type = cursor.getInt(cursor.getColumnIndex(TYPE));
+                boolean flag;
+                flag = flagString != 0;
+                Question q = new Question(question, ch1, ch2, ch3, ch4, ch5, ch6, answer, note,
+                        categoty, type, id, key, flag);
+                questions.add(q);
+            }
+        }
+        cursor.close();
+
+        return questions;
+
+    }
+
 
     protected ArrayList<Question> getAll(boolean[] chaptersTrueFalse, int[] numberPerCategory, boolean[] questionsTypes) {
 
@@ -228,6 +281,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 Cursor cursor = db.query(TABLE_NAME, null, REF.CATEGORY + " = '" + CATEGORY_NAMES[i] + "' AND " + REF.KEY + " IN " + qw, null, null, null, "random()");
                 Question q = null;
                 int count = 0;
+                int catCount = 0;
                 while (cursor.moveToNext()) {
                     count++;
                     if (count > numberPerCategory[i]) {

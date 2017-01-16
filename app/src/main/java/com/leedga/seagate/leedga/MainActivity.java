@@ -53,8 +53,12 @@ import static com.leedga.seagate.leedga.REF.DEFAULT_TEST_KEY;
 import static com.leedga.seagate.leedga.REF.DEFAULT_TEST_PREF_KEY;
 import static com.leedga.seagate.leedga.REF.FIREBASE_COMMIT_NUMBER_PREF_KEY;
 import static com.leedga.seagate.leedga.REF.PREMIUM_USER_KEY;
+import static com.leedga.seagate.leedga.REF.typesNames;
 import static com.leedga.seagate.leedga.TestActivity.UNFINISHED_TEST;
 import static com.leedga.seagate.leedga.TestCategoriesFragment.TEST_BUNDLE;
+import static com.leedga.seagate.leedga.TestTypeFragment.MULTI_CHOICE;
+import static com.leedga.seagate.leedga.TestTypeFragment.SINGLE_CHOICE;
+import static com.leedga.seagate.leedga.TestTypeFragment.TRUE_FALSE;
 
 public class MainActivity extends AppCompatActivity implements MainRecyclerAdaptor.OnMyItemClick, IabBroadcastReceiver.IabBroadcastListener {
 
@@ -432,7 +436,16 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerAdapt
             questions = new DBHelper(this, REF.DATABASE_NAME).getFlaggedQuestions(test.getNumberOfQuestions());
         } else {
             if (generalSettingPreferences.getBoolean(PREMIUM_USER_KEY, false)) {
-                questions = new DBHelper(this, REF.DATABASE_NAME).getAll(test.getChapters(), test.getcountPerCategory(), test.getQuestionTypes());
+                boolean[] questionTypes = test.getQuestionTypes();
+                boolean trueFalseOnly = (questionTypes[TRUE_FALSE]) && (!questionTypes[MULTI_CHOICE]) && (!questionTypes[SINGLE_CHOICE]);
+                boolean multiOnly = (!questionTypes[TRUE_FALSE]) && (questionTypes[MULTI_CHOICE]) && (!questionTypes[SINGLE_CHOICE]);
+                if (trueFalseOnly) {
+                    questions = new DBHelper(this, REF.DATABASE_NAME).getSingleType(test.getChapters(), typesNames[TRUE_FALSE], test.getNumberOfQuestions());
+                } else if (multiOnly) {
+                    questions = new DBHelper(this, REF.DATABASE_NAME).getSingleType(test.getChapters(), typesNames[MULTI_CHOICE], test.getNumberOfQuestions());
+                } else {
+                    questions = new DBHelper(this, REF.DATABASE_NAME).getAll(test.getChapters(), test.getcountPerCategory(), test.getQuestionTypes());
+                }
             } else {
                 questions = new DBHelper(this, REF.DATABASE_NAME).getFree(test.getChapters(), test.getcountPerCategory(), test.getQuestionTypes());
             }
