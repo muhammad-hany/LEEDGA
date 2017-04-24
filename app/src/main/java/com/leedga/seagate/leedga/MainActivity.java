@@ -215,9 +215,9 @@ public class MainActivity extends AppCompatActivity implements MainRecyclerAdapt
 
                         visibility = mPremiumAcount ? View.GONE : View.VISIBLE;
                         SharedPreferences.Editor editor = generalSettingPreferences.edit();
-                        editor.putBoolean(PREMIUM_USER_KEY, /*mPremiumAcount*/true);
+                        editor.putBoolean(PREMIUM_USER_KEY, mPremiumAcount);
                         editor.apply();
-                        updateDefaultTest(/*mPremiumAcount*/true);
+                        updateDefaultTest(mPremiumAcount);
                         upgradeDetailsCard.setVisibility(visibility);
                     }
                 } catch (RemoteException e) {

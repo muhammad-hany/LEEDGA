@@ -135,7 +135,7 @@ public class Question implements Serializable {
     }
 
     public String getAnswer() {
-        return answer;
+        return answer.replace(" ", "");
     }
 
     public void setAnswer(String answer) {

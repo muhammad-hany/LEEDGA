@@ -49,6 +49,7 @@ public class TestSettingActivity extends AppCompatActivity implements FragmentLi
     private DBHelper helper;
     private boolean premiumUser;
     private int roundedMaxPossible;
+    private boolean startUp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,10 +59,12 @@ public class TestSettingActivity extends AppCompatActivity implements FragmentLi
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("Test Settings");
+        startUp = true;
         gettingDefaultTest();
         definingViews();
         updateMinQuestions();
         displayValues();
+        startUp = false;
 
 
 
@@ -148,7 +151,6 @@ public class TestSettingActivity extends AppCompatActivity implements FragmentLi
         if (activeCount == 1) findWhichActiveToDisable();
 
 
-
     }
 
     @Override
@@ -189,15 +191,18 @@ public class TestSettingActivity extends AppCompatActivity implements FragmentLi
         s8 = (Switch) findViewById(R.id.switch8);
         s9 = (Switch) findViewById(R.id.switch9);
         boolean[] chapters = test.getChapters();
-        activeChapters = 0;
-        for (boolean isChecked : chapters) {
-            activeChapters = isChecked ? activeChapters + 1 : activeChapters - 1;
+        activeChapters = calculateActiveChapters();
+        if (activeChapters == 1) {
+            disableLastSwitch();
+        } else {
+            enableLastSwitch();
         }
+
         CompoundButton.OnCheckedChangeListener listener = new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 updateSwitchesStatusTest();
-                activeChapters = isChecked ? activeChapters + 1 : activeChapters - 1;
+                activeChapters = calculateActiveChapters();
                 if (activeChapters == 1) {
                     disableLastSwitch();
                 } else {
@@ -205,6 +210,7 @@ public class TestSettingActivity extends AppCompatActivity implements FragmentLi
                 }
 
                 updateMinQuestions();
+                //any
             }
         };
         s1.setOnCheckedChangeListener(listener);
@@ -216,6 +222,14 @@ public class TestSettingActivity extends AppCompatActivity implements FragmentLi
         s7.setOnCheckedChangeListener(listener);
         s8.setOnCheckedChangeListener(listener);
         s9.setOnCheckedChangeListener(listener);
+    }
+
+    private int calculateActiveChapters() {
+        int i = 0;
+        for (boolean isChecked : test.getChapters()) {
+            if (isChecked) i++;
+        }
+        return i;
     }
 
     private void enableLastSwitch() {
@@ -232,8 +246,10 @@ public class TestSettingActivity extends AppCompatActivity implements FragmentLi
         for (Switch s : switches) {
             if (s.isChecked()) {
                 s.setEnabled(false);
-                Toast.makeText(this, "You must choose at least one domain ", Toast
-                        .LENGTH_LONG).show();
+                if (!startUp) {
+                    Toast.makeText(this, "You must choose at least one domain ", Toast
+                            .LENGTH_SHORT).show();
+                }
             }
         }
     }
@@ -278,9 +294,9 @@ public class TestSettingActivity extends AppCompatActivity implements FragmentLi
 
                     if (progress > asList(myValues).indexOf(roundedMaxPossible)) {
                         if (progress == asList(myValues).indexOf(roundedMaxPossible) + 1) {
-                            Toast.makeText(TestSettingActivity.this, "This is the max number of " +
-                                    "questions that fits your selection criteria", Toast
-                                    .LENGTH_SHORT).show();
+                            if (!startUp) {
+                                Toast.makeText(TestSettingActivity.this, "This is the max number of questions that fits your selection criteria", Toast.LENGTH_SHORT).show();
+                            }
                         }
                         progress = asList(myValues).indexOf(roundedMaxPossible);
                         seekBar.setProgress(progress);
@@ -348,7 +364,7 @@ public class TestSettingActivity extends AppCompatActivity implements FragmentLi
             v.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Toast.makeText(TestSettingActivity.this, "There is no enough flagged questions to perform test", Toast.LENGTH_LONG).show();
+                    Toast.makeText(TestSettingActivity.this, "There is no enough flagged questions to perform test", Toast.LENGTH_SHORT).show();
                 }
             });
         } else {
@@ -387,8 +403,11 @@ public class TestSettingActivity extends AppCompatActivity implements FragmentLi
         oneChoice = (Switch) findViewById(R.id.one_choice);
         multiChoice = (Switch) findViewById(R.id.multi_choice);
         final boolean[] questionTypes = test.getQuestionTypes();
-        for (boolean state : questionTypes) {
-            activeTypeNumber = state ? activeTypeNumber + 1 : activeTypeNumber;
+        activeTypeNumber = calculateActiveTypeNumber();
+        if (premiumUser && activeTypeNumber == 1) {
+            findWhichActiveToDisable();
+        } else {
+            enableAll();
         }
         CompoundButton.OnCheckedChangeListener listener = new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -405,7 +424,7 @@ public class TestSettingActivity extends AppCompatActivity implements FragmentLi
                         break;
                 }
                 test.setQuestionTypes(questionTypes);
-                activeTypeNumber = isChecked ? activeTypeNumber + 1 : activeTypeNumber - 1;
+                activeTypeNumber = calculateActiveTypeNumber();
                 if (premiumUser) {
                     if (activeTypeNumber == 1) {
                         findWhichActiveToDisable();
@@ -437,18 +456,23 @@ public class TestSettingActivity extends AppCompatActivity implements FragmentLi
             View.OnClickListener mockListener = new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Toast.makeText(TestSettingActivity.this, "You need to upgrde to premium " +
-                            "account to unlock all question types", Toast.LENGTH_LONG).show();
+                    Toast.makeText(TestSettingActivity.this, "You need to upgrade to premium account to unlock all question types", Toast.LENGTH_SHORT).show();
                 }
             };
 
             layout.setOnClickListener(mockListener);
-
-
             layout1.setOnClickListener(mockListener);
 
 
         }
+    }
+
+    private int calculateActiveTypeNumber() {
+        int i = 0;
+        for (boolean type : test.getQuestionTypes()) {
+            if (type) i++;
+        }
+        return i;
     }
 
     private void enableAll() {
@@ -469,8 +493,9 @@ public class TestSettingActivity extends AppCompatActivity implements FragmentLi
         } else if (multiChoice.isChecked()) {
             multiChoice.setEnabled(false);
         }
-
-        Toast.makeText(this, "You must choose at least one type", Toast.LENGTH_LONG).show();
+        if (!startUp) {
+            Toast.makeText(this, "You must choose at least one type", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void definingAnswerSetting() {
